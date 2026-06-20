@@ -88,6 +88,7 @@ table.matrix-table input[type=text], table.matrix-table input[type=number] { pad
 .success-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center; }
 .success-overlay.show { display:flex; }
 .success-modal { background:#fff; border-radius:20px; padding:2.5rem 2rem; max-width:460px; width:90%; text-align:center; box-shadow:0 20px 60px rgba(0,0,0,0.2); animation: popIn 0.35s ease; }
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 @keyframes popIn { from { transform:scale(0.7); opacity:0; } to { transform:scale(1); opacity:1; } }
 .success-modal .check-circle { width:80px; height:80px; background:linear-gradient(135deg,#16a34a,#22c55e); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; font-size:40px; }
 .success-modal h2 { font-size:20px; color:#15803d; margin:0 0 8px; }
@@ -148,11 +149,22 @@ table.matrix-table input[type=text], table.matrix-table input[type=number] { pad
 .pdf-sig-table { width:100%; border-collapse:collapse; margin-top:35px; font-size:12pt; }
 .pdf-sig-table td { text-align:center; padding:10px; vertical-align:top; width:50%; }
 
+/* Generic PDF area for F1–F5 forms (created dynamically by downloadFormPDF) */
+.generic-pdf-print {
+  display: none; background: white; color: black; padding: 10mm 15mm;
+  font-family: 'Sarabun', sans-serif; font-size: 12pt; line-height: 1.5; width: 100%;
+}
+.generic-pdf-print * { font-family: 'Sarabun', sans-serif; box-sizing: border-box; }
+.generic-pdf-print h2 { text-align:center; font-size:18pt; margin:0 0 5px; font-weight:bold; color:#1e3a8a; }
+.generic-pdf-print h3 { text-align:center; font-size:12pt; margin:0 0 15px; font-weight:normal; color:#444; }
+
 /* Media Print Rules */
 @media print {
   body * { visibility: hidden; }
-  #pdf-print-area, #pdf-print-area * { visibility: visible; }
-  #pdf-print-area {
+  #pdf-print-area, #pdf-print-area *,
+  .generic-pdf-print, .generic-pdf-print * { visibility: visible; }
+  #pdf-print-area,
+  .generic-pdf-print {
     display: block !important;
     position: absolute;
     left: 0;
@@ -388,6 +400,92 @@ body {
 /* ===== MATRIX TABLE GLOBAL FIX ===== */
 .matrix-table th { color: #fff !important; }
 
+/* ===== GLOBAL FONT SIZE INCREASE ===== */
+body { font-size: 15px !important; }
+.field label { font-size: 13px !important; color: #374151 !important; text-transform: none !important; letter-spacing: 0 !important; font-weight: 600 !important; }
+.field input[type=text], .field input[type=number], .field input[type=date], .field textarea, .field select,
+input[type=text], input[type=tel], input[type=email], input[type=date], input[type=number], textarea, select {
+  font-size: 15px !important;
+  color: #1e293b !important;
+}
+.cb-label { font-size: 15px !important; color: #1e293b !important; }
+.section-title { font-size: 16px !important; color: #1e293b !important; }
+.objective-box { font-size: 14px !important; color: #1e3a5a !important; }
+
+/* ===== MATRIX TABLE - DARK HEADER TEXT ===== */
+table.matrix-table th,
+.matrix-table th {
+  background: #1e3a8a !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  padding: 11px 12px !important;
+  text-shadow: none !important;
+  font-weight: 700 !important;
+}
+table.matrix-table td,
+.matrix-table td {
+  font-size: 14px !important;
+  color: #1e293b !important;
+}
+table.matrix-table td:first-child { color: #1e293b !important; font-weight: 600 !important; }
+
+/* ===== DB TABLE DARK HEADER ===== */
+.db-table th {
+  background: #1e3a8a !important;
+  color: #ffffff !important;
+  font-size: 14px !important;
+  font-weight: 700 !important;
+}
+.db-table td { font-size: 14px !important; color: #1e293b !important; }
+
+/* ===== FORM COMPLETION BADGE ===== */
+.form-completion-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  margin-left: 4px;
+  vertical-align: middle;
+  transition: all 0.3s;
+}
+.completion-none { background: #f1f5f9; color: #94a3b8; }
+.completion-partial { background: #fef3c7; color: #92400e; }
+.completion-done { background: #dcfce7; color: #15803d; }
+
+/* ===== FORM SELECTOR BAR STATUS STRIP ===== */
+.form-selector-btn {
+  position: relative;
+}
+.form-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  border-radius: 0 0 20px 20px;
+  background: #22c55e;
+  transition: width 0.5s ease;
+}
+
+/* ===== DASHBOARD FORM STATUS CARDS ===== */
+#dltv-dashboard-summary .status-card-complete { border-color: #86efac !important; }
+#dltv-dashboard-summary .status-card-partial { border-color: #fcd34d !important; }
+
+/* ===== INLINE SPEC TEXT FIX ===== */
+.inline-specify { font-size: 14px !important; color: #1e293b !important; }
+
+/* ===== SMALL TEXT FIXES ===== */
+small, .small, .preview-item .label { font-size: 12px !important; }
+.preview-item .value { font-size: 14px !important; }
+.btn-pdf, .btn-preview, .btn-edit-row { font-size: 13px !important; }
+.tab { font-size: 13.5px !important; }
+
+/* ===== SECTION INSIDE DB TABLE ===== */
+.summary-list li { font-size: 14px !important; color: #1e293b !important; }
+.summary-card h3 { font-size: 15px !important; }
+
 /* ===== FORM SELECTOR BAR GLASS ===== */
 .form-wrap > div:first-child > div:first-child {
   background: rgba(255,255,255,0.75) !important;
@@ -406,6 +504,147 @@ body {
   line-height: 1.65 !important;
 }
 
+
+/* ════════════════════════════════════════════════
+   DLTV NEW DASHBOARD STYLES
+   ════════════════════════════════════════════════ */
+/* -- stat pills -- */
+.db2-hero { background:linear-gradient(135deg,#1e3a8a 0%,#2563eb 55%,#6366f1 100%);
+  border-radius:14px; padding:22px 26px; margin-bottom:20px;
+  display:flex; align-items:center; gap:20px; flex-wrap:wrap; }
+.db2-hero-text { flex:1; min-width:180px; color:#fff; }
+.db2-hero-text h2 { font-size:18px; font-weight:800; margin:0 0 4px; }
+.db2-hero-text p  { font-size:12.5px; opacity:.82; margin:0; line-height:1.5; }
+.db2-stats { display:flex; gap:12px; flex-wrap:wrap; }
+.db2-stat { background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
+  border-radius:10px; padding:12px 18px; text-align:center; min-width:90px; }
+.db2-stat .n { font-size:26px; font-weight:900; color:#fff; line-height:1; }
+.db2-stat .l { font-size:10.5px; color:rgba(255,255,255,.75); margin-top:3px; }
+
+/* -- summary cards -- */
+.db2-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:12px; margin-bottom:20px; }
+.db2-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  padding:14px 16px; box-shadow:0 1px 3px rgba(0,0,0,.06); }
+.db2-card .ci { font-size:22px; margin-bottom:6px; }
+.db2-card .cn { font-size:26px; font-weight:900; color:#1e3a8a; line-height:1.1; }
+.db2-card .cd { font-size:12px; color:#64748b; margin-top:2px; }
+.db2-card.g .cn { color:#16a34a; }
+.db2-card.a .cn { color:#d97706; }
+.db2-card.r .cn { color:#dc2626; }
+
+/* -- section heading -- */
+.db2-sec-head { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+.db2-sec-head h3 { font-size:15px; font-weight:800; color:#1e293b; margin:0; }
+.db2-badge { background:#eff6ff; color:#1e3a8a; border-radius:20px;
+  padding:2px 10px; font-size:11.5px; font-weight:700; }
+
+/* -- toolbar -- */
+.db2-toolbar { display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap; }
+.db2-search { flex:1; min-width:180px; padding:9px 13px; border:1.5px solid #e2e8f0;
+  border-radius:8px; font-size:13px; font-family:inherit; }
+.db2-search:focus { outline:none; border-color:#3b82f6; }
+.db2-sel { padding:8px 12px; border:1.5px solid #e2e8f0; border-radius:8px;
+  font-size:13px; font-family:inherit; background:#fff; cursor:pointer; }
+.db2-btn { padding:9px 15px; border:1.5px solid #e2e8f0; border-radius:8px;
+  font-size:13px; font-weight:700; cursor:pointer; font-family:inherit;
+  background:#fff; color:#475569; transition:all .15s; white-space:nowrap; }
+.db2-btn:hover { border-color:#3b82f6; color:#1e3a8a; }
+.db2-btn.primary { background:#1e3a8a; color:#fff; border-color:#1e3a8a; }
+.db2-btn.primary:hover { background:#172554; }
+
+/* -- status matrix table -- */
+.db2-wrap { overflow-x:auto; }
+.db2-table { width:100%; border-collapse:collapse; background:#fff;
+  border-radius:12px; overflow:hidden; border:1px solid #e2e8f0;
+  box-shadow:0 1px 3px rgba(0,0,0,.06); min-width:820px; }
+.db2-table th { background:#1e3a8a; color:rgba(255,255,255,.92);
+  padding:11px 13px; font-size:12px; font-weight:700; text-align:left; }
+.db2-table th.fc { text-align:center; }
+.db2-table td { padding:10px 13px; border-bottom:1px solid #f1f5f9;
+  font-size:13px; vertical-align:middle; }
+.db2-table tr:last-child td { border-bottom:none; }
+.db2-table tr:hover td { background:#f8faff; }
+.sn { font-weight:700; color:#1e3a8a; }
+.si { font-size:11px; color:#94a3b8; margin-top:2px; }
+.fchip { display:inline-flex; align-items:center; justify-content:center;
+  width:30px; height:30px; border-radius:50%; font-size:14px; font-weight:700; }
+.fchip.ok { background:#dcfce7; color:#166534; }
+.fchip.no { background:#f1f5f9; color:#94a3b8; }
+.pb-wrap { height:5px; background:#f1f5f9; border-radius:99px; overflow:hidden; margin-top:3px; }
+.pb-fill  { height:100%; border-radius:99px; transition:width .6s ease; }
+.row-tools button { padding:5px 9px; border-radius:6px; border:1px solid #e2e8f0;
+  background:#fff; color:#475569; font-size:11.5px; cursor:pointer;
+  font-family:inherit; font-weight:600; transition:all .15s; margin-right:3px; }
+.row-tools button:hover { background:#eff6ff; color:#1e3a8a; border-color:#93c5fd; }
+.row-tools .ai-b { border-color:#c4b5fd; color:#6d28d9; }
+.row-tools .ai-b:hover { background:#f5f3ff; }
+
+/* -- AI panel -- */
+.db2-ai-panel { background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.07); margin-top:22px; }
+.db2-ai-head { background:linear-gradient(135deg,#1e1b4b,#312e81,#4c1d95);
+  padding:16px 20px; display:flex; align-items:center; gap:12px; }
+.db2-ai-head .aic { width:38px;height:38px;background:rgba(255,255,255,.12);
+  border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px; }
+.db2-ai-head h4 { color:#fff; font-size:14px; font-weight:800; margin:0 0 2px; }
+.db2-ai-head p  { color:rgba(255,255,255,.7); font-size:11.5px; margin:0; }
+.db2-ai-ctrl { padding:14px 20px; border-bottom:1px solid #f1f5f9;
+  display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.sc-btn { padding:6px 13px; border-radius:20px; border:1.5px solid #e2e8f0;
+  background:#fff; color:#475569; font-size:12px; font-weight:700;
+  cursor:pointer; transition:all .15s; font-family:inherit; }
+.sc-btn:hover { border-color:#c4b5fd; color:#6d28d9; }
+.sc-btn.active { background:#6d28d9; color:#fff; border-color:#6d28d9; }
+.btn-ai-run { margin-left:auto; padding:8px 20px;
+  background:linear-gradient(135deg,#4c1d95,#7c3aed); color:#fff; border:none;
+  border-radius:8px; font-size:13px; font-weight:700; cursor:pointer;
+  font-family:inherit; box-shadow:0 2px 8px rgba(109,40,217,.3); transition:all .2s; }
+.btn-ai-run:hover { opacity:.9; transform:translateY(-1px); }
+.btn-ai-run:disabled { opacity:.6; cursor:wait; transform:none; }
+.db2-ai-body { padding:20px; min-height:160px; }
+.ai-ph { text-align:center; padding:36px 20px; color:#94a3b8; }
+.ai-ph .icon { font-size:44px; margin-bottom:10px; }
+.ai-result { animation:fadeUp .35s ease; }
+@keyframes fadeUp { from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);} }
+.ai-meta { display:flex; gap:8px; margin-bottom:14px; font-size:12px; color:#94a3b8; flex-wrap:wrap; }
+.ai-stag { background:#f5f3ff; color:#6d28d9; border-radius:20px;
+  padding:2px 10px; font-weight:700; }
+.ai-sec { margin-bottom:18px; }
+.ai-sec h5 { font-size:13.5px; font-weight:800; color:#1e3a8a;
+  background:#eff6ff; padding:6px 12px; border-radius:6px;
+  margin-bottom:8px; display:flex; align-items:center; gap:6px; }
+.ai-sec ul { padding-left:18px; }
+.ai-sec li { font-size:13px; line-height:1.7; margin-bottom:4px; }
+.ai-sec p  { font-size:13px; line-height:1.7; }
+.tag-row { display:flex; flex-wrap:wrap; gap:5px; margin-top:5px; }
+.tag { padding:3px 11px; border-radius:20px; font-size:11.5px; font-weight:700; }
+.tag.r { background:#fee2e2; color:#991b1b; }
+.tag.a { background:#fef3c7; color:#92400e; }
+.tag.g { background:#dcfce7; color:#166534; }
+.ai-urgent { background:#fff7ed; border:1px solid #fed7aa; border-radius:10px;
+  padding:13px; margin-bottom:18px; }
+.ai-urgent h5 { background:transparent; padding:0; color:#c2410c; margin-bottom:8px; }
+
+/* -- detail modal extra -- */
+.fsg-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:8px; margin-top:8px; }
+.fsg-item { border:2px solid #e2e8f0; border-radius:9px; padding:11px; text-align:center; }
+.fsg-item.ok { border-color:#86efac; background:#f0fdf4; }
+.fsg-item .fi { font-size:18px; margin-bottom:3px; }
+.fsg-item .fn { font-size:11.5px; font-weight:700; color:#475569; }
+.fsg-item .fs { font-size:11px; margin-top:2px; }
+.fsg-item.ok .fs { color:#16a34a; font-weight:700; }
+.fsg-item:not(.ok) .fs { color:#94a3b8; }
+
+/* divider */
+.db2-divider { border:0; border-top:1.5px solid #f1f5f9; margin:22px 0; }
+
+/* ── per-form edit buttons ── */
+.row-tools { display:flex; flex-wrap:wrap; gap:3px; }
+.row-tools button { padding:5px 9px; border-radius:6px; border:1px solid #e2e8f0;
+  background:#fff; color:#475569; font-size:11.5px; cursor:pointer;
+  font-family:inherit; font-weight:600; transition:all .15s; }
+.row-tools button:hover { background:#eff6ff; color:#1e3a8a; border-color:#93c5fd; }
 </style>
 </head>
 <body>
@@ -421,12 +660,12 @@ body {
     <!-- FORM SELECTOR TABS -->
     <div style="display:flex; gap:8px; margin-bottom:1.25rem; flex-wrap:wrap; background:#f1f5f9; border-radius:12px; padding:10px 14px; border:1px solid #e2e8f0;">
       <div style="font-size:13px;font-weight:700;color:#475569;align-self:center;margin-right:4px;">📋 เลือกแบบฟอร์ม:</div>
-      <button class="form-selector-btn active" onclick="switchForm('f0')">🏫 บันทึกบริบทโรงเรียน</button>
-      <button class="form-selector-btn" onclick="switchForm('f1')">👁️ สังเกตความเข้าใจนักเรียน</button>
-      <button class="form-selector-btn" onclick="switchForm('f2')">🏫 สังเกตการกำกับห้องเรียนครูปลายทาง</button>
-      <button class="form-selector-btn" onclick="switchForm('f3')">👨‍🏫 สังเกตการสอนจริงครูต้นทาง</button>
-      <button class="form-selector-btn" onclick="switchForm('f4')">💬 เสียงสะท้อนนักเรียน</button>
-      <button class="form-selector-btn" onclick="switchForm('f5')">📊 สะท้อนผลรวม PLC</button>
+      <button class="form-selector-btn active" id="fsBtn-f0" onclick="switchForm('f0')">🏫 บันทึกบริบทโรงเรียน <span id="badge-f0" class="form-completion-badge completion-none">⭕</span></button>
+      <button class="form-selector-btn" id="fsBtn-f1" onclick="switchForm('f1')">👁️ สังเกตความเข้าใจนักเรียน <span id="badge-f1" class="form-completion-badge completion-none">⭕</span></button>
+      <button class="form-selector-btn" id="fsBtn-f2" onclick="switchForm('f2')">🏫 กำกับห้องเรียนครูปลายทาง <span id="badge-f2" class="form-completion-badge completion-none">⭕</span></button>
+      <button class="form-selector-btn" id="fsBtn-f3" onclick="switchForm('f3')">👨‍🏫 สังเกตการสอนครูต้นทาง <span id="badge-f3" class="form-completion-badge completion-none">⭕</span></button>
+      <button class="form-selector-btn" id="fsBtn-f4" onclick="switchForm('f4')">💬 เสียงสะท้อนนักเรียน <span id="badge-f4" class="form-completion-badge completion-none">⭕</span></button>
+      <button class="form-selector-btn" id="fsBtn-f5" onclick="switchForm('f5')">📊 สะท้อนผลรวม PLC <span id="badge-f5" class="form-completion-badge completion-none">⭕</span></button>
     </div>
 
     <!-- FORM 0: บริบทโรงเรียน (original) -->
@@ -875,20 +1114,20 @@ body {
       <p>ผ่านเทปออกอากาศของครูต้นทาง — โครงการ DLTV</p>
     </div>
     <div class="tabs">
-      <div class="tab active" onclick="showSubTab('f1',0)">๑–๔. วัตถุประสงค์ & ข้อมูลพื้นฐาน</div>
-      <div class="tab" onclick="showSubTab('f1',1)">๕–๖. เกณฑ์ & ความพร้อม</div>
-      <div class="tab" onclick="showSubTab('f1',2)">๗–๘. แกนสังเกต ๑–๒</div>
-      <div class="tab" onclick="showSubTab('f1',3)">๙–๑๐. แกนสังเกต ๓–๔</div>
-      <div class="tab" onclick="showSubTab('f1',4)">๑๑–๑๔. บันทึก & สรุป & ลงนาม</div>
+      <div class="tab active" onclick="showSubTab('f1',0)">1–4. วัตถุประสงค์ & ข้อมูลพื้นฐาน</div>
+      <div class="tab" onclick="showSubTab('f1',1)">5–6. เกณฑ์ & ความพร้อม</div>
+      <div class="tab" onclick="showSubTab('f1',2)">7–8. แกนสังเกต 1–2</div>
+      <div class="tab" onclick="showSubTab('f1',3)">9–10. แกนสังเกต 3–4</div>
+      <div class="tab" onclick="showSubTab('f1',4)">11–14. บันทึก & สรุป & ลงนาม</div>
     </div>
     <div id="f1-tab0" class="tab-content active">
       <div class="section">
-        <div class="section-title">๑. วัตถุประสงค์</div>
+        <div class="section-title">1. วัตถุประสงค์</div>
         <div class="objective-box">จัดทำขึ้นเพื่อสังเกตและวิเคราะห์ว่า <strong>นักเรียนปลายทางเข้าใจเนื้อหาการสอนผ่านเทปออกอากาศของครูต้นทางหรือไม่ เข้าใจหรือไม่เข้าใจช่วงใด เพราะเหตุใด และควรปรับปรุง DLTV อย่างไร</strong></div>
         <div class="objective-box" style="border-left-color:#e11d48;background:#fff1f2;">ข้อมูลนี้ใช้เพื่อการพัฒนา มิใช่เพื่อประเมินหรือตัดสินนักเรียน ครูปลายทาง หรือโรงเรียนปลายทาง</div>
       </div>
       <div class="section">
-        <div class="section-title">๒. ผู้ใช้แบบสังเกต</div>
+        <div class="section-title">2. ผู้ใช้แบบสังเกต</div>
         <div class="cb-group">
           <label class="cb-label"><input type="checkbox"> ครูต้นทางเจ้าของเทปการสอน</label>
           <label class="cb-label"><input type="checkbox"> ครูต้นทางที่ร่วมลงพื้นที่</label>
@@ -898,7 +1137,7 @@ body {
         </div>
       </div>
       <div class="section">
-        <div class="section-title">๓. ข้อมูลพื้นฐานของการสังเกต</div>
+        <div class="section-title">3. ข้อมูลพื้นฐานของการสังเกต</div>
         <div class="row2"><div class="field"><label>ชื่อโรงเรียนปลายทาง</label><input type="text"></div><div class="field"><label>จังหวัด</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>สำนักงานเขตพื้นที่การศึกษา</label><input type="text"></div><div class="field"><label>วันที่สังเกต</label><input type="date"></div></div>
         <div class="row3"><div class="field"><label>ระดับชั้น</label><input type="text"></div><div class="field"><label>ห้อง</label><input type="text"></div><div class="field"><label>จำนวนนักเรียน (คน)</label><input type="number" value="0"></div></div>
@@ -907,7 +1146,7 @@ body {
         <div class="row2"><div class="field"><label>ผู้สังเกต</label><input type="text"></div><div class="field"><label>ตำแหน่ง/บทบาทของผู้สังเกต</label><input type="text"></div></div>
       </div>
       <div class="section">
-        <div class="section-title">๔. ข้อมูลเกี่ยวกับเทปออกอากาศที่ใช้สังเกต</div>
+        <div class="section-title">4. ข้อมูลเกี่ยวกับเทปออกอากาศที่ใช้สังเกต</div>
         <div class="row2"><div class="field"><label>วันที่ออกอากาศของเทป</label><input type="date"></div><div class="field"><label>ชื่อรายวิชา / ตอน</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>เริ่มที่นาทีที่</label><input type="number" value="0"></div><div class="field"><label>ถึงนาทีที่</label><input type="number" value="0"></div></div>
         <div class="field"><label>ลักษณะการใช้เทปในคาบนี้</label>
@@ -927,16 +1166,16 @@ body {
     </div>
     <div id="f1-tab1" class="tab-content">
       <div class="section">
-        <div class="section-title">๕. เกณฑ์ระดับคุณภาพในการสังเกต</div>
+        <div class="section-title">5. เกณฑ์ระดับคุณภาพในการสังเกต</div>
         <table class="matrix-table"><thead><tr><th>ระดับ</th><th>ความหมาย</th><th>เกณฑ์การพิจารณาโดยย่อ</th></tr></thead><tbody>
-          <tr><td><strong>๓</strong></td><td>ชัดเจน / มาก</td><td>พบพฤติกรรมหรือหลักฐานชัดเจน ต่อเนื่อง และส่งผลต่อการเรียนรู้ของนักเรียนอย่างเห็นได้ชัด</td></tr>
-          <tr><td><strong>๒</strong></td><td>บางส่วน / ปานกลาง</td><td>พบพฤติกรรมหรือหลักฐานบางส่วน แต่ยังไม่ต่อเนื่อง หรือผลต่อการเรียนรู้ยังไม่ชัดเจน</td></tr>
-          <tr><td><strong>๑</strong></td><td>น้อย / ไม่ปรากฏ</td><td>พบน้อยมาก ไม่ชัดเจน หรือไม่พบพฤติกรรมหรือหลักฐานที่เกี่ยวข้อง</td></tr>
+          <tr><td><strong>3</strong></td><td>ชัดเจน / มาก</td><td>พบพฤติกรรมหรือหลักฐานชัดเจน ต่อเนื่อง และส่งผลต่อการเรียนรู้ของนักเรียนอย่างเห็นได้ชัด</td></tr>
+          <tr><td><strong>2</strong></td><td>บางส่วน / ปานกลาง</td><td>พบพฤติกรรมหรือหลักฐานบางส่วน แต่ยังไม่ต่อเนื่อง หรือผลต่อการเรียนรู้ยังไม่ชัดเจน</td></tr>
+          <tr><td><strong>1</strong></td><td>น้อย / ไม่ปรากฏ</td><td>พบน้อยมาก ไม่ชัดเจน หรือไม่พบพฤติกรรมหรือหลักฐานที่เกี่ยวข้อง</td></tr>
         </tbody></table>
       </div>
       <div class="section">
-        <div class="section-title">๖. ความพร้อมก่อนเริ่มเรียนผ่านเทป</div>
-        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody>
+        <div class="section-title">6. ความพร้อมก่อนเริ่มเรียนผ่านเทป</div>
+        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody>
           <tr><td>นักเรียนรู้ว่ากำลังจะเรียนเรื่องอะไร</td><td><input type="radio" name="f1_r6_1" value="3"></td><td><input type="radio" name="f1_r6_1" value="2"></td><td><input type="radio" name="f1_r6_1" value="1"></td><td><input type="text"></td></tr>
           <tr><td>นักเรียนเข้าใจเป้าหมายของบทเรียนหรือกิจกรรม</td><td><input type="radio" name="f1_r6_2" value="3"></td><td><input type="radio" name="f1_r6_2" value="2"></td><td><input type="radio" name="f1_r6_2" value="1"></td><td><input type="text"></td></tr>
           <tr><td>นักเรียนได้รับการกระตุ้นให้เชื่อมโยงกับพื้นฐานเดิมอย่างเพียงพอ</td><td><input type="radio" name="f1_r6_3" value="3"></td><td><input type="radio" name="f1_r6_3" value="2"></td><td><input type="radio" name="f1_r6_3" value="1"></td><td><input type="text"></td></tr>
@@ -952,9 +1191,9 @@ body {
     </div>
     <div id="f1-tab2" class="tab-content">
       <div class="section">
-        <div class="section-title">๗. แกนสังเกตที่ ๑: ความเหมาะสมของเทปกับเป้าหมายและความพร้อมของนักเรียนปลายทาง</div>
+        <div class="section-title">7. แกนสังเกตที่ 1: ความเหมาะสมของเทปกับเป้าหมายและความพร้อมของนักเรียนปลายทาง</div>
         <div class="objective-box"><strong>จุดเน้น:</strong> เนื้อหา ภาษา ตัวอย่าง สื่อ ใบงาน และกิจกรรมในเทปเหมาะกับเป้าหมายการเรียนรู้ ระดับชั้น พื้นฐานเดิม และบริบทผู้เรียนจริงของโรงเรียนปลายทางหรือไม่</div>
-        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody>
+        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody>
           <tr><td>เนื้อหาในเทปสอดคล้องกับเป้าหมายการเรียนรู้ของคาบนี้</td><td><input type="radio" name="f1_r7_1" value="3"></td><td><input type="radio" name="f1_r7_1" value="2"></td><td><input type="radio" name="f1_r7_1" value="1"></td><td><input type="text"></td></tr>
           <tr><td>ระดับความยากของเนื้อหาเหมาะกับพื้นฐานนักเรียนปลายทาง</td><td><input type="radio" name="f1_r7_2" value="3"></td><td><input type="radio" name="f1_r7_2" value="2"></td><td><input type="radio" name="f1_r7_2" value="1"></td><td><input type="text"></td></tr>
           <tr><td>ภาษาและคำศัพท์ในเทปเหมาะกับระดับผู้เรียน</td><td><input type="radio" name="f1_r7_3" value="3"></td><td><input type="radio" name="f1_r7_3" value="2"></td><td><input type="radio" name="f1_r7_3" value="1"></td><td><input type="text"></td></tr>
@@ -965,9 +1204,9 @@ body {
         <div class="field" style="margin-top:12px;"><label>สรุปความเหมาะสมของเทปกับนักเรียนปลายทางกลุ่มนี้</label><textarea></textarea></div>
       </div>
       <div class="section">
-        <div class="section-title">๘. แกนสังเกตที่ ๒: การเรียนรู้ของนักเรียนระหว่างใช้เทป</div>
+        <div class="section-title">8. แกนสังเกตที่ 2: การเรียนรู้ของนักเรียนระหว่างใช้เทป</div>
         <div class="objective-box"><strong>จุดเน้น:</strong> นักเรียนติดตามบทเรียนผ่านเทปได้หรือไม่ มีส่วนร่วมในการคิดหรือลงมือทำเพียงใด และมีหลักฐานใดที่สะท้อนว่านักเรียนเข้าใจหรือยังไม่เข้าใจ</div>
-        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody>
+        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody>
           <tr><td>นักเรียนตอบคำถามเกี่ยวกับเนื้อหาได้ถูกต้อง</td><td><input type="radio" name="f1_r8_1" value="3"></td><td><input type="radio" name="f1_r8_1" value="2"></td><td><input type="radio" name="f1_r8_1" value="1"></td><td><input type="text"></td></tr>
           <tr><td>นักเรียนอธิบายเหตุผลหรือกระบวนการคิดของตนเองได้</td><td><input type="radio" name="f1_r8_2" value="3"></td><td><input type="radio" name="f1_r8_2" value="2"></td><td><input type="radio" name="f1_r8_2" value="1"></td><td><input type="text"></td></tr>
           <tr><td>นักเรียนเชื่อมโยงเนื้อหากับความรู้เดิมหรือชีวิตจริงได้</td><td><input type="radio" name="f1_r8_3" value="3"></td><td><input type="radio" name="f1_r8_3" value="2"></td><td><input type="radio" name="f1_r8_3" value="1"></td><td><input type="text"></td></tr>
@@ -985,8 +1224,8 @@ body {
     </div>
     <div id="f1-tab3" class="tab-content">
       <div class="section">
-        <div class="section-title">๙. แกนสังเกตที่ ๓: ภาระทางปัญญา (Cognitive Load) ของนักเรียน</div>
-        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody>
+        <div class="section-title">9. แกนสังเกตที่ 3: ภาระทางปัญญา (Cognitive Load) ของนักเรียน</div>
+        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody>
           <tr><td>หลังฟังคำสั่งหรือคำอธิบายจากเทป นักเรียนเริ่มลงมือในขั้นแรกได้ โดยไม่หยุดชะงักนาน</td><td><input type="radio" name="f1_r9_1" value="3"></td><td><input type="radio" name="f1_r9_1" value="2"></td><td><input type="radio" name="f1_r9_1" value="1"></td><td><input type="text"></td></tr>
           <tr><td>นักเรียนทำตามลำดับขั้นตอนในเทปได้ โดยไม่ข้ามขั้น หรือเปิดใบงานผิดหน้า</td><td><input type="radio" name="f1_r9_2" value="3"></td><td><input type="radio" name="f1_r9_2" value="2"></td><td><input type="radio" name="f1_r9_2" value="1"></td><td><input type="text"></td></tr>
           <tr><td>นักเรียนไม่ต้องถามซ้ำบ่อย ๆ ว่า "ให้ทำอะไร" "ถึงขั้นตอนไหน" หรือ "ต้องทำอย่างไรต่อ"</td><td><input type="radio" name="f1_r9_3" value="3"></td><td><input type="radio" name="f1_r9_3" value="2"></td><td><input type="radio" name="f1_r9_3" value="1"></td><td><input type="text"></td></tr>
@@ -998,8 +1237,8 @@ body {
         <div class="field" style="margin-top:12px;"><label>ช่วงที่นักเรียนเริ่มตามไม่ทันหรือมีภาระทางปัญญาสูง เกิดอะไรขึ้น</label><textarea></textarea></div>
       </div>
       <div class="section">
-        <div class="section-title">๑๐. แกนสังเกตที่ ๔: การเข้าถึงการเรียนรู้ของนักเรียนปลายทาง (ความหลากหลายในห้องเรียน)</div>
-        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody>
+        <div class="section-title">10. แกนสังเกตที่ 4: การเข้าถึงการเรียนรู้ของนักเรียนปลายทาง (ความหลากหลายในห้องเรียน)</div>
+        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody>
           <tr><td>นักเรียนส่วนใหญ่ได้ยินเสียงและเห็นภาพชัดเจน</td><td><input type="radio" name="f1_r10_1" value="3"></td><td><input type="radio" name="f1_r10_1" value="2"></td><td><input type="radio" name="f1_r10_1" value="1"></td><td><input type="text"></td></tr>
           <tr><td>นักเรียนที่พื้นฐานอ่อนกว่ายังสามารถติดตามบทเรียนได้</td><td><input type="radio" name="f1_r10_2" value="3"></td><td><input type="radio" name="f1_r10_2" value="2"></td><td><input type="radio" name="f1_r10_2" value="1"></td><td><input type="text"></td></tr>
           <tr><td>นักเรียนที่อ่าน ฟัง เขียน หรือทำกิจกรรมไม่ทันได้รับการช่วยเหลือ</td><td><input type="radio" name="f1_r10_3" value="3"></td><td><input type="radio" name="f1_r10_3" value="2"></td><td><input type="radio" name="f1_r10_3" value="1"></td><td><input type="text"></td></tr>
@@ -1016,7 +1255,7 @@ body {
     </div>
     <div id="f1-tab4" class="tab-content">
       <div class="section">
-        <div class="section-title">๑๑. บันทึกช่วงสำคัญของเทปที่ส่งผลต่อความเข้าใจของนักเรียน</div>
+        <div class="section-title">11. บันทึกช่วงสำคัญของเทปที่ส่งผลต่อความเข้าใจของนักเรียน</div>
         <table class="matrix-table"><thead><tr><th>ประเด็นเนื้อหาหรือกิจกรรมในเทป</th><th>พฤติกรรมที่สังเกตเห็นจากนักเรียน</th><th>ระดับความเข้าใจโดยรวม</th><th>หลักฐาน / ตัวอย่างคำตอบของนักเรียน</th></tr></thead><tbody>
           <tr><td><input type="text"></td><td><input type="text"></td><td><select><option value="">--เลือก--</option><option>เข้าใจดี</option><option>เข้าใจบางส่วน</option><option>ยังสับสน</option></select></td><td><input type="text"></td></tr>
           <tr><td><input type="text"></td><td><input type="text"></td><td><select><option value="">--เลือก--</option><option>เข้าใจดี</option><option>เข้าใจบางส่วน</option><option>ยังสับสน</option></select></td><td><input type="text"></td></tr>
@@ -1025,7 +1264,7 @@ body {
         </tbody></table>
       </div>
       <div class="section">
-        <div class="section-title">๑๒. สัญญาณที่สะท้อนว่านักเรียนยังไม่เข้าใจหรือหลุดจากบทเรียน</div>
+        <div class="section-title">12. สัญญาณที่สะท้อนว่านักเรียนยังไม่เข้าใจหรือหลุดจากบทเรียน</div>
         <div class="cb-group" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
           <label class="cb-label"><input type="checkbox"> นักเรียนเงียบผิดปกติหรือไม่ตอบสนองต่อคำถาม</label>
           <label class="cb-label"><input type="checkbox"> นักเรียนตอบผิดซ้ำในประเด็นเดิม</label>
@@ -1039,18 +1278,18 @@ body {
         <div class="field" style="margin-top:10px;"><label>หลักฐานหรือเหตุการณ์ที่เห็นชัด</label><textarea></textarea></div>
       </div>
       <div class="section">
-        <div class="section-title">๑๓. เหตุการณ์สำคัญในคาบเรียน (ถ้ามี)</div>
+        <div class="section-title">13. เหตุการณ์สำคัญในคาบเรียน (ถ้ามี)</div>
         <div class="row2"><div class="field"><label>ช่วงเวลาในเทป / คาบเรียน</label><input type="text"></div><div class="field"><label>เกิดอะไรขึ้น</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>นักเรียนแสดงพฤติกรรมอย่างไร</label><textarea></textarea></div><div class="field"><label>ครูผู้สอนสนับสนุนอย่างไร</label><textarea></textarea></div></div>
         <div class="row2"><div class="field"><label>ผลที่เกิดขึ้นกับความเข้าใจของนักเรียน</label><textarea></textarea></div><div class="field"><label>ข้อค้นพบจากเหตุการณ์นี้</label><textarea></textarea></div></div>
       </div>
       <div class="section">
-        <div class="section-title">๑๔. สรุปข้อค้นพบจากการสังเกต (เพื่อการพัฒนา DLTV)</div>
-        <div class="row2"><div class="field"><label>๑๔.๑ นักเรียนเข้าใจดีในประเด็นใด</label><textarea></textarea></div><div class="field"><label>๑๔.๒ นักเรียนยังไม่เข้าใจหรือเข้าใจคลาดเคลื่อนในประเด็นใด</label><textarea></textarea></div></div>
-        <div class="row2"><div class="field"><label>๑๔.๓ สาเหตุสำคัญที่ทำให้นักเรียนเข้าใจหรือไม่เข้าใจ</label><textarea></textarea></div><div class="field"><label>๑๔.๔ เทปการสอนควรปรับช่วงใด</label><textarea></textarea></div></div>
-        <div class="row2"><div class="field"><label>๑๔.๕ วิธีอธิบายหรือคำถามของครูควรปรับอย่างไร</label><textarea></textarea></div><div class="field"><label>๑๔.๕ สื่อ อุปกรณ์ ใบงาน ใบกิจกรรม ควรปรับอย่างไร</label><textarea></textarea></div></div>
-        <div class="field"><label>๑๔.๖ คำแนะนำเพิ่มเติมสำหรับครูปลายทาง</label><textarea></textarea></div>
-        <div class="field"><label>๑๔.๗ ข้อเสนอเร่งด่วน</label>
+        <div class="section-title">14. สรุปข้อค้นพบจากการสังเกต (เพื่อการพัฒนา DLTV)</div>
+        <div class="row2"><div class="field"><label>14.1 นักเรียนเข้าใจดีในประเด็นใด</label><textarea></textarea></div><div class="field"><label>14.2 นักเรียนยังไม่เข้าใจหรือเข้าใจคลาดเคลื่อนในประเด็นใด</label><textarea></textarea></div></div>
+        <div class="row2"><div class="field"><label>14.3 สาเหตุสำคัญที่ทำให้นักเรียนเข้าใจหรือไม่เข้าใจ</label><textarea></textarea></div><div class="field"><label>14.4 เทปการสอนควรปรับช่วงใด</label><textarea></textarea></div></div>
+        <div class="row2"><div class="field"><label>14.5 วิธีอธิบายหรือคำถามของครูควรปรับอย่างไร</label><textarea></textarea></div><div class="field"><label>14.5 สื่อ อุปกรณ์ ใบงาน ใบกิจกรรม ควรปรับอย่างไร</label><textarea></textarea></div></div>
+        <div class="field"><label>14.6 คำแนะนำเพิ่มเติมสำหรับครูปลายทาง</label><textarea></textarea></div>
+        <div class="field"><label>14.7 ข้อเสนอเร่งด่วน</label>
           <div class="cb-group" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <label class="cb-label"><input type="checkbox"> ปรับจังหวะหรือความเร็วของการสอนในเทป</label>
             <label class="cb-label"><input type="checkbox"> ปรับคำอธิบายให้เข้าใจง่ายขึ้น</label>
@@ -1080,17 +1319,17 @@ body {
       <p>ระหว่างใช้เทปออกอากาศ — โครงการ DLTV</p>
     </div>
     <div class="tabs">
-      <div class="tab active" onclick="showSubTab('f2',0)">๑–๔. วัตถุประสงค์ & ข้อมูลพื้นฐาน</div>
-      <div class="tab" onclick="showSubTab('f2',1)">๕–๖. เกณฑ์ & ความพร้อม</div>
-      <div class="tab" onclick="showSubTab('f2',2)">๗–๘. แกนสังเกต ๑–๒</div>
-      <div class="tab" onclick="showSubTab('f2',3)">๙–๑๑. แกนสังเกต ๓–๕</div>
-      <div class="tab" onclick="showSubTab('f2',4)">๑๒–๑๕. บันทึก & สรุป & ลงนาม</div>
+      <div class="tab active" onclick="showSubTab('f2',0)">1–4. วัตถุประสงค์ & ข้อมูลพื้นฐาน</div>
+      <div class="tab" onclick="showSubTab('f2',1)">5–6. เกณฑ์ & ความพร้อม</div>
+      <div class="tab" onclick="showSubTab('f2',2)">7–8. แกนสังเกต 1–2</div>
+      <div class="tab" onclick="showSubTab('f2',3)">9–11. แกนสังเกต 3–5</div>
+      <div class="tab" onclick="showSubTab('f2',4)">12–15. บันทึก & สรุป & ลงนาม</div>
     </div>
     <div id="f2-tab0" class="tab-content active">
-      <div class="section"><div class="section-title">๑. วัตถุประสงค์</div>
+      <div class="section"><div class="section-title">1. วัตถุประสงค์</div>
         <div class="objective-box">จัดทำขึ้นเพื่อศึกษาว่า <strong>ครูปลายทางกำกับ ดูแล และสนับสนุนการเรียนรู้ของนักเรียนระหว่างใช้เทปออกอากาศของครูต้นทางอย่างไร</strong></div>
       </div>
-      <div class="section"><div class="section-title">๒. ผู้ใช้แบบสังเกต</div>
+      <div class="section"><div class="section-title">2. ผู้ใช้แบบสังเกต</div>
         <div class="cb-group">
           <label class="cb-label"><input type="checkbox"> ครูต้นทางเจ้าของเทปการสอน</label>
           <label class="cb-label"><input type="checkbox"> ครูต้นทางที่ร่วมลงพื้นที่</label>
@@ -1099,14 +1338,14 @@ body {
           <label class="cb-label"><input type="checkbox"> ผู้ประสานงาน / ผู้ติดตามโครงการ</label>
         </div>
       </div>
-      <div class="section"><div class="section-title">๓. ข้อมูลพื้นฐานของการสังเกต</div>
+      <div class="section"><div class="section-title">3. ข้อมูลพื้นฐานของการสังเกต</div>
         <div class="row2"><div class="field"><label>ชื่อโรงเรียนปลายทาง</label><input type="text"></div><div class="field"><label>จังหวัด</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>สำนักงานเขตพื้นที่การศึกษา</label><input type="text"></div><div class="field"><label>วันที่สังเกต</label><input type="date"></div></div>
         <div class="row3"><div class="field"><label>ระดับชั้น</label><input type="text"></div><div class="field"><label>ห้อง</label><input type="text"></div><div class="field"><label>จำนวนนักเรียน (คน)</label><input type="number" value="0"></div></div>
         <div class="row2"><div class="field"><label>ชื่อครูต้นทางเจ้าของเทป</label><input type="text"></div><div class="field"><label>ชื่อครูปลายทางผู้กำกับห้องเรียน</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>ผู้สังเกต</label><input type="text"></div><div class="field"><label>ตำแหน่ง/บทบาทของผู้สังเกต</label><input type="text"></div></div>
       </div>
-      <div class="section"><div class="section-title">๔. ข้อมูลเกี่ยวกับเทปออกอากาศ</div>
+      <div class="section"><div class="section-title">4. ข้อมูลเกี่ยวกับเทปออกอากาศ</div>
         <div class="row2"><div class="field"><label>วันที่ออกอากาศ</label><input type="date"></div><div class="field"><label>ชื่อรายวิชา / ตอน</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>เริ่มที่นาทีที่</label><input type="number" value="0"></div><div class="field"><label>ถึงนาทีที่</label><input type="number" value="0"></div></div>
         <div class="field"><label>จุดประสงค์การเรียนรู้</label><textarea></textarea></div>
@@ -1114,16 +1353,16 @@ body {
       <div class="action-controls"><button type="button" class="btn-control btn-next" onclick="showSubTab('f2',1)">ถัดไป <i class="ti ti-arrow-right"></i></button></div>
     </div>
     <div id="f2-tab1" class="tab-content">
-      <div class="section"><div class="section-title">๕. เกณฑ์ระดับคุณภาพ</div>
+      <div class="section"><div class="section-title">5. เกณฑ์ระดับคุณภาพ</div>
         <table class="matrix-table"><thead><tr><th>ระดับ</th><th>ความหมาย</th><th>เกณฑ์การพิจารณาโดยย่อ</th></tr></thead><tbody>
-          <tr><td><strong>๓</strong></td><td>ชัดเจน / มาก</td><td>พบพฤติกรรมหรือหลักฐานชัดเจน ต่อเนื่อง และส่งผลต่อการเรียนรู้อย่างเห็นได้ชัด</td></tr>
-          <tr><td><strong>๒</strong></td><td>บางส่วน / ปานกลาง</td><td>พบพฤติกรรมหรือหลักฐานบางส่วน แต่ยังไม่ต่อเนื่อง</td></tr>
-          <tr><td><strong>๑</strong></td><td>น้อย / ไม่ปรากฏ</td><td>พบน้อยมาก ไม่ชัดเจน หรือไม่พบพฤติกรรมที่เกี่ยวข้อง</td></tr>
+          <tr><td><strong>3</strong></td><td>ชัดเจน / มาก</td><td>พบพฤติกรรมหรือหลักฐานชัดเจน ต่อเนื่อง และส่งผลต่อการเรียนรู้อย่างเห็นได้ชัด</td></tr>
+          <tr><td><strong>2</strong></td><td>บางส่วน / ปานกลาง</td><td>พบพฤติกรรมหรือหลักฐานบางส่วน แต่ยังไม่ต่อเนื่อง</td></tr>
+          <tr><td><strong>1</strong></td><td>น้อย / ไม่ปรากฏ</td><td>พบน้อยมาก ไม่ชัดเจน หรือไม่พบพฤติกรรมที่เกี่ยวข้อง</td></tr>
         </tbody></table>
       </div>
       <div class="section">
-        <div class="section-title">๖. ความพร้อมก่อนเริ่มใช้เทป</div>
-        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
+        <div class="section-title">6. ความพร้อมก่อนเริ่มใช้เทป</div>
+        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
         <tbody><tr><td>ห้องเรียน อุปกรณ์ เสียง ภาพ และจอภาพพร้อมใช้งาน</td><td><input type="radio" name="f2_r6_1" value="3"></td><td><input type="radio" name="f2_r6_1" value="2"></td><td><input type="radio" name="f2_r6_1" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูปลายทางเตรียมใบงาน สื่อ หรืออุปกรณ์ประกอบการเรียน</td><td><input type="radio" name="f2_r6_2" value="3"></td><td><input type="radio" name="f2_r6_2" value="2"></td><td><input type="radio" name="f2_r6_2" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูปลายทางเตรียมนักเรียนให้พร้อมก่อนเปิดเทป</td><td><input type="radio" name="f2_r6_3" value="3"></td><td><input type="radio" name="f2_r6_3" value="2"></td><td><input type="radio" name="f2_r6_3" value="1"></td><td><input type="text"></td></tr>
@@ -1138,8 +1377,8 @@ body {
     </div>
     <div id="f2-tab2" class="tab-content">
       <div class="section">
-        <div class="section-title">๗. แกนสังเกตที่ ๑: การนำเทปออกอากาศไปใช้เป็นกระบวนการเรียนรู้</div>
-        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
+        <div class="section-title">7. แกนสังเกตที่ 1: การนำเทปออกอากาศไปใช้เป็นกระบวนการเรียนรู้</div>
+        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
         <tbody><tr><td>ครูปลายทางใช้เทปสอดคล้องกับจุดประสงค์การเรียนรู้ของคาบเรียน</td><td><input type="radio" name="f2_r7_1" value="3"></td><td><input type="radio" name="f2_r7_1" value="2"></td><td><input type="radio" name="f2_r7_1" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูปลายทางเลือกใช้ช่วงของเทปได้เหมาะสมกับจุดประสงค์การเรียนรู้</td><td><input type="radio" name="f2_r7_2" value="3"></td><td><input type="radio" name="f2_r7_2" value="2"></td><td><input type="radio" name="f2_r7_2" value="1"></td><td><input type="text"></td></tr>
 <tr><td>การใช้เทปเชื่อมโยงกับกิจกรรมก่อน ระหว่าง หรือหลังดู</td><td><input type="radio" name="f2_r7_3" value="3"></td><td><input type="radio" name="f2_r7_3" value="2"></td><td><input type="radio" name="f2_r7_3" value="1"></td><td><input type="text"></td></tr>
@@ -1148,8 +1387,8 @@ body {
 </tbody></table><div class="field" style="margin-top:12px;"><label>สรุปการนำเทปไปใช้เป็นกระบวนการเรียนรู้ในคาบนี้</label><textarea></textarea></div></div>
 
       <div class="section">
-        <div class="section-title">๘. แกนสังเกตที่ ๒: การสอนเสริมและการเชื่อมเทปกับผู้เรียนจริง</div>
-        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
+        <div class="section-title">8. แกนสังเกตที่ 2: การสอนเสริมและการเชื่อมเทปกับผู้เรียนจริง</div>
+        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
         <tbody><tr><td>ครูปลายทางอธิบายเสริมเมื่อพบว่านักเรียนไม่เข้าใจ</td><td><input type="radio" name="f2_r8_1" value="3"></td><td><input type="radio" name="f2_r8_1" value="2"></td><td><input type="radio" name="f2_r8_1" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูปลายทางยกตัวอย่างเพิ่มเติมที่ใกล้ตัวผู้เรียน</td><td><input type="radio" name="f2_r8_2" value="3"></td><td><input type="radio" name="f2_r8_2" value="2"></td><td><input type="radio" name="f2_r8_2" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูปลายทางใช้คำถามช่วยให้นักเรียนคิดตามเทป</td><td><input type="radio" name="f2_r8_3" value="3"></td><td><input type="radio" name="f2_r8_3" value="2"></td><td><input type="radio" name="f2_r8_3" value="1"></td><td><input type="text"></td></tr>
@@ -1166,8 +1405,8 @@ body {
     </div>
     <div id="f2-tab3" class="tab-content">
       <div class="section">
-        <div class="section-title">๙. แกนสังเกตที่ ๓: การจัดการช่วงเปลี่ยนผ่านและการบริหารชั้นเรียน</div>
-        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
+        <div class="section-title">9. แกนสังเกตที่ 3: การจัดการช่วงเปลี่ยนผ่านและการบริหารชั้นเรียน</div>
+        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
         <tbody><tr><td>การเปลี่ยนจากช่วงเตรียมพร้อมเข้าสู่การดูเทปเป็นไปอย่างราบรื่น</td><td><input type="radio" name="f2_r9_1" value="3"></td><td><input type="radio" name="f2_r9_1" value="2"></td><td><input type="radio" name="f2_r9_1" value="1"></td><td><input type="text"></td></tr>
 <tr><td>เมื่อหยุดเทปเพื่อถามหรืออธิบาย นักเรียนยังคงจดจ่อกับบทเรียน</td><td><input type="radio" name="f2_r9_2" value="3"></td><td><input type="radio" name="f2_r9_2" value="2"></td><td><input type="radio" name="f2_r9_2" value="1"></td><td><input type="text"></td></tr>
 <tr><td>การเปลี่ยนจากการดูเทปไปสู่การทำใบงานหรือกิจกรรมไม่เสียเวลามาก</td><td><input type="radio" name="f2_r9_3" value="3"></td><td><input type="radio" name="f2_r9_3" value="2"></td><td><input type="radio" name="f2_r9_3" value="1"></td><td><input type="text"></td></tr>
@@ -1182,8 +1421,8 @@ body {
         <div class="field"><label>ช่วงเปลี่ยนผ่านที่ยังควรพัฒนา</label><textarea></textarea></div>
       </div></div>
       <div class="section">
-        <div class="section-title">๑๐. แกนสังเกตที่ ๔: การช่วยเหลือนักเรียนที่มีความแตกต่าง</div>
-        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
+        <div class="section-title">10. แกนสังเกตที่ 4: การช่วยเหลือนักเรียนที่มีความแตกต่าง</div>
+        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
         <tbody><tr><td>ครูปลายทางสังเกตเห็นนักเรียนที่เริ่มตามไม่ทัน</td><td><input type="radio" name="f2_r10_1" value="3"></td><td><input type="radio" name="f2_r10_1" value="2"></td><td><input type="radio" name="f2_r10_1" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูปลายทางให้ความช่วยเหลือนักเรียนที่ต้องการการสนับสนุนเพิ่มเติม</td><td><input type="radio" name="f2_r10_2" value="3"></td><td><input type="radio" name="f2_r10_2" value="2"></td><td><input type="radio" name="f2_r10_2" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูปลายทางช่วยนักเรียนที่อ่าน ฟัง เขียน หรือทำกิจกรรมไม่ทัน</td><td><input type="radio" name="f2_r10_3" value="3"></td><td><input type="radio" name="f2_r10_3" value="2"></td><td><input type="radio" name="f2_r10_3" value="1"></td><td><input type="text"></td></tr>
@@ -1197,8 +1436,8 @@ body {
         <div class="field"><label>วิธีช่วยเหลือที่ได้ผลในคาบนี้</label><textarea></textarea></div>
       </div></div>
       <div class="section">
-        <div class="section-title">๑๑. แกนสังเกตที่ ๕: การตรวจสอบความเข้าใจและการสรุปบทเรียน</div>
-        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
+        <div class="section-title">11. แกนสังเกตที่ 5: การตรวจสอบความเข้าใจและการสรุปบทเรียน</div>
+        <table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead>
         <tbody><tr><td>ครูปลายทางตรวจสอบความเข้าใจของนักเรียนระหว่างดูเทป</td><td><input type="radio" name="f2_r11_1" value="3"></td><td><input type="radio" name="f2_r11_1" value="2"></td><td><input type="radio" name="f2_r11_1" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูปลายทางใช้คำถามที่ให้นักเรียนอธิบายเหตุผล ไม่ใช่ตอบเพียงสั้น ๆ</td><td><input type="radio" name="f2_r11_2" value="3"></td><td><input type="radio" name="f2_r11_2" value="2"></td><td><input type="radio" name="f2_r11_2" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูปลายทางให้นักเรียนสรุปสิ่งที่เรียนรู้หลังดูเทป</td><td><input type="radio" name="f2_r11_3" value="3"></td><td><input type="radio" name="f2_r11_3" value="2"></td><td><input type="radio" name="f2_r11_3" value="1"></td><td><input type="text"></td></tr>
@@ -1214,7 +1453,7 @@ body {
     </div>
     <div id="f2-tab4" class="tab-content">
       <div class="section">
-        <div class="section-title">๑๒. บันทึกช่วงสำคัญระหว่างใช้เทป</div>
+        <div class="section-title">12. บันทึกช่วงสำคัญระหว่างใช้เทป</div>
         <table class="matrix-table"><thead><tr><th>ช่วงเวลา</th><th>เหตุการณ์ที่เกิดขึ้น</th><th>ครูปลายทางทำอะไร</th><th>ผลที่เกิดกับนักเรียน</th><th>ข้อค้นพบ</th></tr></thead><tbody>
           <tr><td><input type="text" placeholder="นาทีที่ ... ถึง ..."></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
           <tr><td><input type="text" placeholder="นาทีที่ ... ถึง ..."></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
@@ -1222,8 +1461,8 @@ body {
         </tbody></table>
       </div>
       <div class="section">
-        <div class="section-title">๑๓. อุปสรรค วิธีแก้ และแนวปฏิบัติที่ขยายผลได้</div>
-        <div class="field"><label>๑๓.๑ อุปสรรคสำคัญที่พบระหว่างใช้เทป</label>
+        <div class="section-title">13. อุปสรรค วิธีแก้ และแนวปฏิบัติที่ขยายผลได้</div>
+        <div class="field"><label>13.1 อุปสรรคสำคัญที่พบระหว่างใช้เทป</label>
           <div class="cb-group" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <label class="cb-label"><input type="checkbox"> นักเรียนตามเทปไม่ทัน</label>
             <label class="cb-label"><input type="checkbox"> นักเรียนไม่เข้าใจคำศัพท์หรือภาษาที่ใช้ในเทป</label>
@@ -1233,20 +1472,20 @@ body {
             <label class="cb-label"><input type="checkbox"> การจัดห้องเรียนไม่เอื้อต่อการเรียนผ่าน DLTV</label>
           </div>
         </div>
-        <div class="row2"><div class="field"><label>๑๓.๒ วิธีแก้หรือการปรับของครูปลายทางที่พบในคาบนี้</label><textarea></textarea></div><div class="field"><label>๑๓.๓ วิธีใดได้ผลดีและควรนำไปขยายผล</label><textarea></textarea></div></div>
-        <div class="field"><label>๑๓.๔ วิธีใดยังไม่เพียงพอหรือควรปรับปรุง</label><textarea></textarea></div>
+        <div class="row2"><div class="field"><label>13.2 วิธีแก้หรือการปรับของครูปลายทางที่พบในคาบนี้</label><textarea></textarea></div><div class="field"><label>13.3 วิธีใดได้ผลดีและควรนำไปขยายผล</label><textarea></textarea></div></div>
+        <div class="field"><label>13.4 วิธีใดยังไม่เพียงพอหรือควรปรับปรุง</label><textarea></textarea></div>
       </div>
       <div class="section">
-        <div class="section-title">๑๔. เหตุการณ์สำคัญในคาบเรียน (ถ้ามี)</div>
+        <div class="section-title">14. เหตุการณ์สำคัญในคาบเรียน (ถ้ามี)</div>
         <div class="row2"><div class="field"><label>ช่วงเวลา</label><input type="text"></div><div class="field"><label>เกิดอะไรขึ้น</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>ครูปลายทางทำอะไร</label><textarea></textarea></div><div class="field"><label>นักเรียนตอบสนองอย่างไร</label><textarea></textarea></div></div>
         <div class="row2"><div class="field"><label>ผลที่เกิดขึ้นต่อความเข้าใจหรือการมีส่วนร่วมของนักเรียน</label><textarea></textarea></div><div class="field"><label>ข้อค้นพบจากเหตุการณ์นี้</label><textarea></textarea></div></div>
       </div>
       <div class="section">
-        <div class="section-title">๑๕. สรุปข้อค้นพบจากการสังเกต</div>
-        <div class="row2"><div class="field"><label>๑๕.๑ ครูปลายทางมีแนวทางกำกับห้องเรียนใดที่ได้ผล</label><textarea></textarea></div><div class="field"><label>๑๕.๒ วิธีใดช่วยให้นักเรียนเข้าใจหรือมีส่วนร่วมมากขึ้น</label><textarea></textarea></div></div>
-        <div class="field"><label>๑๕.๓ อุปสรรคสำคัญของการกำกับห้องเรียนระหว่างใช้เทป</label><textarea></textarea></div>
-        <div class="field"><label>๑๕.๔ ครูปลายทางควรได้รับการสนับสนุนเพิ่มเติมเรื่องใด</label>
+        <div class="section-title">15. สรุปข้อค้นพบจากการสังเกต</div>
+        <div class="row2"><div class="field"><label>15.1 ครูปลายทางมีแนวทางกำกับห้องเรียนใดที่ได้ผล</label><textarea></textarea></div><div class="field"><label>15.2 วิธีใดช่วยให้นักเรียนเข้าใจหรือมีส่วนร่วมมากขึ้น</label><textarea></textarea></div></div>
+        <div class="field"><label>15.3 อุปสรรคสำคัญของการกำกับห้องเรียนระหว่างใช้เทป</label><textarea></textarea></div>
+        <div class="field"><label>15.4 ครูปลายทางควรได้รับการสนับสนุนเพิ่มเติมเรื่องใด</label>
           <div class="cb-group" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <label class="cb-label"><input type="checkbox"> คู่มือการใช้เทปออกอากาศในห้องเรียน</label>
             <label class="cb-label"><input type="checkbox"> จุดหยุดเทปหรือคำถามแนะนำระหว่างดู</label>
@@ -1256,7 +1495,7 @@ body {
             <label class="cb-label"><input type="checkbox"> แนวทางจัดการชั้นเรียนระหว่างใช้ DLTV</label>
           </div>
         </div>
-        <div class="row2"><div class="field"><label>๑๕.๕ เทปออกอากาศหรือสื่อประกอบควรปรับอะไรเพื่อช่วยครูปลายทาง</label><textarea></textarea></div><div class="field"><label>๑๕.๖ แนวปฏิบัติที่ควรนำไปขยายผลให้โรงเรียนปลายทางอื่น</label><textarea></textarea></div></div>
+        <div class="row2"><div class="field"><label>15.5 เทปออกอากาศหรือสื่อประกอบควรปรับอะไรเพื่อช่วยครูปลายทาง</label><textarea></textarea></div><div class="field"><label>15.6 แนวปฏิบัติที่ควรนำไปขยายผลให้โรงเรียนปลายทางอื่น</label><textarea></textarea></div></div>
         <div class="field"><label>ความเห็นเพิ่มเติมของผู้สังเกต</label><textarea></textarea></div>
       </div>
       <div class="section">
@@ -1277,16 +1516,16 @@ body {
       <p>กับบริบทผู้เรียนจริงของโรงเรียนปลายทาง — โครงการ DLTV</p>
     </div>
     <div class="tabs">
-      <div class="tab active" onclick="showSubTab('f3',0)">๑–๔. วัตถุประสงค์ & ข้อมูลพื้นฐาน</div>
-      <div class="tab" onclick="showSubTab('f3',1)">๕–๗. เกณฑ์ & แกนสังเกต ๑–๒</div>
-      <div class="tab" onclick="showSubTab('f3',2)">๘–๑๐. แกนสังเกต ๓–๕</div>
-      <div class="tab" onclick="showSubTab('f3',3)">๑๑–๑๕. บันทึก & สรุป & ลงนาม</div>
+      <div class="tab active" onclick="showSubTab('f3',0)">1–4. วัตถุประสงค์ & ข้อมูลพื้นฐาน</div>
+      <div class="tab" onclick="showSubTab('f3',1)">5–7. เกณฑ์ & แกนสังเกต 1–2</div>
+      <div class="tab" onclick="showSubTab('f3',2)">8–10. แกนสังเกต 3–5</div>
+      <div class="tab" onclick="showSubTab('f3',3)">11–15. บันทึก & สรุป & ลงนาม</div>
     </div>
     <div id="f3-tab0" class="tab-content active">
-      <div class="section"><div class="section-title">๑. วัตถุประสงค์</div>
+      <div class="section"><div class="section-title">1. วัตถุประสงค์</div>
         <div class="objective-box">จัดทำขึ้นเพื่อศึกษาว่า <strong>เมื่อครูต้นทางลงพื้นที่ไปสอนจริง ณ โรงเรียนปลายทาง ครูต้นทางพบอะไรจากบริบทผู้เรียนจริง นักเรียนตอบสนองต่อการสอนอย่างไร ครูต้นทางปรับวิธีสอนเฉพาะหน้าอย่างไร และควรนำกลับไปพัฒนา DLTV อย่างไร</strong></div>
       </div>
-      <div class="section"><div class="section-title">๒. ผู้ใช้แบบสังเกต</div>
+      <div class="section"><div class="section-title">2. ผู้ใช้แบบสังเกต</div>
         <div class="cb-group">
           <label class="cb-label"><input type="checkbox"> ครูต้นทางที่ร่วมลงพื้นที่</label>
           <label class="cb-label"><input type="checkbox"> ครูปลายทาง</label>
@@ -1294,13 +1533,13 @@ body {
           <label class="cb-label"><input type="checkbox"> ผู้ประสานงาน / ผู้ติดตามโครงการ</label>
         </div>
       </div>
-      <div class="section"><div class="section-title">๓. ข้อมูลพื้นฐานของการสังเกต</div>
+      <div class="section"><div class="section-title">3. ข้อมูลพื้นฐานของการสังเกต</div>
         <div class="row2"><div class="field"><label>ชื่อโรงเรียนปลายทาง</label><input type="text"></div><div class="field"><label>จังหวัด</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>สำนักงานเขตพื้นที่การศึกษา</label><input type="text"></div><div class="field"><label>วันที่สังเกต</label><input type="date"></div></div>
         <div class="row2"><div class="field"><label>ชื่อครูต้นทาง</label><input type="text"></div><div class="field"><label>ชื่อครูปลายทางประจำห้อง</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>ผู้สังเกต</label><input type="text"></div><div class="field"><label>ตำแหน่ง/บทบาทของผู้สังเกต</label><input type="text"></div></div>
       </div>
-      <div class="section"><div class="section-title">๔. ข้อมูลเกี่ยวกับการสอนจริง</div>
+      <div class="section"><div class="section-title">4. ข้อมูลเกี่ยวกับการสอนจริง</div>
         <div class="field"><label>ลักษณะการสอนในคาบนี้</label>
           <div class="cb-group">
             <label class="cb-label"><input type="radio" name="f3_teach_type"> ครูต้นทางสอนจริงทั้งคาบ</label>
@@ -1316,19 +1555,19 @@ body {
       <div class="action-controls"><button type="button" class="btn-control btn-next" onclick="showSubTab('f3',1)">ถัดไป <i class="ti ti-arrow-right"></i></button></div>
     </div>
     <div id="f3-tab1" class="tab-content">
-      <div class="section"><div class="section-title">๕. เกณฑ์ระดับคุณภาพ</div>
+      <div class="section"><div class="section-title">5. เกณฑ์ระดับคุณภาพ</div>
         <table class="matrix-table"><thead><tr><th>ระดับ</th><th>ความหมาย</th><th>เกณฑ์การพิจารณาโดยย่อ</th></tr></thead><tbody>
-          <tr><td><strong>๓</strong></td><td>ชัดเจน / มาก</td><td>พบพฤติกรรมหรือหลักฐานชัดเจน ต่อเนื่อง และส่งผลต่อการเรียนรู้อย่างเห็นได้ชัด</td></tr>
-          <tr><td><strong>๒</strong></td><td>บางส่วน / ปานกลาง</td><td>พบพฤติกรรมหรือหลักฐานบางส่วน แต่ยังไม่ต่อเนื่อง</td></tr>
-          <tr><td><strong>๑</strong></td><td>น้อย / ไม่ปรากฏ</td><td>พบน้อยมาก ไม่ชัดเจน หรือไม่พบพฤติกรรมที่เกี่ยวข้อง</td></tr>
+          <tr><td><strong>3</strong></td><td>ชัดเจน / มาก</td><td>พบพฤติกรรมหรือหลักฐานชัดเจน ต่อเนื่อง และส่งผลต่อการเรียนรู้อย่างเห็นได้ชัด</td></tr>
+          <tr><td><strong>2</strong></td><td>บางส่วน / ปานกลาง</td><td>พบพฤติกรรมหรือหลักฐานบางส่วน แต่ยังไม่ต่อเนื่อง</td></tr>
+          <tr><td><strong>1</strong></td><td>น้อย / ไม่ปรากฏ</td><td>พบน้อยมาก ไม่ชัดเจน หรือไม่พบพฤติกรรมที่เกี่ยวข้อง</td></tr>
         </tbody></table>
-      </div><div class="section"><div class="section-title">๖. ความพร้อมก่อนเริ่มการสอนจริง</div><table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody><tr><td>ห้องเรียนและอุปกรณ์พร้อมต่อการจัดการเรียนรู้</td><td><input type="radio" name="f3_r6_1" value="3"></td><td><input type="radio" name="f3_r6_1" value="2"></td><td><input type="radio" name="f3_r6_1" value="1"></td><td><input type="text"></td></tr>
+      </div><div class="section"><div class="section-title">6. ความพร้อมก่อนเริ่มการสอนจริง</div><table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody><tr><td>ห้องเรียนและอุปกรณ์พร้อมต่อการจัดการเรียนรู้</td><td><input type="radio" name="f3_r6_1" value="3"></td><td><input type="radio" name="f3_r6_1" value="2"></td><td><input type="radio" name="f3_r6_1" value="1"></td><td><input type="text"></td></tr>
 <tr><td>นักเรียนพร้อมเข้าสู่บทเรียน</td><td><input type="radio" name="f3_r6_2" value="3"></td><td><input type="radio" name="f3_r6_2" value="2"></td><td><input type="radio" name="f3_r6_2" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูต้นทางรับรู้บริบทพื้นฐานของนักเรียนก่อนเริ่มสอน</td><td><input type="radio" name="f3_r6_3" value="3"></td><td><input type="radio" name="f3_r6_3" value="2"></td><td><input type="radio" name="f3_r6_3" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูต้นทางเชื่อมโยงบทเรียนกับความรู้เดิมหรือประสบการณ์ของนักเรียน</td><td><input type="radio" name="f3_r6_4" value="3"></td><td><input type="radio" name="f3_r6_4" value="2"></td><td><input type="radio" name="f3_r6_4" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูต้นทางอธิบายเป้าหมายของบทเรียนให้ผู้เรียนเข้าใจ</td><td><input type="radio" name="f3_r6_5" value="3"></td><td><input type="radio" name="f3_r6_5" value="2"></td><td><input type="radio" name="f3_r6_5" value="1"></td><td><input type="text"></td></tr>
 </tbody></table><div class="field" style="margin-top:8px;"><label>ข้อสังเกตก่อนเริ่มสอน</label><textarea></textarea></div></div>
-<div class="section"><div class="section-title">๗. แกนสังเกตที่ ๑: ความเหมาะสมของการสอนกับบริบทผู้เรียนจริง</div><table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody><tr><td>เนื้อหาสอดคล้องกับเป้าหมายการเรียนรู้และระดับชั้น</td><td><input type="radio" name="f3_r7_1" value="3"></td><td><input type="radio" name="f3_r7_1" value="2"></td><td><input type="radio" name="f3_r7_1" value="1"></td><td><input type="text"></td></tr>
+<div class="section"><div class="section-title">7. แกนสังเกตที่ 1: ความเหมาะสมของการสอนกับบริบทผู้เรียนจริง</div><table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody><tr><td>เนื้อหาสอดคล้องกับเป้าหมายการเรียนรู้และระดับชั้น</td><td><input type="radio" name="f3_r7_1" value="3"></td><td><input type="radio" name="f3_r7_1" value="2"></td><td><input type="radio" name="f3_r7_1" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ระดับความยากเหมาะกับพื้นฐานของนักเรียนปลายทาง</td><td><input type="radio" name="f3_r7_2" value="3"></td><td><input type="radio" name="f3_r7_2" value="2"></td><td><input type="radio" name="f3_r7_2" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ภาษาและคำศัพท์ที่ครูต้นทางใช้เหมาะกับผู้เรียน</td><td><input type="radio" name="f3_r7_3" value="3"></td><td><input type="radio" name="f3_r7_3" value="2"></td><td><input type="radio" name="f3_r7_3" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ตัวอย่างหรือสถานการณ์ที่ใช้ใกล้ตัวและเชื่อมโยงกับชีวิตจริงของนักเรียน</td><td><input type="radio" name="f3_r7_4" value="3"></td><td><input type="radio" name="f3_r7_4" value="2"></td><td><input type="radio" name="f3_r7_4" value="1"></td><td><input type="text"></td></tr>
@@ -1341,7 +1580,7 @@ body {
         <button type="button" class="btn-control btn-next" onclick="showSubTab('f3',2)">ถัดไป <i class="ti ti-arrow-right"></i></button>
       </div>
     </div>
-    <div id="f3-tab2" class="tab-content"><div class="section"><div class="section-title">๘. แกนสังเกตที่ ๒: การจัดกระบวนการเรียนรู้ในห้องเรียนจริง</div><table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody><tr><td>ครูต้นทางนำเข้าสู่บทเรียนได้ชัดเจนและเชื่อมโยงกับผู้เรียน</td><td><input type="radio" name="f3_r8_1" value="3"></td><td><input type="radio" name="f3_r8_1" value="2"></td><td><input type="radio" name="f3_r8_1" value="1"></td><td><input type="text"></td></tr>
+    <div id="f3-tab2" class="tab-content"><div class="section"><div class="section-title">8. แกนสังเกตที่ 2: การจัดกระบวนการเรียนรู้ในห้องเรียนจริง</div><table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody><tr><td>ครูต้นทางนำเข้าสู่บทเรียนได้ชัดเจนและเชื่อมโยงกับผู้เรียน</td><td><input type="radio" name="f3_r8_1" value="3"></td><td><input type="radio" name="f3_r8_1" value="2"></td><td><input type="radio" name="f3_r8_1" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูต้นทางใช้คำถามกระตุ้นการคิด ไม่ใช่เพียงถามให้ตอบตาม</td><td><input type="radio" name="f3_r8_2" value="3"></td><td><input type="radio" name="f3_r8_2" value="2"></td><td><input type="radio" name="f3_r8_2" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูต้นทางเปิดโอกาสให้นักเรียนคิด ลงมือทำ หรือแสดงออก</td><td><input type="radio" name="f3_r8_3" value="3"></td><td><input type="radio" name="f3_r8_3" value="2"></td><td><input type="radio" name="f3_r8_3" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูต้นทางตรวจสอบความเข้าใจระหว่างสอนเป็นระยะ</td><td><input type="radio" name="f3_r8_4" value="3"></td><td><input type="radio" name="f3_r8_4" value="2"></td><td><input type="radio" name="f3_r8_4" value="1"></td><td><input type="text"></td></tr>
@@ -1349,7 +1588,7 @@ body {
 <tr><td>ครูต้นทางสรุปประเด็นสำคัญและเชื่อมโยงการนำไปใช้</td><td><input type="radio" name="f3_r8_6" value="3"></td><td><input type="radio" name="f3_r8_6" value="2"></td><td><input type="radio" name="f3_r8_6" value="1"></td><td><input type="text"></td></tr>
 <tr><td>กระบวนการเรียนรู้มีความต่อเนื่องและไม่สะดุดเกินจำเป็น</td><td><input type="radio" name="f3_r8_7" value="3"></td><td><input type="radio" name="f3_r8_7" value="2"></td><td><input type="radio" name="f3_r8_7" value="1"></td><td><input type="text"></td></tr>
 </tbody></table><div class="field" style="margin-top:12px;"><label>ข้อค้นพบเกี่ยวกับกระบวนการเรียนรู้ที่ควรนำกลับไปพัฒนา DLTV</label><textarea></textarea></div></div>
-<div class="section"><div class="section-title">๙. แกนสังเกตที่ ๓: การตอบสนองและการปรับการสอนเฉพาะหน้า</div><table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody><tr><td>ครูต้นทางสังเกตเห็นสัญญาณว่านักเรียนเข้าใจหรือยังไม่เข้าใจ</td><td><input type="radio" name="f3_r9_1" value="3"></td><td><input type="radio" name="f3_r9_1" value="2"></td><td><input type="radio" name="f3_r9_1" value="1"></td><td><input type="text"></td></tr>
+<div class="section"><div class="section-title">9. แกนสังเกตที่ 3: การตอบสนองและการปรับการสอนเฉพาะหน้า</div><table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody><tr><td>ครูต้นทางสังเกตเห็นสัญญาณว่านักเรียนเข้าใจหรือยังไม่เข้าใจ</td><td><input type="radio" name="f3_r9_1" value="3"></td><td><input type="radio" name="f3_r9_1" value="2"></td><td><input type="radio" name="f3_r9_1" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูต้นทางปรับคำอธิบายเมื่อพบว่านักเรียนยังไม่เข้าใจ</td><td><input type="radio" name="f3_r9_2" value="3"></td><td><input type="radio" name="f3_r9_2" value="2"></td><td><input type="radio" name="f3_r9_2" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูต้นทางปรับตัวอย่าง คำถาม หรือกิจกรรมให้เหมาะกับผู้เรียนจริง</td><td><input type="radio" name="f3_r9_3" value="3"></td><td><input type="radio" name="f3_r9_3" value="2"></td><td><input type="radio" name="f3_r9_3" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูต้นทางลดความซับซ้อนของเนื้อหาเมื่อผู้เรียนตามไม่ทัน</td><td><input type="radio" name="f3_r9_4" value="3"></td><td><input type="radio" name="f3_r9_4" value="2"></td><td><input type="radio" name="f3_r9_4" value="1"></td><td><input type="text"></td></tr>
@@ -1357,7 +1596,7 @@ body {
 <tr><td>ครูต้นทางบริหารเวลาและปรับจังหวะการสอนตามสถานการณ์จริง</td><td><input type="radio" name="f3_r9_6" value="3"></td><td><input type="radio" name="f3_r9_6" value="2"></td><td><input type="radio" name="f3_r9_6" value="1"></td><td><input type="text"></td></tr>
 <tr><td>ครูต้นทางรักษาเป้าหมายการเรียนรู้ได้ แม้ต้องปรับวิธีสอนเฉพาะหน้า</td><td><input type="radio" name="f3_r9_7" value="3"></td><td><input type="radio" name="f3_r9_7" value="2"></td><td><input type="radio" name="f3_r9_7" value="1"></td><td><input type="text"></td></tr>
 </tbody></table><div class="row2"><div class="field"><label>ตัวอย่างการปรับการสอนเฉพาะหน้าที่เห็นชัด</label><textarea></textarea></div><div class="field"><label>ผลของการปรับนั้นต่อความเข้าใจหรือการมีส่วนร่วมของนักเรียน</label><textarea></textarea></div></div></div>
-<div class="section"><div class="section-title">๑๐. แกนสังเกตที่ ๔: การมีส่วนร่วม ความเข้าใจ และความแตกต่างของผู้เรียน</div><table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">๓</th><th style="width:8%">๒</th><th style="width:8%">๑</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody><tr><td>นักเรียนมีส่วนร่วมในการตอบคำถามหรือทำกิจกรรม</td><td><input type="radio" name="f3_r10_1" value="3"></td><td><input type="radio" name="f3_r10_1" value="2"></td><td><input type="radio" name="f3_r10_1" value="1"></td><td><input type="text"></td></tr>
+<div class="section"><div class="section-title">10. แกนสังเกตที่ 4: การมีส่วนร่วม ความเข้าใจ และความแตกต่างของผู้เรียน</div><table class="matrix-table"><thead><tr><th>ประเด็นสังเกต</th><th style="width:8%">3</th><th style="width:8%">2</th><th style="width:8%">1</th><th>หลักฐานเชิงสังเกต</th></tr></thead><tbody><tr><td>นักเรียนมีส่วนร่วมในการตอบคำถามหรือทำกิจกรรม</td><td><input type="radio" name="f3_r10_1" value="3"></td><td><input type="radio" name="f3_r10_1" value="2"></td><td><input type="radio" name="f3_r10_1" value="1"></td><td><input type="text"></td></tr>
 <tr><td>นักเรียนอธิบายความเข้าใจด้วยคำพูดของตนเองได้</td><td><input type="radio" name="f3_r10_2" value="3"></td><td><input type="radio" name="f3_r10_2" value="2"></td><td><input type="radio" name="f3_r10_2" value="1"></td><td><input type="text"></td></tr>
 <tr><td>นักเรียนเชื่อมโยงบทเรียนกับความรู้เดิมหรือชีวิตจริงได้</td><td><input type="radio" name="f3_r10_3" value="3"></td><td><input type="radio" name="f3_r10_3" value="2"></td><td><input type="radio" name="f3_r10_3" value="1"></td><td><input type="text"></td></tr>
 <tr><td>นักเรียนกล้าถามหรือบอกเมื่อยังไม่เข้าใจ</td><td><input type="radio" name="f3_r10_4" value="3"></td><td><input type="radio" name="f3_r10_4" value="2"></td><td><input type="radio" name="f3_r10_4" value="1"></td><td><input type="text"></td></tr>
@@ -1374,7 +1613,7 @@ body {
     </div>
     <div id="f3-tab3" class="tab-content">
       <div class="section">
-        <div class="section-title">๑๑. แกนสังเกตที่ ๕: สิ่งที่แตกต่างจากการสอนออกอากาศหรือการสอนในห้องส่ง</div>
+        <div class="section-title">11. แกนสังเกตที่ 5: สิ่งที่แตกต่างจากการสอนออกอากาศหรือการสอนในห้องส่ง</div>
         <table class="matrix-table"><thead><tr><th>ประเด็นเปรียบเทียบ</th><th>สิ่งที่พบจากการสอนจริง</th><th>ความหมายต่อการพัฒนา DLTV</th></tr></thead><tbody>
           <tr><td>จังหวะการสอน</td><td><input type="text"></td><td><input type="text"></td></tr>
           <tr><td>ความยากของเนื้อหา</td><td><input type="text"></td><td><input type="text"></td></tr>
@@ -1389,7 +1628,7 @@ body {
         <div class="field" style="margin-top:12px;"><label>สิ่งที่ครูต้นทางเห็นชัดเจนจากการสอนจริง ซึ่งอาจไม่เห็นจากการสอนออกอากาศ</label><textarea></textarea></div>
       </div>
       <div class="section">
-        <div class="section-title">๑๒. บันทึกช่วงสำคัญของคาบเรียน (ถ้ามี)</div>
+        <div class="section-title">12. บันทึกช่วงสำคัญของคาบเรียน (ถ้ามี)</div>
         <table class="matrix-table"><thead><tr><th>เหตุการณ์ที่เกิดขึ้น</th><th>ครูต้นทางทำอะไร</th><th>นักเรียนตอบสนองอย่างไร</th><th>ข้อค้นพบ</th></tr></thead><tbody>
           <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
           <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
@@ -1397,8 +1636,8 @@ body {
         </tbody></table>
       </div>
       <div class="section">
-        <div class="section-title">๑๓. อุปสรรค วิธีแก้ และข้อค้นพบจากการสอนจริง</div>
-        <div class="field"><label>๑๓.๑ อุปสรรคสำคัญที่พบระหว่างการสอนจริง</label>
+        <div class="section-title">13. อุปสรรค วิธีแก้ และข้อค้นพบจากการสอนจริง</div>
+        <div class="field"><label>13.1 อุปสรรคสำคัญที่พบระหว่างการสอนจริง</label>
           <div class="cb-group" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <label class="cb-label"><input type="checkbox"> นักเรียนพื้นฐานแตกต่างกันมาก</label>
             <label class="cb-label"><input type="checkbox"> นักเรียนไม่กล้าถามหรือไม่กล้าแสดงออก</label>
@@ -1408,13 +1647,13 @@ body {
             <label class="cb-label"><input type="checkbox"> ใบงานหรือกิจกรรมไม่เหมาะกับบริบทจริง</label>
           </div>
         </div>
-        <div class="row2"><div class="field"><label>๑๓.๒ วิธีแก้หรือการปรับของครูต้นทางที่พบในคาบนี้</label><textarea></textarea></div><div class="field"><label>๑๓.๓ วิธีใดได้ผลดีและควรนำไปใช้ในการออกแบบการสอนออกอากาศ</label><textarea></textarea></div></div>
+        <div class="row2"><div class="field"><label>13.2 วิธีแก้หรือการปรับของครูต้นทางที่พบในคาบนี้</label><textarea></textarea></div><div class="field"><label>13.3 วิธีใดได้ผลดีและควรนำไปใช้ในการออกแบบการสอนออกอากาศ</label><textarea></textarea></div></div>
       </div>
       <div class="section">
-        <div class="section-title">๑๕. สรุปข้อค้นพบจากการสังเกต (เพื่อการพัฒนา DLTV)</div>
-        <div class="row2"><div class="field"><label>๑๕.๑ นักเรียนเข้าใจหรือไม่เข้าใจประเด็นใด</label><textarea></textarea></div><div class="field"><label>๑๕.๒ อุปสรรคสำคัญของการเรียนรู้ในบริบทผู้เรียนจริง</label><textarea></textarea></div></div>
-        <div class="row2"><div class="field"><label>๑๕.๓ สิ่งที่แตกต่างจากการสอนออกอากาศหรือการสอนในห้องส่ง</label><textarea></textarea></div><div class="field"><label>๑๕.๔ ครูต้นทางปรับวิธีสอนเฉพาะหน้าอย่างไร และผลเป็นอย่างไร</label><textarea></textarea></div></div>
-        <div class="row2"><div class="field"><label>๑๕.๕ เทปการสอนหรือวิธีสอนออกอากาศควรปรับอะไร</label><textarea></textarea></div><div class="field"><label>ความเห็นเพิ่มเติมของผู้สังเกต</label><textarea></textarea></div></div>
+        <div class="section-title">15. สรุปข้อค้นพบจากการสังเกต (เพื่อการพัฒนา DLTV)</div>
+        <div class="row2"><div class="field"><label>15.1 นักเรียนเข้าใจหรือไม่เข้าใจประเด็นใด</label><textarea></textarea></div><div class="field"><label>15.2 อุปสรรคสำคัญของการเรียนรู้ในบริบทผู้เรียนจริง</label><textarea></textarea></div></div>
+        <div class="row2"><div class="field"><label>15.3 สิ่งที่แตกต่างจากการสอนออกอากาศหรือการสอนในห้องส่ง</label><textarea></textarea></div><div class="field"><label>15.4 ครูต้นทางปรับวิธีสอนเฉพาะหน้าอย่างไร และผลเป็นอย่างไร</label><textarea></textarea></div></div>
+        <div class="row2"><div class="field"><label>15.5 เทปการสอนหรือวิธีสอนออกอากาศควรปรับอะไร</label><textarea></textarea></div><div class="field"><label>ความเห็นเพิ่มเติมของผู้สังเกต</label><textarea></textarea></div></div>
       </div>
       <div class="section">
         <div class="section-title">ลงชื่อผู้สังเกต</div>
@@ -1434,16 +1673,16 @@ body {
       <p>ต่อการจัดการเรียนรู้ด้วย DLTV — โครงการจัดการเรียนรู้ด้วยการศึกษาทางไกลผ่านดาวเทียม</p>
     </div>
     <div class="tabs">
-      <div class="tab active" onclick="showSubTab('f4',0)">๑–๔. วัตถุประสงค์ & ข้อมูลทั่วไป</div>
-      <div class="tab" onclick="showSubTab('f4',1)">๕. เสียงสะท้อนของนักเรียน</div>
-      <div class="tab" onclick="showSubTab('f4',2)">๖–๗. สิ่งที่อยากบอก & สรุปผู้รวบรวม</div>
+      <div class="tab active" onclick="showSubTab('f4',0)">1–4. วัตถุประสงค์ & ข้อมูลทั่วไป</div>
+      <div class="tab" onclick="showSubTab('f4',1)">5. เสียงสะท้อนของนักเรียน</div>
+      <div class="tab" onclick="showSubTab('f4',2)">6–7. สิ่งที่อยากบอก & สรุปผู้รวบรวม</div>
     </div>
     <div id="f4-tab0" class="tab-content active">
-      <div class="section"><div class="section-title">๑. วัตถุประสงค์</div>
+      <div class="section"><div class="section-title">1. วัตถุประสงค์</div>
         <div class="objective-box">จัดทำขึ้นเพื่อรับฟัง <strong>เสียงสะท้อนของนักเรียนปลายทาง</strong> ต่อการจัดการเรียนรู้ด้วย DLTV ความรู้สึกต่อการเรียน ความเข้าใจเบื้องต้น สิ่งที่ช่วยให้เรียนรู้ได้ดี อุปสรรคระหว่างเรียน และสิ่งที่อยากให้ครูช่วยเพิ่มเติม</div>
         <div class="objective-box" style="border-left-color:#e11d48;background:#fff1f2;"><strong>หมายเหตุ:</strong> แบบสอบถามนี้มิใช่แบบทดสอบ มิใช่การตัดสินผลการเรียนของนักเรียน คำตอบของนักเรียนจะช่วยให้ครูปรับการสอนและสื่อการเรียนรู้ให้เหมาะกับนักเรียนมากขึ้น</div>
       </div>
-      <div class="section"><div class="section-title">๓. ข้อมูลทั่วไป</div>
+      <div class="section"><div class="section-title">3. ข้อมูลทั่วไป</div>
         <div class="row2"><div class="field"><label>โรงเรียน</label><input type="text"></div><div class="field"><label>จังหวัด</label><input type="text"></div></div>
         <div class="row3"><div class="field"><label>ระดับชั้น</label><input type="text"></div><div class="field"><label>ห้อง</label><input type="text"></div><div class="field"><label>รายวิชา</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>เรื่องที่เรียน</label><input type="text"></div><div class="field"><label>วันที่ตอบแบบสอบถาม</label><input type="date"></div></div>
@@ -1455,41 +1694,41 @@ body {
           </div>
         </div>
       </div>
-      <div class="section"><div class="section-title">๔. เกณฑ์การตอบแบบสอบถาม</div>
+      <div class="section"><div class="section-title">4. เกณฑ์การตอบแบบสอบถาม</div>
         <table class="matrix-table"><thead><tr><th>ระดับ</th><th>ความหมาย</th></tr></thead><tbody>
-          <tr><td><strong>๓</strong></td><td>เห็นด้วยมาก / ใช่มาก</td></tr>
-          <tr><td><strong>๒</strong></td><td>เห็นด้วยบางส่วน / ปานกลาง</td></tr>
-          <tr><td><strong>๑</strong></td><td>เห็นด้วยน้อย / ยังไม่ค่อยใช่</td></tr>
+          <tr><td><strong>3</strong></td><td>เห็นด้วยมาก / ใช่มาก</td></tr>
+          <tr><td><strong>2</strong></td><td>เห็นด้วยบางส่วน / ปานกลาง</td></tr>
+          <tr><td><strong>1</strong></td><td>เห็นด้วยน้อย / ยังไม่ค่อยใช่</td></tr>
         </tbody></table>
       </div>
       <div class="action-controls"><button type="button" class="btn-control btn-next" onclick="showSubTab('f4',1)">ถัดไป <i class="ti ti-arrow-right"></i></button></div>
     </div>
     <div id="f4-tab1" class="tab-content">
-<div class="section"><div class="section-title">๕.๑ ความรู้สึกต่อการเรียนในครั้งนี้</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">๓</th><th style="width:12%">๒</th><th style="width:12%">๑</th></tr></thead><tbody><tr><td>๑. บทเรียนในครั้งนี้น่าสนใจ</td><td><input type="radio" name="f4_q_1" value="3"></td><td><input type="radio" name="f4_q_1" value="2"></td><td><input type="radio" name="f4_q_1" value="1"></td></tr>
-<tr><td>๒. ฉันรู้สึกอยากเรียนรู้ระหว่างทำกิจกรรม</td><td><input type="radio" name="f4_q_2" value="3"></td><td><input type="radio" name="f4_q_2" value="2"></td><td><input type="radio" name="f4_q_2" value="1"></td></tr>
-<tr><td>๓. ฉันรู้สึกผ่อนคลายและไม่เครียดเกินไประหว่างเรียน</td><td><input type="radio" name="f4_q_3" value="3"></td><td><input type="radio" name="f4_q_3" value="2"></td><td><input type="radio" name="f4_q_3" value="1"></td></tr>
+<div class="section"><div class="section-title">5.1 ความรู้สึกต่อการเรียนในครั้งนี้</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">3</th><th style="width:12%">2</th><th style="width:12%">1</th></tr></thead><tbody><tr><td>1. บทเรียนในครั้งนี้น่าสนใจ</td><td><input type="radio" name="f4_q1" value="3"></td><td><input type="radio" name="f4_q1" value="2"></td><td><input type="radio" name="f4_q1" value="1"></td></tr>
+<tr><td>2. ฉันรู้สึกอยากเรียนรู้ระหว่างทำกิจกรรม</td><td><input type="radio" name="f4_q2" value="3"></td><td><input type="radio" name="f4_q2" value="2"></td><td><input type="radio" name="f4_q2" value="1"></td></tr>
+<tr><td>3. ฉันรู้สึกผ่อนคลายและไม่เครียดเกินไประหว่างเรียน</td><td><input type="radio" name="f4_q3" value="3"></td><td><input type="radio" name="f4_q3" value="2"></td><td><input type="radio" name="f4_q3" value="1"></td></tr>
 </tbody></table></div>
-<div class="section"><div class="section-title">๕.๒ ความเข้าใจต่อบทเรียน</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">๓</th><th style="width:12%">๒</th><th style="width:12%">๑</th></tr></thead><tbody><tr><td>๔. ฉันเข้าใจว่าเรื่องที่เรียนในวันนี้คืออะไร</td><td><input type="radio" name="f4_q_1" value="3"></td><td><input type="radio" name="f4_q_1" value="2"></td><td><input type="radio" name="f4_q_1" value="1"></td></tr>
-<tr><td>๕. ฉันเข้าใจคำอธิบายของครูหรือเนื้อหาในเทป</td><td><input type="radio" name="f4_q_2" value="3"></td><td><input type="radio" name="f4_q_2" value="2"></td><td><input type="radio" name="f4_q_2" value="1"></td></tr>
-<tr><td>๖. ฉันเข้าใจตัวอย่างหรือสถานการณ์ที่ใช้ประกอบบทเรียน</td><td><input type="radio" name="f4_q_3" value="3"></td><td><input type="radio" name="f4_q_3" value="2"></td><td><input type="radio" name="f4_q_3" value="1"></td></tr>
-<tr><td>๗. ฉันสามารถอธิบายสิ่งที่เรียนด้วยคำพูดของตนเองได้</td><td><input type="radio" name="f4_q_4" value="3"></td><td><input type="radio" name="f4_q_4" value="2"></td><td><input type="radio" name="f4_q_4" value="1"></td></tr>
+<div class="section"><div class="section-title">5.2 ความเข้าใจต่อบทเรียน</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">3</th><th style="width:12%">2</th><th style="width:12%">1</th></tr></thead><tbody><tr><td>4. ฉันเข้าใจว่าเรื่องที่เรียนในวันนี้คืออะไร</td><td><input type="radio" name="f4_q4" value="3"></td><td><input type="radio" name="f4_q4" value="2"></td><td><input type="radio" name="f4_q4" value="1"></td></tr>
+<tr><td>5. ฉันเข้าใจคำอธิบายของครูหรือเนื้อหาในเทป</td><td><input type="radio" name="f4_q5" value="3"></td><td><input type="radio" name="f4_q5" value="2"></td><td><input type="radio" name="f4_q5" value="1"></td></tr>
+<tr><td>6. ฉันเข้าใจตัวอย่างหรือสถานการณ์ที่ใช้ประกอบบทเรียน</td><td><input type="radio" name="f4_q6" value="3"></td><td><input type="radio" name="f4_q6" value="2"></td><td><input type="radio" name="f4_q6" value="1"></td></tr>
+<tr><td>7. ฉันสามารถอธิบายสิ่งที่เรียนด้วยคำพูดของตนเองได้</td><td><input type="radio" name="f4_q7" value="3"></td><td><input type="radio" name="f4_q7" value="2"></td><td><input type="radio" name="f4_q7" value="1"></td></tr>
 </tbody></table></div>
-<div class="section"><div class="section-title">๕.๓ สื่อ ใบงาน และกิจกรรมประกอบการเรียน</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">๓</th><th style="width:12%">๒</th><th style="width:12%">๑</th></tr></thead><tbody><tr><td>๘. สื่อหรือภาพประกอบช่วยให้ฉันเข้าใจบทเรียนมากขึ้น</td><td><input type="radio" name="f4_q_1" value="3"></td><td><input type="radio" name="f4_q_1" value="2"></td><td><input type="radio" name="f4_q_1" value="1"></td></tr>
-<tr><td>๙. ใบงานหรือกิจกรรมช่วยให้ฉันได้ฝึกคิดหรือฝึกทำ</td><td><input type="radio" name="f4_q_2" value="3"></td><td><input type="radio" name="f4_q_2" value="2"></td><td><input type="radio" name="f4_q_2" value="1"></td></tr>
-<tr><td>๑๐. เวลาที่ใช้ทำใบงานหรือกิจกรรมเหมาะสม</td><td><input type="radio" name="f4_q_3" value="3"></td><td><input type="radio" name="f4_q_3" value="2"></td><td><input type="radio" name="f4_q_3" value="1"></td></tr>
+<div class="section"><div class="section-title">5.3 สื่อ ใบงาน และกิจกรรมประกอบการเรียน</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">3</th><th style="width:12%">2</th><th style="width:12%">1</th></tr></thead><tbody><tr><td>8. สื่อหรือภาพประกอบช่วยให้ฉันเข้าใจบทเรียนมากขึ้น</td><td><input type="radio" name="f4_q8" value="3"></td><td><input type="radio" name="f4_q8" value="2"></td><td><input type="radio" name="f4_q8" value="1"></td></tr>
+<tr><td>9. ใบงานหรือกิจกรรมช่วยให้ฉันได้ฝึกคิดหรือฝึกทำ</td><td><input type="radio" name="f4_q9" value="3"></td><td><input type="radio" name="f4_q9" value="2"></td><td><input type="radio" name="f4_q9" value="1"></td></tr>
+<tr><td>10. เวลาที่ใช้ทำใบงานหรือกิจกรรมเหมาะสม</td><td><input type="radio" name="f4_q10" value="3"></td><td><input type="radio" name="f4_q10" value="2"></td><td><input type="radio" name="f4_q10" value="1"></td></tr>
 </tbody></table></div>
-<div class="section"><div class="section-title">๕.๔ การมีส่วนร่วมและการได้รับความช่วยเหลือ</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">๓</th><th style="width:12%">๒</th><th style="width:12%">๑</th></tr></thead><tbody><tr><td>๑๑. ฉันได้มีส่วนร่วมในการตอบคำถามหรือทำกิจกรรม</td><td><input type="radio" name="f4_q_1" value="3"></td><td><input type="radio" name="f4_q_1" value="2"></td><td><input type="radio" name="f4_q_1" value="1"></td></tr>
-<tr><td>๑๒. ฉันกล้าถามหรือบอกครูเมื่อยังไม่เข้าใจ</td><td><input type="radio" name="f4_q_2" value="3"></td><td><input type="radio" name="f4_q_2" value="2"></td><td><input type="radio" name="f4_q_2" value="1"></td></tr>
-<tr><td>๑๓. ฉันรู้สึกว่าครูเปิดโอกาสให้นักเรียนมีส่วนร่วม</td><td><input type="radio" name="f4_q_3" value="3"></td><td><input type="radio" name="f4_q_3" value="2"></td><td><input type="radio" name="f4_q_3" value="1"></td></tr>
-<tr><td>๑๔. เมื่อฉันไม่เข้าใจ มีครูหรือเพื่อนช่วยอธิบายเพิ่มเติม</td><td><input type="radio" name="f4_q_4" value="3"></td><td><input type="radio" name="f4_q_4" value="2"></td><td><input type="radio" name="f4_q_4" value="1"></td></tr>
+<div class="section"><div class="section-title">5.4 การมีส่วนร่วมและการได้รับความช่วยเหลือ</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">3</th><th style="width:12%">2</th><th style="width:12%">1</th></tr></thead><tbody><tr><td>11. ฉันได้มีส่วนร่วมในการตอบคำถามหรือทำกิจกรรม</td><td><input type="radio" name="f4_q11" value="3"></td><td><input type="radio" name="f4_q11" value="2"></td><td><input type="radio" name="f4_q11" value="1"></td></tr>
+<tr><td>12. ฉันกล้าถามหรือบอกครูเมื่อยังไม่เข้าใจ</td><td><input type="radio" name="f4_q12" value="3"></td><td><input type="radio" name="f4_q12" value="2"></td><td><input type="radio" name="f4_q12" value="1"></td></tr>
+<tr><td>13. ฉันรู้สึกว่าครูเปิดโอกาสให้นักเรียนมีส่วนร่วม</td><td><input type="radio" name="f4_q13" value="3"></td><td><input type="radio" name="f4_q13" value="2"></td><td><input type="radio" name="f4_q13" value="1"></td></tr>
+<tr><td>14. เมื่อฉันไม่เข้าใจ มีครูหรือเพื่อนช่วยอธิบายเพิ่มเติม</td><td><input type="radio" name="f4_q14" value="3"></td><td><input type="radio" name="f4_q14" value="2"></td><td><input type="radio" name="f4_q14" value="1"></td></tr>
 </tbody></table></div>
-<div class="section"><div class="section-title">๕.๕ สิ่งที่ช่วยให้เรียนรู้ได้ดีขึ้น</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">๓</th><th style="width:12%">๒</th><th style="width:12%">๑</th></tr></thead><tbody><tr><td>๑๕. ครูอธิบายชัดเจนและเป็นลำดับ</td><td><input type="radio" name="f4_q_1" value="3"></td><td><input type="radio" name="f4_q_1" value="2"></td><td><input type="radio" name="f4_q_1" value="1"></td></tr>
-<tr><td>๑๖. ตัวอย่างที่ใช้ในบทเรียนเข้าใจง่ายและใกล้ตัว</td><td><input type="radio" name="f4_q_2" value="3"></td><td><input type="radio" name="f4_q_2" value="2"></td><td><input type="radio" name="f4_q_2" value="1"></td></tr>
-<tr><td>๑๗. ครูให้เวลาคิดหรือตอบคำถามเพียงพอ</td><td><input type="radio" name="f4_q_3" value="3"></td><td><input type="radio" name="f4_q_3" value="2"></td><td><input type="radio" name="f4_q_3" value="1"></td></tr>
+<div class="section"><div class="section-title">5.5 สิ่งที่ช่วยให้เรียนรู้ได้ดีขึ้น</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">3</th><th style="width:12%">2</th><th style="width:12%">1</th></tr></thead><tbody><tr><td>15. ครูอธิบายชัดเจนและเป็นลำดับ</td><td><input type="radio" name="f4_q15" value="3"></td><td><input type="radio" name="f4_q15" value="2"></td><td><input type="radio" name="f4_q15" value="1"></td></tr>
+<tr><td>16. ตัวอย่างที่ใช้ในบทเรียนเข้าใจง่ายและใกล้ตัว</td><td><input type="radio" name="f4_q16" value="3"></td><td><input type="radio" name="f4_q16" value="2"></td><td><input type="radio" name="f4_q16" value="1"></td></tr>
+<tr><td>17. ครูให้เวลาคิดหรือตอบคำถามเพียงพอ</td><td><input type="radio" name="f4_q17" value="3"></td><td><input type="radio" name="f4_q17" value="2"></td><td><input type="radio" name="f4_q17" value="1"></td></tr>
 </tbody></table></div>
-<div class="section"><div class="section-title">๕.๖ อุปสรรคที่อาจทำให้เรียนไม่เข้าใจ</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">๓</th><th style="width:12%">๒</th><th style="width:12%">๑</th></tr></thead><tbody><tr><td>๑๘. บางช่วงของบทเรียนเร็วเกินไปสำหรับฉัน</td><td><input type="radio" name="f4_q_1" value="3"></td><td><input type="radio" name="f4_q_1" value="2"></td><td><input type="radio" name="f4_q_1" value="1"></td></tr>
-<tr><td>๑๙. บางคำหรือบางประโยคยากเกินไป</td><td><input type="radio" name="f4_q_2" value="3"></td><td><input type="radio" name="f4_q_2" value="2"></td><td><input type="radio" name="f4_q_2" value="1"></td></tr>
-<tr><td>๒๐. ฉันต้องการเวลาเพิ่มในการคิด ทำใบงาน หรือทำกิจกรรม</td><td><input type="radio" name="f4_q_3" value="3"></td><td><input type="radio" name="f4_q_3" value="2"></td><td><input type="radio" name="f4_q_3" value="1"></td></tr>
+<div class="section"><div class="section-title">5.6 อุปสรรคที่อาจทำให้เรียนไม่เข้าใจ</div><table class="matrix-table"><thead><tr><th>ข้อความ</th><th style="width:12%">3</th><th style="width:12%">2</th><th style="width:12%">1</th></tr></thead><tbody><tr><td>18. บางช่วงของบทเรียนเร็วเกินไปสำหรับฉัน</td><td><input type="radio" name="f4_q18" value="3"></td><td><input type="radio" name="f4_q18" value="2"></td><td><input type="radio" name="f4_q18" value="1"></td></tr>
+<tr><td>19. บางคำหรือบางประโยคยากเกินไป</td><td><input type="radio" name="f4_q19" value="3"></td><td><input type="radio" name="f4_q19" value="2"></td><td><input type="radio" name="f4_q19" value="1"></td></tr>
+<tr><td>20. ฉันต้องการเวลาเพิ่มในการคิด ทำใบงาน หรือทำกิจกรรม</td><td><input type="radio" name="f4_q20" value="3"></td><td><input type="radio" name="f4_q20" value="2"></td><td><input type="radio" name="f4_q20" value="1"></td></tr>
 </tbody></table></div>
 
       <div class="action-controls">
@@ -1499,24 +1738,24 @@ body {
     </div>
     <div id="f4-tab2" class="tab-content">
       <div class="section">
-        <div class="section-title">๖. สิ่งที่นักเรียนอยากบอกเพิ่มเติม</div>
-        <div class="row2"><div class="field"><label>๖.๑ วันนี้ฉันเข้าใจเรื่องใดมากที่สุด</label><textarea></textarea></div><div class="field"><label>๖.๒ วันนี้ฉันยังไม่เข้าใจเรื่องใด หรือยังทำได้ไม่ดีตรงไหน</label><textarea></textarea></div></div>
-        <div class="row2"><div class="field"><label>๖.๓ สิ่งที่ช่วยให้ฉันเรียนรู้ได้ดีในวันนี้คืออะไร</label><textarea></textarea></div><div class="field"><label>๖.๔ สิ่งที่ฉันอยากให้ครูช่วยเพิ่มเติมในการเรียนครั้งต่อไป</label><textarea></textarea></div></div>
-        <div class="field"><label>๖.๕ ถ้าให้คะแนนความเข้าใจของตนเองในวันนี้ ฉันให้คะแนนตนเองเท่าไร</label>
+        <div class="section-title">6. สิ่งที่นักเรียนอยากบอกเพิ่มเติม</div>
+        <div class="row2"><div class="field"><label>6.1 วันนี้ฉันเข้าใจเรื่องใดมากที่สุด</label><textarea></textarea></div><div class="field"><label>6.2 วันนี้ฉันยังไม่เข้าใจเรื่องใด หรือยังทำได้ไม่ดีตรงไหน</label><textarea></textarea></div></div>
+        <div class="row2"><div class="field"><label>6.3 สิ่งที่ช่วยให้ฉันเรียนรู้ได้ดีในวันนี้คืออะไร</label><textarea></textarea></div><div class="field"><label>6.4 สิ่งที่ฉันอยากให้ครูช่วยเพิ่มเติมในการเรียนครั้งต่อไป</label><textarea></textarea></div></div>
+        <div class="field"><label>6.5 ถ้าให้คะแนนความเข้าใจของตนเองในวันนี้ ฉันให้คะแนนตนเองเท่าไร</label>
           <div class="cb-group" style="flex-direction:row;gap:20px;">
-            <label class="cb-label"><input type="radio" name="f4_self_score"> ๓ (เข้าใจมาก)</label>
-            <label class="cb-label"><input type="radio" name="f4_self_score"> ๒ (เข้าใจบางส่วน)</label>
-            <label class="cb-label"><input type="radio" name="f4_self_score"> ๑ (ยังไม่ค่อยเข้าใจ)</label>
+            <label class="cb-label"><input type="radio" name="f4_self_score"> 3 (เข้าใจมาก)</label>
+            <label class="cb-label"><input type="radio" name="f4_self_score"> 2 (เข้าใจบางส่วน)</label>
+            <label class="cb-label"><input type="radio" name="f4_self_score"> 1 (ยังไม่ค่อยเข้าใจ)</label>
           </div>
         </div>
         <div class="field"><label>เพราะเหตุใด</label><textarea></textarea></div>
       </div>
       <div class="section">
-        <div class="section-title">๗. สำหรับผู้รวบรวมข้อมูล</div>
+        <div class="section-title">7. สำหรับผู้รวบรวมข้อมูล</div>
         <div class="field"><label>จำนวนนักเรียนที่ตอบแบบสอบถามทั้งหมด</label><input type="number" value="0" style="width:120px;"></div>
-        <div class="row2"><div class="field"><label>๗.๑ นักเรียนส่วนใหญ่รู้สึกอย่างไรต่อการเรียนในครั้งนี้</label><textarea></textarea></div><div class="field"><label>นักเรียนส่วนใหญ่เข้าใจเรื่องใดดี</label><textarea></textarea></div></div>
+        <div class="row2"><div class="field"><label>7.1 นักเรียนส่วนใหญ่รู้สึกอย่างไรต่อการเรียนในครั้งนี้</label><textarea></textarea></div><div class="field"><label>นักเรียนส่วนใหญ่เข้าใจเรื่องใดดี</label><textarea></textarea></div></div>
         <div class="field"><label>นักเรียนส่วนใหญ่ยังไม่เข้าใจหรือยังต้องการความช่วยเหลือเรื่องใด</label><textarea></textarea></div>
-        <div class="field"><label>๗.๒ ประเด็นที่ควรนำไปประกอบการพัฒนา DLTV</label>
+        <div class="field"><label>7.2 ประเด็นที่ควรนำไปประกอบการพัฒนา DLTV</label>
           <div class="cb-group" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <label class="cb-label"><input type="checkbox"> ปรับจังหวะหรือความเร็วของบทเรียน</label>
             <label class="cb-label"><input type="checkbox"> ปรับภาษาและคำอธิบายให้เข้าใจง่ายขึ้น</label>
@@ -1547,23 +1786,23 @@ body {
       <p>โครงการจัดการเรียนรู้ด้วยการศึกษาทางไกลผ่านดาวเทียม (DLTV)</p>
     </div>
     <div class="tabs">
-      <div class="tab active" onclick="showSubTab('f5',0)">๑–๔. วัตถุประสงค์ & ข้อมูลทั่วไป</div>
-      <div class="tab" onclick="showSubTab('f5',1)">๕–๖. บริบทโรงเรียน & ข้อค้นพบ</div>
-      <div class="tab" onclick="showSubTab('f5',2)">๗–๙. ประเด็นพัฒนา & แนวปฏิบัติ & จัดลำดับ</div>
-      <div class="tab" onclick="showSubTab('f5',3)">๑๐–๑๒. ข้อเสนอ & แผน & สรุป & ลงนาม</div>
+      <div class="tab active" onclick="showSubTab('f5',0)">1–4. วัตถุประสงค์ & ข้อมูลทั่วไป</div>
+      <div class="tab" onclick="showSubTab('f5',1)">5–6. บริบทโรงเรียน & ข้อค้นพบ</div>
+      <div class="tab" onclick="showSubTab('f5',2)">7–9. ประเด็นพัฒนา & แนวปฏิบัติ & จัดลำดับ</div>
+      <div class="tab" onclick="showSubTab('f5',3)">10–12. ข้อเสนอ & แผน & สรุป & ลงนาม</div>
     </div>
     <div id="f5-tab0" class="tab-content active">
-      <div class="section"><div class="section-title">๑. วัตถุประสงค์</div>
+      <div class="section"><div class="section-title">1. วัตถุประสงค์</div>
         <div class="objective-box">แบบสะท้อนผลรวมฉบับนี้ใช้หลังการลงพื้นที่โรงเรียนปลายทางหรือหลังการประชุม PLC เพื่อ<strong>สังเคราะห์ข้อค้นพบจากเครื่องมือภาคสนามทุกชุด ให้เป็นข้อเสนอเพื่อพัฒนาการจัดการเรียนรู้ด้วย DLTV อย่างเป็นระบบ</strong></div>
       </div>
-      <div class="section"><div class="section-title">๒. ข้อมูลทั่วไปของการสะท้อนผล</div>
+      <div class="section"><div class="section-title">2. ข้อมูลทั่วไปของการสะท้อนผล</div>
         <div class="row2"><div class="field"><label>ชื่อโรงเรียนปลายทาง</label><input type="text"></div><div class="field"><label>จังหวัด</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>สำนักงานเขตพื้นที่การศึกษา</label><input type="text"></div><div class="field"><label>วันที่ลงพื้นที่</label><input type="date"></div></div>
         <div class="row2"><div class="field"><label>วันที่ประชุม PLC / สะท้อนผล</label><input type="date"></div><div class="field"><label>ระดับชั้น / รายวิชาที่เกี่ยวข้อง</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>ชื่อครูต้นทาง</label><input type="text"></div><div class="field"><label>ชื่อครูปลายทาง</label><input type="text"></div></div>
         <div class="row2"><div class="field"><label>ผู้บันทึกผลการสะท้อน</label><input type="text"></div><div class="field"><label>ตำแหน่ง / บทบาท</label><input type="text"></div></div>
       </div>
-      <div class="section"><div class="section-title">๓. ผู้ร่วมสะท้อนผล</div>
+      <div class="section"><div class="section-title">3. ผู้ร่วมสะท้อนผล</div>
         <table class="matrix-table"><thead><tr><th>ชื่อ-นามสกุล</th><th>ตำแหน่ง / บทบาท</th><th>หน่วยงาน / โรงเรียน</th></tr></thead><tbody>
           <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
           <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
@@ -1571,7 +1810,7 @@ body {
           <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
         </tbody></table>
       </div>
-      <div class="section"><div class="section-title">๔. เครื่องมือและข้อมูลที่ใช้ประกอบการสังเคราะห์</div>
+      <div class="section"><div class="section-title">4. เครื่องมือและข้อมูลที่ใช้ประกอบการสังเคราะห์</div>
         <div class="cb-group">
           <label class="cb-label"><input type="checkbox"> แบบบันทึกบริบทโรงเรียนปลายทางเพื่อการพัฒนา DLTV</label>
           <label class="cb-label"><input type="checkbox"> แบบสังเกตความเข้าใจของนักเรียนปลายทางผ่านเทปออกอากาศ</label>
@@ -1585,9 +1824,9 @@ body {
       <div class="action-controls"><button type="button" class="btn-control btn-next" onclick="showSubTab('f5',1)">ถัดไป <i class="ti ti-arrow-right"></i></button></div>
     </div>
     <div id="f5-tab1" class="tab-content">
-      <div class="section"><div class="section-title">๕. สรุปบริบทสำคัญของโรงเรียนปลายทาง</div>
-        <div class="field"><label>๕.๑ บริบทสำคัญที่ส่งผลต่อการใช้ DLTV</label><textarea placeholder="๑. ...&#10;๒. ...&#10;๓. ..."></textarea></div>
-        <div class="field"><label>๕.๒ ข้อจำกัดสำคัญที่ควรคำนึงถึง</label>
+      <div class="section"><div class="section-title">5. สรุปบริบทสำคัญของโรงเรียนปลายทาง</div>
+        <div class="field"><label>5.1 บริบทสำคัญที่ส่งผลต่อการใช้ DLTV</label><textarea placeholder="1. ...&#10;2. ...&#10;3. ..."></textarea></div>
+        <div class="field"><label>5.2 ข้อจำกัดสำคัญที่ควรคำนึงถึง</label>
           <div class="cb-group" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
             <label class="cb-label"><input type="checkbox"> ครูไม่ครบชั้น</label>
             <label class="cb-label"><input type="checkbox"> ครูสอนไม่ตรงวิชาเอก</label>
@@ -1601,7 +1840,7 @@ body {
           <div class="field" style="margin-top:8px;"><label>รายละเอียดเพิ่มเติม</label><textarea></textarea></div>
         </div>
       </div>
-      <div class="section"><div class="section-title">๖.๑ ความเข้าใจของนักเรียนปลายทางผ่านเทปออกอากาศ</div>
+      <div class="section"><div class="section-title">6.1 ความเข้าใจของนักเรียนปลายทางผ่านเทปออกอากาศ</div>
         <table class="matrix-table"><thead><tr><th>ประเด็นสังเคราะห์</th><th>ข้อค้นพบสำคัญ</th><th>หลักฐานประกอบโดยย่อ</th><th>ความหมายต่อการพัฒนา DLTV</th></tr></thead><tbody>
           <tr><td>นักเรียนเข้าใจดีในเรื่องใด</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
           <tr><td>นักเรียนยังไม่เข้าใจหรือเข้าใจคลาดเคลื่อนในเรื่องใด</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
@@ -1609,7 +1848,7 @@ body {
           <tr><td>ช่วงของเทปที่ควรปรับปรุง</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
         </tbody></table>
       </div>
-      <div class="section"><div class="section-title">๖.๒ การกำกับห้องเรียนของครูปลายทาง</div>
+      <div class="section"><div class="section-title">6.2 การกำกับห้องเรียนของครูปลายทาง</div>
         <table class="matrix-table"><thead><tr><th>ประเด็นสังเคราะห์</th><th>ข้อค้นพบสำคัญ</th><th>หลักฐานประกอบโดยย่อ</th><th>ความหมายต่อการสนับสนุนครูปลายทาง</th></tr></thead><tbody>
           <tr><td>วิธีที่ครูปลายทางใช้แล้วได้ผล</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
           <tr><td>วิธีที่ช่วยให้นักเรียนมีส่วนร่วมมากขึ้น</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
@@ -1617,7 +1856,7 @@ body {
           <tr><td>แนวทางที่ควรสนับสนุนหรือขยายผล</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
         </tbody></table>
       </div>
-      <div class="section"><div class="section-title">๖.๔ เสียงสะท้อนของนักเรียนปลายทาง</div>
+      <div class="section"><div class="section-title">6.4 เสียงสะท้อนของนักเรียนปลายทาง</div>
         <table class="matrix-table"><thead><tr><th>ประเด็นสังเคราะห์</th><th>ข้อค้นพบสำคัญ</th><th>ความหมายต่อการพัฒนา DLTV</th></tr></thead><tbody>
           <tr><td>สิ่งที่นักเรียนรู้สึกว่าช่วยให้เรียนรู้ได้ดี</td><td><input type="text"></td><td><input type="text"></td></tr>
           <tr><td>สิ่งที่นักเรียนยังไม่เข้าใจหรืออยากให้ช่วยเพิ่มเติม</td><td><input type="text"></td><td><input type="text"></td></tr>
@@ -1630,7 +1869,7 @@ body {
       </div>
     </div>
     <div id="f5-tab2" class="tab-content">
-      <div class="section"><div class="section-title">๗. ประเด็นที่ควรปรับปรุง DLTV</div>
+      <div class="section"><div class="section-title">7. ประเด็นที่ควรปรับปรุง DLTV</div>
         <table class="matrix-table"><thead><tr><th>ด้านที่ควรพัฒนา</th><th>ประเด็นที่พบ</th><th>ข้อเสนอเพื่อปรับปรุง</th><th>ระดับความเร่งด่วน</th></tr></thead><tbody>
           <tr><td>เทปการสอน / จังหวะการสอน</td><td><input type="text"></td><td><input type="text"></td><td><select><option>--</option><option>สูง</option><option>ปานกลาง</option><option>ต่ำ</option></select></td></tr>
           <tr><td>วิธีอธิบาย / ภาษา / คำศัพท์</td><td><input type="text"></td><td><input type="text"></td><td><select><option>--</option><option>สูง</option><option>ปานกลาง</option><option>ต่ำ</option></select></td></tr>
@@ -1642,20 +1881,20 @@ body {
           <tr><td>ระบบสนับสนุนอื่น ๆ</td><td><input type="text"></td><td><input type="text"></td><td><select><option>--</option><option>สูง</option><option>ปานกลาง</option><option>ต่ำ</option></select></td></tr>
         </tbody></table>
       </div>
-      <div class="section"><div class="section-title">๘. แนวปฏิบัติที่ดีที่ควรนำไปขยายผล</div>
+      <div class="section"><div class="section-title">8. แนวปฏิบัติที่ดีที่ควรนำไปขยายผล</div>
         <table class="matrix-table"><thead><tr><th>แนวปฏิบัติที่พบ</th><th>ใครเป็นผู้ดำเนินการ</th><th>หลักฐานที่แสดงว่าได้ผล</th><th>แนวทางขยายผล</th></tr></thead><tbody>
           <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
           <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
           <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
         </tbody></table>
       </div>
-      <div class="section"><div class="section-title">๙. การจัดลำดับความสำคัญของข้อเสนอ</div>
+      <div class="section"><div class="section-title">9. การจัดลำดับความสำคัญของข้อเสนอ</div>
         <table class="matrix-table"><thead><tr><th style="width:6%">ลำดับ</th><th>ประเด็นที่ควรพัฒนา</th><th>เหตุผลที่ควรดำเนินการ</th><th>ผู้เกี่ยวข้องหลัก</th><th>ระยะเวลา</th></tr></thead><tbody>
-          <tr><td>๑</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
-          <tr><td>๒</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
-          <tr><td>๓</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
-          <tr><td>๔</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
-          <tr><td>๕</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td>1</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td>2</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td>3</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td>4</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
+          <tr><td>5</td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
         </tbody></table>
         <div class="field" style="margin-top:12px;"><label>ข้อเสนอเร่งด่วนที่สุดที่ควรดำเนินการทันที</label><textarea></textarea></div>
       </div>
@@ -1665,11 +1904,11 @@ body {
       </div>
     </div>
     <div id="f5-tab3" class="tab-content">
-      <div class="section"><div class="section-title">๑๐. ข้อเสนอเชิงระบบต่อมูลนิธิฯ หรือผู้บริหารโครงการ</div>
-        <div class="row2"><div class="field"><label>๑๐.๑ สิ่งที่ควรสนับสนุนโรงเรียนปลายทางเพิ่มเติม</label><textarea></textarea></div><div class="field"><label>๑๐.๒ สิ่งที่ควรพัฒนาสำหรับครูต้นทาง</label><textarea></textarea></div></div>
-        <div class="row2"><div class="field"><label>๑๐.๓ สิ่งที่ควรพัฒนาสำหรับครูปลายทาง</label><textarea></textarea></div><div class="field"><label>๑๐.๔ ประเด็นที่ควรนำเสนอผู้บริหารเพื่อพิจารณาเชิงนโยบาย</label><textarea></textarea></div></div>
+      <div class="section"><div class="section-title">10. ข้อเสนอเชิงระบบต่อมูลนิธิฯ หรือผู้บริหารโครงการ</div>
+        <div class="row2"><div class="field"><label>10.1 สิ่งที่ควรสนับสนุนโรงเรียนปลายทางเพิ่มเติม</label><textarea></textarea></div><div class="field"><label>10.2 สิ่งที่ควรพัฒนาสำหรับครูต้นทาง</label><textarea></textarea></div></div>
+        <div class="row2"><div class="field"><label>10.3 สิ่งที่ควรพัฒนาสำหรับครูปลายทาง</label><textarea></textarea></div><div class="field"><label>10.4 ประเด็นที่ควรนำเสนอผู้บริหารเพื่อพิจารณาเชิงนโยบาย</label><textarea></textarea></div></div>
       </div>
-      <div class="section"><div class="section-title">๑๑. ข้อตกลงหรือแผนดำเนินการหลัง PLC</div>
+      <div class="section"><div class="section-title">11. ข้อตกลงหรือแผนดำเนินการหลัง PLC</div>
         <table class="matrix-table"><thead><tr><th>ประเด็นดำเนินการ</th><th>ผู้รับผิดชอบ</th><th>ระยะเวลา</th><th>ผลที่คาดหวัง</th></tr></thead><tbody>
           <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
           <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
@@ -1677,10 +1916,10 @@ body {
           <tr><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td><td><input type="text"></td></tr>
         </tbody></table>
       </div>
-      <div class="section"><div class="section-title">๑๒. สรุปภาพรวมสำหรับการพัฒนา DLTV</div>
-        <div class="field"><label>๑๒.๑ ข้อค้นพบสำคัญที่สุดจากโรงเรียนปลายทางแห่งนี้</label><textarea placeholder="๑. ...&#10;๒. ...&#10;๓. ..."></textarea></div>
-        <div class="field"><label>๑๒.๒ บทเรียนสำคัญสำหรับการพัฒนาการเรียนการสอนออกอากาศ DLTV</label><textarea placeholder="๑. ...&#10;๒. ...&#10;๓. ..."></textarea></div>
-        <div class="field"><label>๑๒.๓ ข้อเสนอหลักที่ควรนำกลับไปดำเนินการต่อ</label><textarea placeholder="๑. ...&#10;๒. ...&#10;๓. ..."></textarea></div>
+      <div class="section"><div class="section-title">12. สรุปภาพรวมสำหรับการพัฒนา DLTV</div>
+        <div class="field"><label>12.1 ข้อค้นพบสำคัญที่สุดจากโรงเรียนปลายทางแห่งนี้</label><textarea placeholder="1. ...&#10;2. ...&#10;3. ..."></textarea></div>
+        <div class="field"><label>12.2 บทเรียนสำคัญสำหรับการพัฒนาการเรียนการสอนออกอากาศ DLTV</label><textarea placeholder="1. ...&#10;2. ...&#10;3. ..."></textarea></div>
+        <div class="field"><label>12.3 ข้อเสนอหลักที่ควรนำกลับไปดำเนินการต่อ</label><textarea placeholder="1. ...&#10;2. ...&#10;3. ..."></textarea></div>
       </div>
       <div class="section"><div class="section-title">ลงชื่อผู้บันทึกผลการสะท้อน และผู้รับรอง</div>
         <div class="row2"><div class="field"><label>ลงชื่อผู้บันทึกผลการสะท้อน (ชื่อ-นามสกุล)</label><input type="text"></div><div class="field"><label>ตำแหน่ง / บทบาท</label><input type="text"></div></div>
@@ -1696,46 +1935,80 @@ body {
     </div>
   </div><!-- end form-f5 -->
 
+  </div><!-- end formModeView (FIX: was missing, caused dashboard to be nested inside hidden formModeView) -->
+
   <div id="dashboardModeView" style="display:none;">
-    <div class="form-header" style="background:linear-gradient(135deg, #334155, #475569)">
-      <h1>📊 แดชบอร์ดติดตามผล & สรุปสถิติบริบทโรงเรียนปลายทาง</h1>
-      <p>ระบบรวบรวมข้อมูล คัดกรอง ค้นหา และพิมพ์เอกสารสรุปบริบทรายโรงเรียนในรูปแบบไฟล์ PDF</p>
-    </div>
 
-    <div class="dashboard-summary-row">
-      <div class="summary-card">
-        <h3>สถิติกลุ่มประเภทโรงเรียน</h3>
-        <div class="summary-list" id="schoolTypeSummaryList"><p style="color:#64748b; font-size:13px;">รอโหลดข้อมูล...</p></div>
+    <!-- HERO -->
+    <div class="db2-hero">
+      <div class="db2-hero-text">
+        <h2>📊 แดชบอร์ดติดตามแบบฟอร์ม DLTV</h2>
+        <p>ติดตามสถานะการกรอก F0–F5 รายโรงเรียน · วิเคราะห์ประเด็นสำคัญด้วย AI · พิมพ์ PDF</p>
       </div>
-      <div class="summary-card">
-        <h3>ลักษณะการใช้ระบบ DLTV</h3>
-        <div class="summary-list" id="usageSummaryList"><p style="color:#64748b; font-size:13px;">รอโหลดข้อมูล...</p></div>
+      <div class="db2-stats">
+        <div class="db2-stat"><div class="n" id="ds-total">—</div><div class="l">โรงเรียนทั้งหมด</div></div>
+        <div class="db2-stat"><div class="n" id="ds-complete">—</div><div class="l">ครบทุกฟอร์ม</div></div>
+        <div class="db2-stat"><div class="n" id="ds-forms">—</div><div class="l">ฟอร์มที่รับแล้ว</div></div>
+        <div class="db2-stat"><div class="n" id="ds-pct">—</div><div class="l">ความคืบหน้า</div></div>
       </div>
     </div>
 
-    <div class="search-box">
-      <input type="text" id="dbSearchInput" placeholder="🔍 ค้นหาด้วย ชื่อโรงเรียน, รหัส 10 หลัก, อำเภอ, จังหวัด..." oninput="filterDashboardTable()">
-      <button class="btn-refresh" onclick="loadDashboardData()"><i class="ti ti-refresh"></i> ดึงข้อมูลล่าสุด</button>
+    <!-- SUMMARY CARDS -->
+    <div class="db2-cards" id="db2SummaryCards">
+      <div class="db2-card"><div class="ci">🏫</div><div class="cn" id="db2-c0">—</div><div class="cd">โรงเรียนที่บันทึก F0</div></div>
+      <div class="db2-card g"><div class="ci">✅</div><div class="cn" id="db2-c1">—</div><div class="cd">กรอกครบ F0–F5</div></div>
+      <div class="db2-card a"><div class="ci">⏳</div><div class="cn" id="db2-c2">—</div><div class="cd">กรอกบางฟอร์ม</div></div>
+      <div class="db2-card r"><div class="ci">⭕</div><div class="cn" id="db2-c3">—</div><div class="cd">มีเฉพาะ F0</div></div>
+      <div class="db2-card"><div class="ci">📋</div><div class="cn" id="db2-c4">—</div><div class="cd">แบบฟอร์มรวมทั้งหมด</div></div>
     </div>
 
-    <div style="overflow-x:auto;">
-      <table class="db-table">
+    <hr class="db2-divider">
+
+    <!-- STATUS TABLE -->
+    <div class="db2-sec-head">
+      <h3>📋 สถานะการกรอกแบบฟอร์มรายโรงเรียน</h3>
+      <span class="db2-badge" id="db2TableBadge">—</span>
+    </div>
+    <div class="db2-toolbar">
+      <input class="db2-search" id="dbSearchInput" placeholder="🔍 ค้นหาชื่อโรงเรียน, จังหวัด, รหัส..." oninput="filterDashboardTable()">
+      <select class="db2-sel" id="db2FilterSel" onchange="filterDashboardTable()">
+        <option value="">ทุกสถานะ</option>
+        <option value="complete">✅ ครบทุกฟอร์ม</option>
+        <option value="partial">⏳ บางฟอร์ม</option>
+        <option value="f0only">📝 มีแค่ F0</option>
+      </select>
+      <button class="db2-btn" onclick="loadDashboardData()">🔄 รีเฟรช</button>
+    </div>
+    <div class="db2-wrap">
+      <table class="db2-table" id="db2Table">
         <thead>
           <tr>
-            <th>วันที่บันทึก</th>
-            <th>ชื่อโรงเรียน</th>
-            <th>รหัสโรงเรียน</th>
-            <th>จังหวัด</th>
-            <th>ผู้ให้ข้อมูล</th>
-            <th>สถานะ</th>
-            <th style="text-align:center;">เครื่องมือ</th>
+            <th style="min-width:190px;">โรงเรียน</th>
+            <th style="min-width:80px;">จังหวัด</th>
+            <th class="fc" title="F0 บริบทโรงเรียน">F0<br><span style="font-size:10px;opacity:.7;">บริบท</span></th>
+            <th class="fc" title="F1 สังเกตนักเรียน">F1<br><span style="font-size:10px;opacity:.7;">นักเรียน</span></th>
+            <th class="fc" title="F2 กำกับห้องเรียน">F2<br><span style="font-size:10px;opacity:.7;">ห้องเรียน</span></th>
+            <th class="fc" title="F3 ครูต้นทาง">F3<br><span style="font-size:10px;opacity:.7;">ต้นทาง</span></th>
+            <th class="fc" title="F4 เสียงสะท้อน">F4<br><span style="font-size:10px;opacity:.7;">สะท้อน</span></th>
+            <th class="fc" title="F5 PLC">F5<br><span style="font-size:10px;opacity:.7;">PLC</span></th>
+            <th style="min-width:110px;">ความคืบหน้า</th>
+            <th style="min-width:180px;">เครื่องมือ</th>
           </tr>
         </thead>
         <tbody id="dbTableBody">
-          <tr><td colspan="7" style="text-align:center; color:#64748b; padding:30px;">กำลังโหลดข้อมูลจากระบบ...</td></tr>
+          <tr><td colspan="10" style="text-align:center;padding:36px;color:#94a3b8;">⏳ กำลังโหลดข้อมูล...</td></tr>
         </tbody>
       </table>
     </div>
+
+    <hr class="db2-divider">
+
+    <!-- Legacy summary cards (hidden, kept for backward compat) -->
+    <div style="display:none;">
+      <div id="schoolTypeSummaryList"></div>
+      <div id="usageSummaryList"></div>
+    </div>
+
   </div>
 </div>
 
@@ -1743,8 +2016,8 @@ body {
 <div class="success-overlay" id="successOverlay">
   <div class="success-modal">
     <div class="check-circle" style="color:#fff; font-size:40px; display:flex; align-items:center; justify-content:center;">✓</div>
-    <h2>บันทึกข้อมูลสำเร็จ!</h2>
-    <p>ข้อมูลของโรงเรียน <strong id="successSchoolName"></strong><br>ถูกส่งเข้าระบบ Google Sheets เรียบร้อยแล้ว</p>
+    <h2 id="successTitle">บันทึกข้อมูลสำเร็จ!</h2>
+    <p>ข้อมูล <strong id="successFormLabel">F0 บริบทโรงเรียน</strong> ของโรงเรียน <strong id="successSchoolName"></strong><br>ถูกส่งเข้าระบบ Google Sheets เรียบร้อยแล้ว</p>
     <button class="btn-dashboard-link" onclick="closeSuccessPopup(); switchMode('dashboard')">
       <i class="ti ti-chart-bar"></i> ไปยัง Dashboard ติดตามผล
     </button>
@@ -1916,7 +2189,7 @@ body {
 
 <script>
 // Google Apps Script Web App URL (Hardcoded)
-const GS_URL = "https://script.google.com/macros/s/AKfycbyRBL7WVGA65E7s52GFoGY8OeFMT2exwTl5GWrBP_puIxyxwuqNuyvTk3-lnXaa4SwvmA/exec";
+const GS_URL = "https://script.google.com/macros/s/AKfycbxqNWIku4ODcHxvgR91TkMe4F97oeWVFNLd7wLqMrwi4iDPzUqvhAjSsMWIytmVGQCG4Q/exec";
 
 let currentTabIdx = 0;
 const totalTabs = 6;
@@ -1988,7 +2261,13 @@ function switchMode(mode) {
   document.getElementById('modeDashboardBtn').classList.toggle('active', mode === 'dashboard');
   document.getElementById('formModeView').style.display = mode === 'form' ? 'block' : 'none';
   document.getElementById('dashboardModeView').style.display = mode === 'dashboard' ? 'block' : 'none';
-  if(mode === 'dashboard') loadDashboardData();
+  if (mode === 'dashboard') {
+    // reset any injected content from old scripts
+    const oldSummary = document.getElementById('dltv-dashboard-summary');
+    if (oldSummary) oldSummary.remove();
+    loadDashboardData();
+    setTimeout(loadSavedAiKey, 300);
+  }
 }
 
 function getVal(id) { return document.getElementById(id) ? document.getElementById(id).value.trim() : ''; }
@@ -2003,33 +2282,62 @@ function getRadioVal(name) {
 
 async function submitForm() {
   const statusEl = document.getElementById('submitStatus');
-  statusEl.innerHTML = '<span style="color:orange;"><i class="ti ti-loader animate-spin"></i> กำลังส่งข้อมูลไปยัง Google Sheets โปรดรอสักครู่...</span>';
+  const submitBtn = document.getElementById('submitBtn');
+  // ป้องกันการกดซ้ำ
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.style.opacity = '0.7';
+    submitBtn.innerHTML = '<i class="ti ti-loader" style="font-size:20px;animation:spin 1s linear infinite;"></i> กำลังส่งข้อมูล...';
+  }
+  statusEl.innerHTML = '<span style="color:orange;"><i class="ti ti-loader"></i> ⏳ กำลังส่งข้อมูลไปยัง Google Sheets โปรดรอสักครู่...</span>';
 
-  let majorArr = [];
-  document.querySelectorAll('#major_table tbody tr').forEach(row => {
-    const cntEl = row.querySelector('.mj-count');
-    if(cntEl && (cntEl.value > 0)) {
-      const subj = cntEl.getAttribute('data-subject') || getVal('mj_other_title');
-      const note = row.querySelector('.mj-note') ? row.querySelector('.mj-note').value : getVal('mj_other_note');
-      majorArr.push(`${subj}:${cntEl.value}คน(${note||'-'})`);
+  // ===== ครอบทุกขั้นตอนด้วย try/catch เดียว =====
+  // (เดิม การสร้าง payload ทำนอก try/catch — ถ้า element ใดหายไป/เป็น null
+  //  จะเกิด Error แล้วโค้ดหยุดทำงานทันที โดยไม่มีใครมาปลดสถานะปุ่ม "กำลังส่งข้อมูล..."
+  //  ทำให้ปุ่มหมุนค้างตลอดไป ทั้งที่ยังไม่ได้ยิง fetch ไป Google Sheets เลย)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000); // timeout 15s
+
+  // 🛟 Watchdog: นาฬิกาสำรองอิสระ ถ้าผ่านไป 20 วิแล้วปุ่มยังไม่ถูกปลดล็อก
+  // (เผื่อกรณีที่คาดไม่ถึง เช่น fetch ค้างแบบไม่ throw, AbortController ใช้ไม่ได้บนเบราว์เซอร์เก่า ฯลฯ)
+  // จะบังคับปลดสถานะปุ่มเสมอ ไม่ให้ค้างถาวรอีกต่อไป
+  const watchdogId = setTimeout(() => {
+    if (submitBtn && submitBtn.disabled) {
+      submitBtn.disabled = false;
+      submitBtn.style.opacity = '1';
+      submitBtn.innerHTML = '<i class="ti ti-send" style="font-size:20px;"></i> ✅ บันทึกและส่งข้อมูลเข้าระบบ';
+      statusEl.innerHTML = '<span style="color:red;">⏱️ การเชื่อมต่อใช้เวลานานผิดปกติ — กรุณาตรวจสอบอินเทอร์เน็ต หรือลองกดบันทึกอีกครั้ง (ข้อมูลถูกสำรองไว้ใน localStorage แล้ว)</span>';
+      console.error('[submitForm] watchdog triggered: button was stuck disabled for 20s+');
     }
-  });
+  }, 20000);
 
-  let acArr = [];
-  gradeList.forEach(g => {
-    const subj = document.querySelector(`.ac-subject[data-grade="${g}"]`).value;
-    const freq = getRadioVal(`ac_freq_${g}`);
-    if(subj || freq) acArr.push(`${g}[วิชา:${subj||'-'}|ความถี่:${freq||'-'}]`);
-  });
+  try {
+    let majorArr = [];
+    document.querySelectorAll('#major_table tbody tr').forEach(row => {
+      const cntEl = row.querySelector('.mj-count');
+      if(cntEl && (cntEl.value > 0)) {
+        const subj = cntEl.getAttribute('data-subject') || getVal('mj_other_title');
+        const note = row.querySelector('.mj-note') ? row.querySelector('.mj-note').value : getVal('mj_other_note');
+        majorArr.push(`${subj}:${cntEl.value}คน(${note||'-'})`);
+      }
+    });
 
-  let hwArr = [];
-  gradeList.forEach(g => {
-    const tv = getRadioVal(`tv_${g}`);
-    const ird = getRadioVal(`ird_${g}`);
-    if(tv || ird) hwArr.push(`${g}[TV:${tv||'-'}|IRD:${ird||'-'}]`);
-  });
+    let acArr = [];
+    gradeList.forEach(g => {
+      const subjEl = document.querySelector(`.ac-subject[data-grade="${g}"]`);
+      const subj = subjEl ? subjEl.value : '';
+      const freq = getRadioVal(`ac_freq_${g}`);
+      if(subj || freq) acArr.push(`${g}[วิชา:${subj||'-'}|ความถี่:${freq||'-'}]`);
+    });
 
-  const payload = {
+    let hwArr = [];
+    gradeList.forEach(g => {
+      const tv = getRadioVal(`tv_${g}`);
+      const ird = getRadioVal(`ird_${g}`);
+      if(tv || ird) hwArr.push(`${g}[TV:${tv||'-'}|IRD:${ird||'-'}]`);
+    });
+
+    const payload = {
     'timestamp': new Date().toLocaleString('th-TH'),
     'ผู้ให้ข้อมูล_สถานะ': getRadioVal('inf_role'),
     'ผู้ให้ข้อมูล_ชื่อ': getVal('inf_name'),
@@ -2082,21 +2390,47 @@ async function submitForm() {
     'ลงนาม_ผู้รับข้อมูล': getVal('sig2_name'),
     'ลงนาม_ตำแหน่งผู้รับ': getVal('sig2_pos'),
     'ลงนาม_วันที่ผู้รับ': getVal('sig2_date')
-  };
+    };
 
-  try {
+    // บันทึกลง localStorage ก่อนส่งเสมอ (กันข้อมูลหาย)
+    try { localStorage.setItem('dltv_f0_last_payload', JSON.stringify(payload)); } catch(e) {}
+
+    // ===== SUBMIT WITH TIMEOUT + no-cors fallback =====
+    // เนื่องจาก no-cors ไม่สามารถอ่าน response ได้ → ใช้ AbortController + timeout
+    // ถ้าส่งสำเร็จ (ไม่ throw) ถือว่า Google Apps Script ได้รับข้อมูลแล้ว
+    //
+    // 🔧 บั๊กสำคัญที่แก้: เดิมส่ง payload ตรง ๆ (flat object) แต่ Code.gs ฝั่ง doPost()
+    // ต้องการรูปแบบ { formId: "...", data: {...} } เท่านั้น (ดู Code.gs บรรทัด
+    // formId = payload.formId / data = payload.data) ถ้าไม่มี formId มันจะ throw
+    // "ข้อมูลไม่ครบ" และไม่บันทึกลง Sheet เลย แต่เพราะเป็น no-cors ฝั่งหน้าเว็บ
+    // อ่าน response ไม่ได้ จึงเข้าใจผิดว่า "บันทึกสำเร็จ" ทั้งที่ Sheet ไม่มีแถวใหม่เพิ่ม
     await fetch(GS_URL, {
       method: 'POST',
       mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // เลี่ยง preflight ที่ no-cors ไม่รองรับ
+      body: JSON.stringify({ formId: 'f0', data: payload, mode: 'dynamic' }),
+      signal: controller.signal
     });
+    clearTimeout(timeoutId); clearTimeout(watchdogId);
+    // no-cors fetch ที่ไม่ throw = ส่งสำเร็จ
     statusEl.innerHTML = '<span style="color:green;"><i class="ti ti-circle-check"></i> บันทึกข้อมูลสำเร็จเรียบร้อย!</span>';
-    document.getElementById('successSchoolName').textContent = payload['ชื่อโรงเรียน'] || 'โรงเรียน';
-    document.getElementById('successOverlay').classList.add('show');
+    showSuccessPopup(payload['ชื่อโรงเรียน'] || 'โรงเรียน', '🏫 F0 บันทึกบริบทโรงเรียน');
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; submitBtn.innerHTML = '<i class="ti ti-send" style="font-size:20px;"></i> ✅ บันทึกและส่งข้อมูลเข้าระบบ'; }
     resetForm();
   } catch (e) {
-    statusEl.innerHTML = '<span style="color:red;">❌ เกิดข้อผิดพลาด: ' + e.message + '</span>';
+    // ✅ ตอนนี้ catch ครอบทุกอย่าง (ทั้งตอนสร้าง payload และตอน fetch)
+    // ดังนั้นไม่ว่าจะ error จากจุดไหน ปุ่มจะถูกปลดสถานะเสมอ ไม่ค้างอีกต่อไป
+    clearTimeout(timeoutId); clearTimeout(watchdogId);
+    if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; }
+    if (e.name === 'AbortError') {
+      statusEl.innerHTML = '<span style="color:#b45309;"><i class="ti ti-clock"></i> หมดเวลาการตอบสนอง — ข้อมูลอาจถูกบันทึกแล้ว กรุณาตรวจสอบ Google Sheets</span>';
+      showSuccessPopup(payload['ชื่อโรงเรียน'] || 'โรงเรียน', '🏫 F0 บันทึกบริบทโรงเรียน', true);
+      if (submitBtn) { submitBtn.innerHTML = '<i class="ti ti-send" style="font-size:20px;"></i> ✅ บันทึกและส่งข้อมูลเข้าระบบ'; }
+      resetForm();
+    } else {
+      statusEl.innerHTML = '<span style="color:red;">❌ เกิดข้อผิดพลาด: ' + e.message + ' — ข้อมูลถูกบันทึกไว้ใน localStorage แล้ว (กรุณาแจ้งผู้ดูแลระบบ)</span>';
+      if (submitBtn) { submitBtn.innerHTML = '<i class="ti ti-send" style="font-size:20px;"></i> ✅ บันทึกและส่งข้อมูลเข้าระบบ'; }
+    }
   }
 }
 
@@ -2106,133 +2440,489 @@ function resetForm() {
   showTab(0);
 }
 
-async function loadDashboardData() {
-  const tbody = document.getElementById('dbTableBody');
-  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;"><i class="ti ti-loader animate-spin"></i> กำลังโหลดข้อมูลล่าสุด...</td></tr>';
-  
-  try {
-    const rRead = await fetch(`${GS_URL}?action=read`);
-    allResponsesData = await rRead.json();
-    renderDashboardTable(allResponsesData);
-    
-    const rSum = await fetch(`${GS_URL}?action=summary`);
-    const summary = await rSum.json();
-    renderSummaryCards(summary);
-  } catch (err) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:red;">❌ ดึงข้อมูลไม่สำเร็จ ตรวจสอบสิทธิ์การแชร์</td></tr>';
+// ════════════════════════════════════════════════════
+// DASHBOARD v2 — State
+// ════════════════════════════════════════════════════
+let db2MultiFormData = {}; // { f0:[...], f1:[...], ... }
+let db2FilteredData  = [];
+let db2AiScope       = 'overview';
+
+const DB2_FORMS = [
+  { id:'f0', label:'F0', name:'บันทึกบริบทโรงเรียน',      emoji:'🏫' },
+  { id:'f1', label:'F1', name:'สังเกตความเข้าใจนักเรียน', emoji:'👁️' },
+  { id:'f2', label:'F2', name:'กำกับห้องเรียนปลายทาง',    emoji:'🏫' },
+  { id:'f3', label:'F3', name:'สังเกตการสอนต้นทาง',       emoji:'👨‍🏫' },
+  { id:'f4', label:'F4', name:'เสียงสะท้อนนักเรียน',      emoji:'💬' },
+  { id:'f5', label:'F5', name:'สะท้อนผลรวม PLC',           emoji:'📊' },
+];
+
+// ── JSONP helper (ไม่มีปัญหา CORS) ──────────────────
+function db2JsonpFetch(url, ms=14000) {
+  return new Promise((resolve, reject) => {
+    const cb = '__db2cb_' + Date.now() + '_' + Math.random().toString(36).slice(2);
+    const sc = document.createElement('script');
+    let done = false;
+    const cleanup = () => { done=true; delete window[cb]; sc.parentNode&&sc.parentNode.removeChild(sc); };
+    window[cb] = d => { cleanup(); resolve(d); };
+    const t = setTimeout(() => { if(!done){ cleanup(); reject(new Error('Timeout')); } }, ms);
+    sc.onerror = () => { clearTimeout(t); cleanup(); reject(new Error('Script error')); };
+    const sep = url.includes('?') ? '&' : '?';
+    sc.src = url + sep + 'callback=' + cb;
+    document.head.appendChild(sc);
+  });
+}
+
+async function db2Fetch(url) {
+  // ลอง JSONP ก่อน → fallback fetch
+  try { return await db2JsonpFetch(url, 12000); }
+  catch(e) {
+    const r = await fetch(url);
+    return r.json();
   }
 }
 
-function renderDashboardTable(data) {
+// ── LOAD ALL DATA ────────────────────────────────────
+async function loadDashboardData() {
   const tbody = document.getElementById('dbTableBody');
-  if(!data || data.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; padding:20px;">ไม่พบข้อมูล</td></tr>';
+  tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:36px;color:#64748b;">⏳ กำลังโหลดข้อมูล...</td></tr>';
+
+  db2MultiFormData = {};
+  allResponsesData = [];
+
+  try {
+    // F0
+    const f0 = await db2Fetch(`${GS_URL}?action=read`);
+    db2MultiFormData.f0 = Array.isArray(f0) ? f0 : [];
+    allResponsesData = [...db2MultiFormData.f0];
+
+    // F1–F5 (ไม่ block ถ้า GAS ยังไม่รองรับ)
+    for (const fid of ['f1','f2','f3','f4','f5']) {
+      try { const d = await db2Fetch(`${GS_URL}?action=read&form=${fid}`);
+            db2MultiFormData[fid] = Array.isArray(d) ? d : []; }
+      catch(_) { db2MultiFormData[fid] = []; }
+    }
+
+    // รวมโรงเรียนจาก F1–F5 ที่ไม่มี F0 (ชื่อยังไม่อยู่ใน allResponsesData)
+    const knownNames = new Set(allResponsesData.map(r => (r['ชื่อโรงเรียน']||'').trim()));
+    for (const fid of ['f1','f2','f3','f4','f5']) {
+      (db2MultiFormData[fid]||[]).forEach(r => {
+        const n = db2GetRowSchoolName(r).trim();
+        if (n && !knownNames.has(n)) {
+          knownNames.add(n);
+          // สร้าง stub row สำหรับโรงเรียนที่มีแค่ F1–F5 ยังไม่มี F0
+          allResponsesData.push({
+            'ชื่อโรงเรียน': n,
+            'จังหวัด': r['จังหวัด'] || r['จังหวัด '] || '-',
+            'รหัสโรงเรียน': '',
+            'ผู้ให้ข้อมูล_วันที่บันทึก': r['timestamp'] || r['Timestamp'] || '',
+            '_stub': true  // ยังไม่มี F0
+          });
+        }
+      });
+    }
+
+    db2RenderAll();
+    showToast('✅ โหลดข้อมูลสำเร็จ — ' + allResponsesData.length + ' โรงเรียน');
+
+  } catch(err) {
+    tbody.innerHTML = `<tr><td colspan="10" style="padding:36px;">
+      <div style="text-align:center;color:#dc2626;font-weight:700;">❌ ดึงข้อมูลไม่สำเร็จ</div>
+      <div style="text-align:center;color:#64748b;font-size:13px;margin-top:6px;">${err.message}</div>
+      <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:9px;padding:12px 16px;margin:14px auto 0;max-width:560px;font-size:13px;line-height:1.8;color:#92400e;">
+        <strong>🔧 วิธีแก้:</strong> เปิด Apps Script → Deploy → ตรวจสอบ <em>Who has access: Anyone</em><br>
+        แล้วเพิ่ม JSONP support ใน doGet:<br>
+        <code>if(e.parameter.callback) return ContentService.createTextOutput(e.parameter.callback+'('+JSON.stringify(result)+')').setMimeType(ContentService.MimeType.JAVASCRIPT);</code>
+      </div>
+    </td></tr>`;
+  }
+}
+
+// ── RENDER ALL ───────────────────────────────────────
+function db2RenderAll() {
+  db2FilteredData = [...allResponsesData];
+  db2UpdateHero();
+  db2UpdateCards();
+  db2RenderTable(db2FilteredData);
+}
+
+function db2UpdateHero() {
+  const total = allResponsesData.length;
+  let totalForms = 0;
+  DB2_FORMS.forEach(f => { totalForms += (db2MultiFormData[f.id]||[]).length; });
+  const pct = total > 0 ? Math.round(totalForms/(total*6)*100) : 0;
+  const complete = allResponsesData.filter(r => db2SchoolFormCount(r['ชื่อโรงเรียน']||'') === 6).length;
+  document.getElementById('ds-total').textContent    = total;
+  document.getElementById('ds-complete').textContent = complete;
+  document.getElementById('ds-forms').textContent    = totalForms;
+  document.getElementById('ds-pct').textContent      = pct + '%';
+}
+
+function db2UpdateCards() {
+  const total = allResponsesData.length;
+  let c1=0, c2=0, c3=0;
+  allResponsesData.forEach(r => {
+    const cnt = db2SchoolFormCount(r['ชื่อโรงเรียน']||'');
+    if(cnt===6) c1++; else if(cnt>=2) c2++; else c3++;
+  });
+  const totalForms = DB2_FORMS.reduce((a,f)=>a+(db2MultiFormData[f.id]||[]).length,0);
+  document.getElementById('db2-c0').textContent = total;
+  document.getElementById('db2-c1').textContent = c1;
+  document.getElementById('db2-c2').textContent = c2;
+  document.getElementById('db2-c3').textContent = c3;
+  document.getElementById('db2-c4').textContent = totalForms;
+}
+
+// หาชื่อโรงเรียนจาก row ของฟอร์มใดก็ได้
+// F0 ใช้ label "ชื่อโรงเรียน", F1/F2/F3/F5 ใช้ "ชื่อโรงเรียนปลายทาง", F4 ใช้ "โรงเรียน"
+// (autoCollectForm สร้าง key จาก label ของแต่ละฟอร์ม จึงไม่ตรงกัน) ต้องเช็คทุกแบบ
+function db2GetRowSchoolName(r) {
+  return (r['ชื่อโรงเรียน'] || r['ชื่อโรงเรียนปลายทาง'] || r['โรงเรียน'] || r['school_name'] || '').toString().trim();
+}
+
+function db2SchoolFormStatus(name) {
+  const trimmed = name.trim();
+  const st = {};
+  DB2_FORMS.forEach(f => {
+    if (f.id === 'f0') {
+      // F0 จริงต้องไม่ใช่ stub row
+      st.f0 = allResponsesData.some(r => (r['ชื่อโรงเรียน']||'').trim() === trimmed && !r._stub);
+    } else {
+      st[f.id] = (db2MultiFormData[f.id]||[]).some(r =>
+        db2GetRowSchoolName(r) === trimmed
+      );
+    }
+  });
+  return st;
+}
+function db2SchoolFormCount(name) {
+  return Object.values(db2SchoolFormStatus(name)).filter(Boolean).length;
+}
+
+// ── TABLE ─────────────────────────────────────────────
+function db2RenderTable(data) {
+  const tbody = document.getElementById('dbTableBody');
+  const badge = document.getElementById('db2TableBadge');
+  if(badge) badge.textContent = data.length + ' โรงเรียน';
+
+  if(!data.length) {
+    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#94a3b8;">ไม่พบข้อมูลที่ตรงกัน</td></tr>';
     return;
   }
-  tbody.innerHTML = '';
-  data.forEach((item, index) => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${item.ผู้ให้ข้อมูล_วันที่บันทึก || item.timestamp || '-'}</td>
-        <td><a href="#" style="font-weight:600; color:var(--accent); text-decoration:none;" onclick="openPreviewModal(${index}); return false;">${item.ชื่อโรงเรียน || '-'}</a></td>
-        <td><code>${item.รหัสโรงเรียน || '-'}</code></td>
-        <td>${item.จังหวัด || '-'}</td>
-        <td>${item.ผู้ให้ข้อมูล_ชื่อ || '-'}<br><small style="color:#64748b;">(${item.ผู้ให้ข้อมูล_สถานะ || '-'})</small></td>
-        <td><span class="status-badge">✓ สมบูรณ์</span></td>
-        <td style="text-align:center; white-space:nowrap;">
-          <button class="btn-preview" onclick="openPreviewModal(${index})"><i class="ti ti-eye"></i> พรีวิว</button>
-          <button class="btn-edit-row" style="margin-left:4px;" onclick="openEditModal(${index})"><i class="ti ti-pencil"></i> แก้ไข</button>
-          <button class="btn-pdf" style="margin-left:4px;" onclick="downloadSinglePDF(${index})"><i class="ti ti-file-text"></i> PDF</button>
-        </td>
-      </tr>`;
-  });
+
+  tbody.innerHTML = data.map((row, idx) => {
+    const name    = row['ชื่อโรงเรียน'] || '-';
+    const prov    = row['จังหวัด']        || '-';
+    const code    = row['รหัสโรงเรียน']   || (row._stub ? '(ยังไม่มี F0)' : '-');
+    const date    = row['ผู้ให้ข้อมูล_วันที่บันทึก'] || row['timestamp'] || '-';
+    const isStub  = !!row._stub;
+    const st      = db2SchoolFormStatus(name);
+    const cnt     = Object.values(st).filter(Boolean).length;
+    const pct     = Math.round(cnt/6*100);
+    const col     = pct===100 ? '#16a34a' : pct>=50 ? '#d97706' : '#3b82f6';
+
+    const chips = DB2_FORMS.map(f => {
+      const safeName = name.replace(/'/g,"\\'");
+      return st[f.id]
+        ? `<td style="text-align:center;"><span class="fchip ok" style="cursor:pointer;" title="คลิกเพื่อดู ${f.label}" onclick="openFormPreview('${safeName}','${f.id}')">✓</span></td>`
+        : `<td style="text-align:center;"><span class="fchip no" style="cursor:pointer;font-size:11px;" title="ยังไม่มีข้อมูล ${f.label}">—</span></td>`;
+    }).join('');
+
+    // find original index in allResponsesData for PDF/preview
+    const origIdx = allResponsesData.indexOf(row);
+
+    const f0Tools = isStub
+      ? `<span style="font-size:11px;color:#f59e0b;font-weight:600;">⚠️ ยังไม่มีข้อมูล F0</span>`
+      : `<button onclick="openPreviewModal(${origIdx})"><i class="ti ti-eye"></i> พรีวิว</button>
+         <button onclick="openEditModal(${origIdx})"><i class="ti ti-pencil"></i> แก้ไข F0</button>
+         <button onclick="downloadSinglePDF(${origIdx})"><i class="ti ti-file-text"></i> PDF</button>`;
+
+    return `<tr${isStub ? ' style="background:#fffbeb;"' : ''}>
+      <td>
+        <div class="sn">${name}${isStub ? ' <span style="font-size:10px;color:#d97706;background:#fef3c7;padding:1px 6px;border-radius:10px;">ยังไม่มี F0</span>' : ''}</div>
+        <div class="si">${code} · ${date}</div>
+      </td>
+      <td>${prov}</td>
+      ${chips}
+      <td>
+        <div style="display:flex;align-items:center;gap:5px;">
+          <span style="font-weight:700;color:${col};font-size:12.5px;">${cnt}/6</span>
+          <span style="font-size:11px;color:#94a3b8;">(${pct}%)</span>
+        </div>
+        <div class="pb-wrap"><div class="pb-fill" style="width:${pct}%;background:${col};"></div></div>
+      </td>
+      <td class="row-tools">
+        ${f0Tools}
+        ${DB2_FORMS.filter(f=>f.id!=='f0'&&st[f.id]).map(f=>`<button style="background:#f0fdf4;color:#15803d;border-color:#bbf7d0;" onclick="openFormEdit('${name.replace(/'/g,"\\'")}','${f.id}')"><i class="ti ti-pencil"></i> แก้ไข ${f.label}</button>`).join('')}
+      </td>
+    </tr>`;
+  }).join('');
 }
 
 function filterDashboardTable() {
-  const query = document.getElementById('dbSearchInput').value.toLowerCase();
-  const filtered = allResponsesData.filter(item => {
-    return (item.ชื่อโรงเรียน || '').toLowerCase().includes(query) ||
-           (item.รหัสโรงเรียน || '').toLowerCase().includes(query) ||
-           (item.อำเภอ || '').toLowerCase().includes(query) ||
-           (item.จังหวัด || '').toLowerCase().includes(query);
+  const q  = (document.getElementById('dbSearchInput')?.value||'').toLowerCase();
+  const st = document.getElementById('db2FilterSel')?.value || '';
+
+  db2FilteredData = allResponsesData.filter(row => {
+    const name = (row['ชื่อโรงเรียน']||'').toLowerCase();
+    const prov = (row['จังหวัด']||'').toLowerCase();
+    const code = (row['รหัสโรงเรียน']||'').toLowerCase();
+    if(q && !name.includes(q) && !prov.includes(q) && !code.includes(q)) return false;
+    if(st) {
+      const cnt = db2SchoolFormCount(row['ชื่อโรงเรียน']||'');
+      if(st==='complete' && cnt!==6) return false;
+      if(st==='partial'  && (cnt<2||cnt===6)) return false;
+      if(st==='f0only'   && cnt!==1) return false;
+    }
+    return true;
   });
-  renderDashboardTable(filtered);
+  db2RenderTable(db2FilteredData);
 }
 
-function renderSummaryCards(summary) {
-  const typeDiv = document.getElementById('schoolTypeSummaryList');
-  if (summary.schoolTypeSummary && summary.schoolTypeSummary.length) {
-    typeDiv.innerHTML = '<ul>' + summary.schoolTypeSummary.map(item => `<li><strong>${item.type}</strong> <span class="summary-badge">${item.count} แห่ง</span></li>`).join('') + '</ul>';
-  } else {
-    typeDiv.innerHTML = '<p>ไม่มีข้อมูลประเภทโรงเรียน</p>';
+// legacy compat
+function renderDashboardTable(data) { db2RenderTable(data); }
+function renderSummaryCards(summary) {} // no-op, cards now auto-computed
+
+// ── AI ANALYSIS ──────────────────────────────────────
+function setAiScope(scope, btn) {
+  db2AiScope = scope;
+  document.querySelectorAll('.sc-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+async function db2AiSchool(name) {
+  db2AiScope = 'overview';
+  document.querySelectorAll('.sc-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  const allForms = {};
+  DB2_FORMS.forEach(f => {
+    allForms[f.id] = (db2MultiFormData[f.id]||[]).filter(r =>
+      db2GetRowSchoolName(r) === name
+    );
+  });
+  const f0row = allResponsesData.find(r=>(r['ชื่อโรงเรียน']||'')===name);
+  await db2CallClaude(db2BuildSnippet('overview', allForms, f0row?[f0row]:[]), 'เฉพาะโรงเรียน: '+name);
+  document.getElementById('db2AiBody').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+async function runAiAnalysis() {
+  if(!allResponsesData.length){ showToast('⚠️ กรุณาโหลดข้อมูลก่อน'); return; }
+  const labels = {overview:'ภาพรวมทั้งหมด',f0:'F0 บริบท',f1:'F1 นักเรียน',
+    f2f3:'F2+F3 ครู',f4f5:'F4+F5 สะท้อน',issues:'ปัญหา',support:'ความต้องการ'};
+  await db2CallClaude(db2BuildSnippet(db2AiScope, db2MultiFormData, allResponsesData), labels[db2AiScope]||db2AiScope);
+}
+
+function db2BuildSnippet(scope, formData, f0Rows) {
+  const lines = [];
+  const incF0 = ['overview','f0','issues','support'].includes(scope);
+  if(incF0 && f0Rows.length) {
+    lines.push(`=== F0: บริบทโรงเรียนปลายทาง (${f0Rows.length} โรงเรียน) ===`);
+    f0Rows.slice(0,25).forEach(r => {
+      lines.push(`
+โรงเรียน: ${r['ชื่อโรงเรียน']||'-'} | จังหวัด: ${r['จังหวัด']||'-'} | ประเภท: ${r['ประเภทโรงเรียน_รวม']||'-'}`);
+      lines.push(`การใช้ DLTV: ${r['ภาพรวมการใช้_รวม']||'-'} | ข้อจำกัด: ${r['ข้อจำกัดสำคัญ_รวม']||'-'}`);
+      lines.push(`จุดแข็ง: ${r['จุดแข็งโรงเรียน']||'-'}`);
+      lines.push(`ปัญหา: ${r['ปัญหาอุปสรรค']||'-'} | ต้องการ: ${r['สิ่งที่โรงเรียนต้องการสนับสนุน']||'-'}`);
+      lines.push(`ครูต้นทางควรรู้: ${r['ครูต้นทางควรรับรู้']||'-'}`);
+      if(r['S8_บริบทสำคัญ']) lines.push(`สรุปบริบท: ${r['S8_บริบทสำคัญ']}`);
+    });
   }
-  
-  const usageDiv = document.getElementById('usageSummaryList');
-  if (summary.usageSummary && summary.usageSummary.length) {
-    usageDiv.innerHTML = '<ul>' + summary.usageSummary.map(item => `<li><strong>${item.usage}</strong> <span class="summary-badge">${item.count} แห่ง</span></li>`).join('') + '</ul>';
+  ['f1','f2','f3','f4','f5'].forEach(fid => {
+    const need = scope==='overview'||scope===fid||
+      (scope==='f2f3'&&(fid==='f2'||fid==='f3'))||
+      (scope==='f4f5'&&(fid==='f4'||fid==='f5'))||
+      scope==='issues';
+    if(need && (formData[fid]||[]).length) {
+      const fd = DB2_FORMS.find(f=>f.id===fid);
+      lines.push(`
+=== ${fid.toUpperCase()}: ${fd?.name} (${formData[fid].length} รายการ) ===`);
+      formData[fid].slice(0,10).forEach(r => {
+        lines.push(Object.entries(r).filter(([k,v])=>v&&String(v).length>2&&!k.includes('rowIndex'))
+          .slice(0,10).map(([k,v])=>`${k}: ${v}`).join(' | '));
+      });
+    }
+  });
+  return lines.join('\n');
+}
+
+// ── ดึง API key จาก input หรือ sessionStorage ──────────
+function getAnthropicKey() {
+  const inp = document.getElementById('aiKeyInput');
+  const val = inp ? inp.value.trim() : '';
+  if (val) { try { sessionStorage.setItem('dltv_ai_key', val); } catch(_){} return val; }
+  try { return sessionStorage.getItem('dltv_ai_key') || ''; } catch(_){ return ''; }
+}
+
+function saveAiKey(val) {
+  const status = document.getElementById('aiKeyStatus');
+  if (!status) return;
+  if (val && val.startsWith('sk-ant-')) {
+    try { sessionStorage.setItem('dltv_ai_key', val); } catch(_){}
+    status.textContent = '✅ พร้อมใช้งาน';
+    status.style.color = '#16a34a';
+  } else if (val) {
+    status.textContent = '❌ Key ไม่ถูกต้อง';
+    status.style.color = '#dc2626';
   } else {
-    usageDiv.innerHTML = '<p>ไม่มีข้อมูลการใช้ DLTV</p>';
+    status.textContent = '—';
+    status.style.color = '#94a3b8';
   }
+}
+
+function loadSavedAiKey() {
+  try {
+    const saved = sessionStorage.getItem('dltv_ai_key');
+    const inp = document.getElementById('aiKeyInput');
+    if (saved && inp) {
+      inp.value = saved;
+      saveAiKey(saved);
+    }
+  } catch(_){}
+}
+
+async function db2CallClaude(snippet, scopeLabel) {
+  const btn  = document.getElementById('db2AiBtn');
+  const body = document.getElementById('db2AiBody');
+
+  // ตรวจ API key
+  const apiKey = getAnthropicKey();
+  if (!apiKey || !apiKey.startsWith('sk-ant-')) {
+    body.innerHTML = `
+      <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:12px;padding:20px;text-align:center;">
+        <div style="font-size:28px;margin-bottom:8px;">🔑</div>
+        <div style="font-weight:700;color:#92400e;margin-bottom:6px;">กรุณาใส่ Anthropic API Key ก่อน</div>
+        <div style="font-size:13px;color:#64748b;margin-bottom:14px;">วาง key ในช่องด้านบน แล้วกด "วิเคราะห์ด้วย AI" อีกครั้ง</div>
+        <a href="https://console.anthropic.com/api-keys" target="_blank"
+           style="font-size:13px;color:#6d28d9;font-weight:600;">🔗 ขอ API Key ที่ console.anthropic.com</a>
+      </div>`;
+    return;
+  }
+
+  btn.disabled = true; btn.textContent = '⏳ กำลังวิเคราะห์...';
+  body.innerHTML = '<div style="text-align:center;padding:40px;color:#6d28d9;"><div style="font-size:36px;margin-bottom:10px;">🤖</div><div style="font-size:14px;font-weight:700;">AI กำลังวิเคราะห์ข้อมูล...</div></div>';
+
+  const sys = `คุณเป็นผู้เชี่ยวชาญวิเคราะห์ข้อมูลการศึกษา DLTV ตอบเป็นภาษาไทย ใน JSON เท่านั้น ไม่มี backticks:
+{"executive_summary":"...","key_findings":["..."],"strengths":["..."],"challenges":["..."],"recommendations":["..."],"urgent_issues":["..."],"tags":{"red":["..."],"amber":["..."],"green":["..."]}}`;
+
+  const scopeMap = {overview:'วิเคราะห์ภาพรวมทั้งหมด',f0:'วิเคราะห์บริบทโรงเรียน F0',f1:'วิเคราะห์ความเข้าใจนักเรียน F1',f2f3:'วิเคราะห์การสอนครูต้นทาง/ปลายทาง F2+F3',f4f5:'วิเคราะห์เสียงสะท้อนและ PLC F4+F5',issues:'ระบุและจัดกลุ่มปัญหาอุปสรรค',support:'วิเคราะห์ความต้องการการสนับสนุน'};
+
+  try {
+    // เรียก Anthropic API โดยตรงจาก browser
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1500,
+        system: sys,
+        messages: [{ role: 'user', content: `${scopeMap[db2AiScope]||scopeMap.overview}\n\n${snippet}\n\nขอบเขต: ${scopeLabel}` }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(()=>({error:{message:res.statusText}}));
+      throw new Error(err.error?.message || `HTTP ${res.status}`);
+    }
+
+    const data = await res.json();
+    const raw  = data.content?.[0]?.text || '';
+    let parsed;
+    try { parsed = JSON.parse(raw.replace(/```json|```/g,'').trim()); } catch(_){}
+    if (parsed) db2RenderAiResult(parsed, scopeLabel);
+    else body.innerHTML = `<div class="ai-result"><div class="ai-sec"><h5>📄 ผลวิเคราะห์</h5><p style="white-space:pre-wrap;line-height:1.8;">${raw}</p></div></div>`;
+
+  } catch(e) {
+    body.innerHTML = `<div style="color:#dc2626;text-align:center;padding:30px;font-size:14px;">❌ ${e.message}</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = '✨ วิเคราะห์ด้วย AI';
+  }
+}
+
+function db2RenderAiResult(d, scopeLabel) {
+  const body = document.getElementById('db2AiBody');
+  const li   = arr => (arr||[]).map(i=>`<li>${i}</li>`).join('') || '<li>—</li>';
+  const tags = (arr,cls) => (arr||[]).map(t=>`<span class="tag ${cls}">${t}</span>`).join('');
+  body.innerHTML = `<div class="ai-result">
+    <div class="ai-meta"><span class="ai-stag">📊 ${scopeLabel}</span><span>· ${new Date().toLocaleTimeString('th-TH')}</span><span>· ${allResponsesData.length} โรงเรียน</span></div>
+    ${d.executive_summary?`<div class="ai-sec"><h5>📌 สรุปผู้บริหาร</h5><p>${d.executive_summary}</p></div>`:''}
+    ${(d.key_findings||[]).length?`<div class="ai-sec"><h5>🔍 ข้อค้นพบสำคัญ</h5><ul>${li(d.key_findings)}</ul></div>`:''}
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:18px;">
+      ${(d.strengths||[]).length?`<div class="ai-sec" style="margin:0;"><h5>💚 จุดแข็ง</h5><ul>${li(d.strengths)}</ul></div>`:''}
+      ${(d.challenges||[]).length?`<div class="ai-sec" style="margin:0;"><h5>🔴 ความท้าทาย</h5><ul>${li(d.challenges)}</ul></div>`:''}
+    </div>
+    ${(d.recommendations||[]).length?`<div class="ai-sec"><h5>💡 ข้อเสนอแนะ</h5><ul>${li(d.recommendations)}</ul></div>`:''}
+    ${(d.urgent_issues||[]).length?`<div class="ai-urgent ai-sec"><h5>⚡ ประเด็นเร่งด่วน</h5><ul>${li(d.urgent_issues)}</ul></div>`:''}
+    ${d.tags?`<div class="ai-sec"><h5>🏷️ ป้ายกำกับ</h5><div class="tag-row">${tags(d.tags.red,'r')}${tags(d.tags.amber,'a')}${tags(d.tags.green,'g')}</div></div>`:''}
+  </div>`;
 }
 
 function openPreviewModal(index) {
   currentPreviewIndex = index;
   const item = allResponsesData[index];
-  if(!item) return;
+  if (!item) return;
+  const name = item['ชื่อโรงเรียน'] || 'โรงเรียนปลายทาง';
 
-  document.getElementById('previewModalTitle').textContent = `📋 ${item.ชื่อโรงเรียน || 'โรงเรียนปลายทาง'}`;
+  document.getElementById('previewModalTitle').textContent = `📋 ${name} — ภาพรวมทุกแบบฟอร์ม`;
 
   const body = document.getElementById('previewModalBody');
-  body.innerHTML = `
-    <div class="preview-section">
-      <h4>📍 ข้อมูลทั่วไป</h4>
-      <div class="preview-row">
-        <div class="preview-item"><div class="label">ชื่อโรงเรียน</div><div class="value">${item.ชื่อโรงเรียน||'-'}</div></div>
-        <div class="preview-item"><div class="label">รหัสโรงเรียน</div><div class="value">${item.รหัสโรงเรียน||'-'}</div></div>
-        <div class="preview-item"><div class="label">จังหวัด</div><div class="value">${item.จังหวัด||'-'}</div></div>
-        <div class="preview-item"><div class="label">อำเภอ</div><div class="value">${item.อำเภอ||'-'}</div></div>
-        <div class="preview-item"><div class="label">สพท.</div><div class="value">${item.สำนักงานเขตพื้นที่||'-'}</div></div>
-        <div class="preview-item"><div class="label">ประเภทโรงเรียน</div><div class="value">${item.ประเภทโรงเรียน_รวม||'-'}</div></div>
-      </div>
-    </div>
-    <div class="preview-section">
-      <h4>👤 ผู้ให้ข้อมูล</h4>
-      <div class="preview-row">
-        <div class="preview-item"><div class="label">ชื่อ</div><div class="value">${item.ผู้ให้ข้อมูล_ชื่อ||'-'}</div></div>
-        <div class="preview-item"><div class="label">ตำแหน่ง</div><div class="value">${item.ผู้ให้ข้อมูล_ตำแหน่ง||'-'}</div></div>
-        <div class="preview-item"><div class="label">สถานะ</div><div class="value">${item.ผู้ให้ข้อมูล_สถานะ||'-'}</div></div>
-        <div class="preview-item"><div class="label">วันที่</div><div class="value">${item.ผู้ให้ข้อมูล_วันที่บันทึก||'-'}</div></div>
-      </div>
-    </div>
-    <div class="preview-section">
-      <h4>👥 บุคลากร</h4>
-      <div class="preview-row">
-        <div class="preview-item"><div class="label">ผอ./ครูใหญ่</div><div class="value">${item.ผอ_ครูใหญ่||'-'}</div></div>
-        <div class="preview-item"><div class="label">ครูทั้งหมด</div><div class="value">${item.จำนวนครูทั้งหมด||'0'} คน</div></div>
-        <div class="preview-item"><div class="label">ครูอัตราจ้าง</div><div class="value">${item.จำนวนครูอัตราจ้าง||'0'} คน</div></div>
-      </div>
-    </div>
-    <div class="preview-section">
-      <h4>📺 การใช้ DLTV</h4>
-      <div class="preview-row">
-        <div class="preview-item" style="width:100%;"><div class="label">ภาพรวมการใช้</div><div class="value">${item.ภาพรวมการใช้_รวม||'-'}</div></div>
-        <div class="preview-item" style="width:100%;"><div class="label">ช่องทางรับชม</div><div class="value">${item.ช่องทางรับชม_รวม||'-'}</div></div>
-      </div>
-    </div>
-    <div class="preview-section">
-      <h4>📝 สรุปบริบทสำคัญ</h4>
-      <div style="font-size:13px; line-height:1.7; color:#1e293b;">
-        <p><strong>บริบทสำคัญ:</strong> ${(item.S8_บริบทสำคัญ||'-').replace(/\n/g,'<br>')}</p>
-        <p><strong>ข้อจำกัด:</strong> ${(item.S8_ข้อจำกัดการเรียน||'-').replace(/\n/g,'<br>')}</p>
-        <p><strong>ข้อควรคำนึง:</strong> ${(item.S8_ข้อควรคำนึงถึง||'-').replace(/\n/g,'<br>')}</p>
-        <p><strong>ข้อเสนอแนะ:</strong> ${(item.S8_ข้อเสนอแนะเบื้องต้น||'-').replace(/\n/g,'<br>')}</p>
-      </div>
-    </div>
-  `;
+
+  // ── F0 section ──
+  let html = `<div class="preview-section">
+    <h4>🏫 F0 บันทึกบริบทโรงเรียน</h4>`;
+  if (!item._stub) {
+    const f0Fields = [
+      ['ชื่อโรงเรียน','ชื่อโรงเรียน'],['รหัสโรงเรียน','รหัสโรงเรียน'],
+      ['จังหวัด','จังหวัด'],['อำเภอ','อำเภอ'],['สำนักงานเขตพื้นที่','สพท.'],
+      ['ประเภทโรงเรียน_รวม','ประเภทโรงเรียน'],['ภาพรวมการใช้_รวม','ภาพรวมการใช้ DLTV'],
+      ['จุดแข็งโรงเรียน','จุดแข็ง'],['ปัญหาอุปสรรค','ปัญหาอุปสรรค'],
+      ['S8_บริบทสำคัญ','สรุปบริบทสำคัญ'],['S8_ข้อจำกัดการเรียน','ข้อจำกัด'],
+      ['S8_ข้อเสนอแนะเบื้องต้น','ข้อเสนอแนะ'],
+    ];
+    html += `<div class="preview-row">`;
+    f0Fields.forEach(([key, label]) => {
+      if (item[key]) html += `<div class="preview-item" style="width:100%;margin-bottom:6px;">
+        <div class="label">${label}</div>
+        <div class="value" style="font-weight:500;white-space:pre-wrap;">${String(item[key]).replace(/</g,'&lt;')}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<p style="color:#f59e0b;font-weight:600;">⚠️ ยังไม่ได้กรอกแบบฟอร์ม F0</p>`;
+  }
+  html += `</div>`;
+
+  // ── F1–F5 sections ──
+  const skipKeys = ['rowIndex','Timestamp','timestamp'];
+  DB2_FORMS.filter(f => f.id !== 'f0').forEach(fd => {
+    const row = findFormRow(name, fd.id);
+    html += `<div class="preview-section">
+      <h4>${fd.emoji} ${fd.label} ${fd.name}</h4>`;
+    if (row) {
+      const entries = Object.entries(row)
+        .filter(([k,v]) => !skipKeys.includes(k) && v !== undefined && v !== null && String(v).trim() !== '');
+      if (entries.length) {
+        html += entries.map(([k,v]) => `
+          <div class="preview-item" style="width:100%;margin-bottom:6px;">
+            <div class="label">${k.replace(/_/g,' ')}</div>
+            <div class="value" style="font-weight:500;white-space:pre-wrap;">${String(v).replace(/</g,'&lt;')}</div>
+          </div>`).join('');
+      } else {
+        html += `<p style="color:#94a3b8;">ไม่มีข้อมูล</p>`;
+      }
+    } else {
+      html += `<p style="color:#94a3b8;">— ยังไม่ได้กรอกแบบฟอร์มนี้</p>`;
+    }
+    html += `</div>`;
+  });
+
+  body.innerHTML = html;
 
   document.querySelector('.modal-footer').innerHTML = `
-    <button class="btn-modal-pdf" onclick="downloadSinglePDF(currentPreviewIndex)"><i class="ti ti-file-text"></i> ออก PDF</button>
-    <button class="btn-modal-edit" onclick="showEditMode()"><i class="ti ti-pencil"></i> แก้ไขข้อมูล</button>
+    <button class="btn-modal-pdf" onclick="downloadSinglePDF(currentPreviewIndex)"><i class="ti ti-file-text"></i> ออก PDF (F0)</button>
+    <button class="btn-modal-edit" onclick="showEditMode()"><i class="ti ti-pencil"></i> แก้ไข F0</button>
   `;
 
   document.getElementById('previewModal').classList.add('show');
@@ -2326,7 +3016,206 @@ async function saveEditedData() {
 }
 
 function closePreviewModal() { document.getElementById('previewModal').classList.remove('show'); }
+
+// ============================================================
+//  GENERIC FORM PREVIEW / PDF — ใช้ได้กับทุกฟอร์ม (F0–F5)
+//  เพราะแต่ละฟอร์มมีโครงสร้าง field ไม่เหมือนกัน จึงแสดงผล
+//  แบบ key: value อัตโนมัติ แทนการ hardcode ทีละฟิลด์แบบ F0
+// ============================================================
+function findFormRow(schoolName, formId) {
+  if (formId === 'f0') {
+    return allResponsesData.find(r => (r['ชื่อโรงเรียน']||'').trim() === schoolName.trim());
+  }
+  return (db2MultiFormData[formId]||[]).find(r =>
+    db2GetRowSchoolName(r) === schoolName.trim()
+  );
+}
+
+function openFormPreview(schoolName, formId) {
+  const fd  = DB2_FORMS.find(f => f.id === formId);
+  const row = findFormRow(schoolName, formId);
+
+  if (!row) {
+    showToast('⚠️ ไม่พบข้อมูลของฟอร์มนี้สำหรับ ' + schoolName);
+    return;
+  }
+
+  document.getElementById('previewModalTitle').textContent =
+    `${fd ? fd.emoji : '📋'} ${fd ? fd.name : formId.toUpperCase()} — ${schoolName}`;
+
+  const skipKeys = ['rowIndex', 'Timestamp', 'timestamp'];
+  const body = document.getElementById('previewModalBody');
+  const rows = Object.entries(row)
+    .filter(([k, v]) => !skipKeys.includes(k) && v !== undefined && v !== null && String(v).trim() !== '')
+    .map(([k, v]) => `
+      <div class="preview-item" style="width:100%;margin-bottom:10px;">
+        <div class="label">${k}</div>
+        <div class="value" style="font-weight:500;white-space:pre-wrap;">${String(v).replace(/</g,'&lt;')}</div>
+      </div>`).join('');
+
+  body.innerHTML = `<div class="preview-section"><h4>${fd ? fd.emoji+' '+fd.name : formId.toUpperCase()}</h4>${rows || '<p style="color:#94a3b8;">ไม่มีข้อมูล</p>'}</div>`;
+
+  document.querySelector('.modal-footer').innerHTML = `
+    <button class="btn-modal-pdf" onclick="downloadFormPDF('${schoolName.replace(/'/g,"\\'")}','${formId}')"><i class="ti ti-file-text"></i> ออก PDF</button>
+    <button class="btn-modal-edit" onclick="openFormEdit('${schoolName.replace(/'/g,"\\'")}','${formId}')"><i class="ti ti-pencil"></i> แก้ไขข้อมูล</button>
+  `;
+
+  document.getElementById('previewModal').classList.add('show');
+}
+
+// ── แก้ไขข้อมูลฟอร์ม F1–F5 ──────────────────────────────────
+let currentEditFormId = null;
+let currentEditSchoolName = null;
+
+function openFormEdit(schoolName, formId) {
+  const fd  = DB2_FORMS.find(f => f.id === formId);
+  const row = findFormRow(schoolName, formId);
+  if (!row) { showToast('⚠️ ไม่พบข้อมูลของฟอร์มนี้'); return; }
+
+  currentEditFormId    = formId;
+  currentEditSchoolName = schoolName;
+
+  document.getElementById('previewModalTitle').textContent =
+    `✏️ แก้ไข: ${fd ? fd.emoji + ' ' + fd.name : formId.toUpperCase()} — ${schoolName}`;
+
+  const skipKeys = ['rowIndex', 'Timestamp', 'timestamp'];
+  const longKeys = new Set();
+
+  // key ที่ควรใช้ textarea (ยาวกว่า 60 ตัวอักษรหรือมี newline)
+  Object.entries(row).forEach(([k, v]) => {
+    if (v && (String(v).length > 60 || String(v).includes('\n'))) longKeys.add(k);
+  });
+
+  let html = `<div style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:8px;padding:12px;margin-bottom:16px;font-size:13px;color:#1e3a8a;">
+    <strong>✏️ แก้ไขข้อมูล ${fd ? fd.name : formId.toUpperCase()}</strong> — ${schoolName}<br>
+    <span style="color:#64748b;">กรอกข้อมูลที่ต้องการแก้ไขแล้วกด "บันทึกการแก้ไข"</span>
+  </div><div class="edit-grid">`;
+
+  Object.entries(row).forEach(([k, v]) => {
+    if (skipKeys.includes(k)) return;
+    const safeid = 'ff_' + k.replace(/[^a-zA-Zก-ฮ0-9]/g, '_');
+    const label  = k.replace(/_/g, ' ');
+    const val    = (v || '').toString();
+    if (longKeys.has(k)) {
+      html += `<div class="edit-field field-full" data-key="${k}">
+        <label>${label}</label>
+        <textarea id="${safeid}" rows="3" style="font-size:13px;">${val.replace(/</g,'&lt;')}</textarea>
+      </div>`;
+    } else {
+      html += `<div class="edit-field" data-key="${k}">
+        <label>${label}</label>
+        <input type="text" id="${safeid}" value="${val.replace(/"/g,'&quot;').replace(/</g,'&lt;')}" style="font-size:13px;">
+      </div>`;
+    }
+  });
+
+  html += `</div>`;
+  document.getElementById('previewModalBody').innerHTML = html;
+
+  document.querySelector('.modal-footer').innerHTML = `
+    <button style="background:#f1f5f9;color:#64748b;border:none;padding:10px 20px;border-radius:8px;font-size:14px;cursor:pointer;" onclick="openFormPreview(currentEditSchoolName, currentEditFormId)">← ยกเลิก</button>
+    <button class="btn-modal-edit" onclick="saveFormEditedData()"><i class="ti ti-device-floppy"></i> บันทึกการแก้ไข</button>
+  `;
+}
+
+async function saveFormEditedData() {
+  const formId     = currentEditFormId;
+  const schoolName = currentEditSchoolName;
+  if (!formId || !schoolName) return;
+
+  const row = findFormRow(schoolName, formId);
+  if (!row) { showToast('⚠️ ไม่พบข้อมูลที่จะแก้ไข'); return; }
+
+  // อัปเดต row จาก input/textarea ใน modal
+  document.querySelectorAll('#previewModalBody [data-key]').forEach(wrapper => {
+    const key   = wrapper.getAttribute('data-key');
+    const input = wrapper.querySelector('input, textarea');
+    if (input && key) row[key] = input.value;
+  });
+
+  // ส่งไป Google Sheets ถ้ามี rowIndex
+  if (row.rowIndex) {
+    try {
+      await fetch(GS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'update', formId: formId, rowIndex: row.rowIndex, data: row })
+      });
+    } catch(e) { console.warn('Form update failed:', e); }
+  }
+
+  db2RenderAll();
+  closePreviewModal();
+
+  const notice = document.createElement('div');
+  notice.style.cssText = 'position:fixed;bottom:24px;right:24px;background:#15803d;color:#fff;padding:12px 20px;border-radius:10px;font-weight:600;z-index:9999;font-size:14px;box-shadow:0 4px 20px rgba(0,0,0,0.2);animation:popIn 0.3s ease;';
+  notice.textContent = `✓ บันทึกการแก้ไข ${formId.toUpperCase()} เรียบร้อยแล้ว`;
+  document.body.appendChild(notice);
+  setTimeout(() => notice.remove(), 3000);
+}
+
+async function downloadFormPDF(schoolName, formId) {
+  const fd  = DB2_FORMS.find(f => f.id === formId);
+  const row = findFormRow(schoolName, formId);
+  if (!row) { showToast('⚠️ ไม่พบข้อมูลของฟอร์มนี้'); return; }
+
+  // F0 ใช้เทมเพลตเดิมที่ออกแบบไว้แล้ว (สวยกว่า, ครบหมวดหมู่)
+  if (formId === 'f0') {
+    const idx = allResponsesData.indexOf(row);
+    if (idx >= 0) { await downloadSinglePDF(idx); return; }
+  }
+
+  const skipKeys = ['rowIndex', 'Timestamp', 'timestamp'];
+  const rowsHtml = Object.entries(row)
+    .filter(([k, v]) => !skipKeys.includes(k) && v !== undefined && v !== null && String(v).trim() !== '')
+    .map(([k, v]) => `<tr><td style="width:32%;font-weight:bold;background:#f8fafc;">${k}</td><td style="white-space:pre-wrap;">${String(v).replace(/</g,'&lt;')}</td></tr>`)
+    .join('');
+
+  // สร้าง print area ชั่วคราวสำหรับฟอร์มนี้
+  let area = document.getElementById('generic-pdf-print-area');
+  if (area) area.remove();
+  area = document.createElement('div');
+  area.id = 'generic-pdf-print-area';
+  area.className = 'generic-pdf-print';
+  area.innerHTML = `
+    <h2>${fd ? fd.name : formId.toUpperCase()}</h2>
+    <h3>โครงการจัดการเรียนรู้ด้วยการศึกษาทางไกลผ่านดาวเทียม (DLTV) — ${schoolName}</h3>
+    <table class="pdf-table">${rowsHtml}</table>
+  `;
+  document.body.appendChild(area);
+  area.style.display = 'block';
+
+  const oldTitle = document.title;
+  document.title = `DLTV_${formId.toUpperCase()}_${schoolName}`;
+
+  await document.fonts.ready;
+  window.print();
+
+  document.title = oldTitle;
+  area.remove();
+}
+
+
 function closeSuccessPopup() { document.getElementById('successOverlay').classList.remove('show'); }
+
+// แสดง popup แจ้งเตือนเด่นชัดทุกครั้งที่บันทึกข้อมูลสำเร็จ (ใช้ร่วมกันทุกฟอร์ม F0–F5)
+function showSuccessPopup(schoolName, formLabel, isWarning) {
+  const titleEl = document.getElementById('successTitle');
+  const circleEl = document.querySelector('#successOverlay .check-circle');
+  if (isWarning) {
+    titleEl.textContent = '⏱️ ส่งข้อมูลแล้ว (รอผลยืนยัน)';
+    titleEl.style.color = '#b45309';
+    if (circleEl) circleEl.style.background = 'linear-gradient(135deg,#d97706,#f59e0b)';
+  } else {
+    titleEl.textContent = '✅ บันทึกข้อมูลสำเร็จ!';
+    titleEl.style.color = '#15803d';
+    if (circleEl) circleEl.style.background = 'linear-gradient(135deg,#16a34a,#22c55e)';
+  }
+  document.getElementById('successFormLabel').textContent = formLabel || '';
+  document.getElementById('successSchoolName').textContent = schoolName || 'โรงเรียน';
+  document.getElementById('successOverlay').classList.add('show');
+}
 
 async function downloadSinglePDF(index) {
   const item = allResponsesData[index];
@@ -2521,132 +3410,81 @@ function showToast(msg) {
   toast._timer = setTimeout(() => { toast.style.opacity = '0'; }, 2500);
 }
 
-// --- Dashboard: summarize all forms ---
-function buildDashboard() {
-  const forms = [
-    { id: 'f1', label: '👁️ สังเกตความเข้าใจนักเรียน', color: '#7c3aed' },
-    { id: 'f2', label: '🏫 กำกับห้องเรียนครูปลายทาง', color: '#0f766e' },
-    { id: 'f3', label: '👨‍🏫 สอนจริงครูต้นทาง', color: '#b45309' },
-    { id: 'f4', label: '💬 เสียงสะท้อนนักเรียน', color: '#be185d' },
-    { id: 'f5', label: '📊 สะท้อนผลรวม PLC', color: '#1e3a8a' },
-  ];
+// upgradeDashboard removed — dashboard v2 handles all rendering
 
-  const dashEl = document.getElementById('dltv-dashboard-summary');
-  if (!dashEl) return;
-
-  let html = '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px;">';
-  forms.forEach(form => {
-    const saved = localStorage.getItem('dltv_form_' + form.id);
-    const hasSaved = !!saved;
-    let schoolName = '-', dateVal = '-', filledCount = 0, totalCount = 0;
-    if (saved) {
-      try {
-        const data = JSON.parse(saved);
-        const keys = Object.keys(data);
-        totalCount = keys.length;
-        filledCount = keys.filter(k => data[k] !== '' && data[k] !== false && data[k] !== '0').length;
-        // Try to find school name
-        Object.keys(data).forEach(k => {
-          if ((k.includes('school') || k.includes('_school')) && data[k]) schoolName = data[k];
-          if ((k.includes('date') || k.includes('_date')) && data[k] && dateVal === '-') dateVal = data[k];
-        });
-      } catch(e) {}
-    }
-    const pct = totalCount > 0 ? Math.round(filledCount / totalCount * 100) : 0;
-    const statusColor = pct >= 80 ? '#16a34a' : pct >= 40 ? '#d97706' : '#6b7280';
-    const statusLabel = pct >= 80 ? 'กรอกแล้ว ✅' : pct >= 40 ? 'กรอกบางส่วน ⏳' : hasSaved ? 'เริ่มกรอกแล้ว 📝' : 'ยังไม่ได้กรอก ⭕';
-
-    html += `<div style="border:1.5px solid #e2e8f0;border-radius:14px;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-      <div style="background:${form.color};padding:14px 16px;color:#fff;">
-        <div style="font-size:14px;font-weight:700;">${form.label}</div>
-        <div style="font-size:12px;opacity:0.85;margin-top:2px;">${schoolName !== '-' ? '📍 ' + schoolName : 'ยังไม่ได้ระบุโรงเรียน'}</div>
-      </div>
-      <div style="padding:14px 16px;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
-          <div style="flex:1;background:#f1f5f9;border-radius:99px;height:8px;overflow:hidden;">
-            <div style="width:${pct}%;height:100%;background:${statusColor};border-radius:99px;transition:width 0.5s;"></div>
-          </div>
-          <span style="font-size:12px;font-weight:700;color:${statusColor};min-width:32px;">${pct}%</span>
-        </div>
-        <div style="font-size:12px;color:${statusColor};font-weight:600;">${statusLabel}</div>
-        ${dateVal !== '-' ? '<div style="font-size:11px;color:#94a3b8;margin-top:4px;">📅 ' + dateVal + '</div>' : ''}
-        <div style="margin-top:12px;display:flex;gap:8px;">
-          <button onclick="switchForm('${form.id}')" style="flex:1;padding:8px;font-size:12px;border-radius:8px;background:${form.color};color:#fff;border:none;cursor:pointer;font-weight:600;">✏️ กรอกแบบฟอร์ม</button>
-          ${hasSaved ? `<button onclick="clearFormData('${form.id}')" style="padding:8px 10px;font-size:12px;border-radius:8px;background:#fff;color:#e11d48;border:1.5px solid #fca5a5;cursor:pointer;" title="ล้างข้อมูล">🗑️</button>` : ''}
-        </div>
-      </div>
-    </div>`;
-  });
-  html += '</div>';
-  dashEl.innerHTML = html;
-}
-
-// --- Save indicator bars for each form ---
-function addSaveBar(formId, color) {
+</script>
+<script>
+// ===== FORM COMPLETION STATUS TRACKER =====
+function calcFormCompletion(formId) {
   const panel = document.getElementById('form-' + formId);
-  if (!panel) return;
-  // Add floating save bar at bottom of each form-panel
-  const bar = document.createElement('div');
-  bar.style.cssText = 'position:sticky;bottom:0;background:#f8fafc;border-top:1.5px solid #e2e8f0;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px;z-index:10;';
-  bar.innerHTML = `
-    <span id="save-indicator-${formId}" style="font-size:12px;color:#64748b;opacity:0.5;transition:opacity 0.4s;">💾 กรอกข้อมูลแล้วบันทึกอัตโนมัติ</span>
-    <div style="display:flex;gap:8px;">
-      <button onclick="clearFormData('${formId}')" style="padding:6px 12px;font-size:12px;border-radius:7px;background:#fff;color:#e11d48;border:1.5px solid #fca5a5;cursor:pointer;font-weight:600;">🗑️ ล้างข้อมูล</button>
-      <button onclick="saveFormData('${formId}')" style="padding:6px 14px;font-size:12px;border-radius:7px;background:${color};color:#fff;border:none;cursor:pointer;font-weight:700;">💾 บันทึกทันที</button>
-    </div>`;
-  panel.appendChild(bar);
-}
-
-// --- Upgrade Dashboard view to show our summary ---
-function upgradeDashboard() {
-  const dash = document.getElementById('dashboardModeView');
-  if (!dash) return;
-  // Inject our summary section at the top
-  let summaryDiv = document.getElementById('dltv-dashboard-summary');
-  if (!summaryDiv) {
-    summaryDiv = document.createElement('div');
-    summaryDiv.id = 'dltv-dashboard-summary';
-    summaryDiv.style.cssText = 'padding:0 0 20px 0;';
-    const heading = document.createElement('div');
-    heading.innerHTML = '<div style="font-size:16px;font-weight:800;color:#1e293b;margin-bottom:14px;display:flex;align-items:center;gap:8px;"><span style="background:#3b82f6;color:#fff;border-radius:8px;padding:4px 10px;font-size:13px;">📋 ภาพรวมแบบฟอร์มทั้งหมด</span></div>';
-    dash.insertBefore(heading, dash.firstChild);
-    dash.insertBefore(summaryDiv, dash.children[1] || null);
+  if (!panel) {
+    const saved = localStorage.getItem('dltv_form_' + formId);
+    if (!saved) return { pct: 0, filled: 0, total: 0 };
+    try {
+      const data = JSON.parse(saved);
+      const vals = Object.values(data);
+      const total = vals.length;
+      const filled = vals.filter(v => v !== '' && v !== false && v !== null && v !== undefined).length;
+      return { pct: total > 0 ? Math.round(filled/total*100) : 0, filled, total };
+    } catch(e) { return { pct: 0, filled: 0, total: 0 }; }
   }
-  buildDashboard();
-}
-
-// --- Init on load ---
-document.addEventListener('DOMContentLoaded', () => {
-  // Restore saved data for all new forms
-  ['f1','f2','f3','f4','f5'].forEach(id => {
-    restoreFormData(id);
-    setupAutoSave(id);
+  const inputs = Array.from(panel.querySelectorAll('input[type=text], input[type=tel], input[type=email], input[type=date], input[type=number], textarea, select'));
+  const radioGroups = {};
+  panel.querySelectorAll('input[type=radio]').forEach(r => {
+    if (!radioGroups.hasOwnProperty(r.name)) radioGroups[r.name] = false;
+    if (r.checked) radioGroups[r.name] = true;
   });
+  const checkboxGroups = {};
+  panel.querySelectorAll('input[type=checkbox]').forEach(c => {
+    const grp = c.name || (c.closest('.cb-group') ? c.closest('.cb-group').id || 'cbg' : 'cbg');
+    if (!checkboxGroups.hasOwnProperty(grp)) checkboxGroups[grp] = false;
+    if (c.checked) checkboxGroups[grp] = true;
+  });
+  const total = inputs.length + Object.keys(radioGroups).length + Object.keys(checkboxGroups).length;
+  const filled = inputs.filter(i => i.value && i.value.trim() !== '').length
+    + Object.values(radioGroups).filter(Boolean).length
+    + Object.values(checkboxGroups).filter(Boolean).length;
+  return { pct: total > 0 ? Math.round(filled/total*100) : 0, filled, total };
+}
 
-  // Add save bars
-  const formColors = { f1:'#7c3aed', f2:'#0f766e', f3:'#b45309', f4:'#be185d', f5:'#1e3a8a' };
-  ['f1','f2','f3','f4','f5'].forEach(id => addSaveBar(id, formColors[id]));
-
-  // Hook into dashboard view button to refresh summary
-  const dashBtn = document.querySelector('[onclick*="dashboardModeView"]') ||
-                  document.querySelector('[onclick*="showDashboard"]');
-  if (dashBtn) {
-    const orig = dashBtn.getAttribute('onclick');
-    dashBtn.setAttribute('onclick', orig + '; upgradeDashboard();');
+function updateCompletionBadge(formId) {
+  const badge = document.getElementById('badge-' + formId);
+  if (!badge) return;
+  const { pct } = calcFormCompletion(formId);
+  badge.className = 'form-completion-badge';
+  if (pct >= 80) {
+    badge.className += ' completion-done';
+    badge.textContent = '\u2705 ' + pct + '%';
+  } else if (pct >= 15) {
+    badge.className += ' completion-partial';
+    badge.textContent = '\u23f3 ' + pct + '%';
+  } else {
+    badge.className += ' completion-none';
+    badge.textContent = pct > 0 ? '\ud83d\udcdd ' + pct + '%' : '\u2b55';
   }
+}
 
-  // If already on dashboard, build it
-  const dash = document.getElementById('dashboardModeView');
-  if (dash && dash.style.display !== 'none') upgradeDashboard();
+function updateAllBadges() {
+  ['f0','f1','f2','f3','f4','f5'].forEach(id => updateCompletionBadge(id));
+}
+
+// Hook auto-update on input events
+document.addEventListener('DOMContentLoaded', function() {
+  setTimeout(function() {
+    document.querySelectorAll('.form-panel').forEach(function(panel) {
+      var formId = panel.id.replace('form-', '');
+      panel.addEventListener('change', function() { setTimeout(function(){ updateCompletionBadge(formId); }, 200); });
+      panel.addEventListener('input', function() { setTimeout(function(){ updateCompletionBadge(formId); }, 200); });
+    });
+    // f0 main form
+    var mainForm = document.getElementById('form-f0');
+    if (mainForm) {
+      mainForm.addEventListener('change', function() { setTimeout(function(){ updateCompletionBadge('f0'); }, 200); });
+      mainForm.addEventListener('input', function() { setTimeout(function(){ updateCompletionBadge('f0'); }, 200); });
+    }
+    updateAllBadges();
+  }, 800);
 });
-
-// Patch showDashboard if it exists
-const _origShowDash = window.showDashboard;
-window.showDashboard = function(...args) {
-  if (_origShowDash) _origShowDash(...args);
-  setTimeout(upgradeDashboard, 100);
-};
-
 </script>
 <script>
 // ===== ANIMATED PARTICLES BACKGROUND =====
@@ -2721,271 +3559,30 @@ window.showDashboard = function(...args) {
   draw();
 })();
 
+</script>
+<script>
 // ============================================================
-//  submit-to-sheets.js
-//  วางโค้ดนี้ไว้ใน <script> ก่อนปิด </body> ของไฟล์ dltv_system_v2.html
-//  ทำหน้าที่: เก็บค่าจากฟอร์ม -> ส่งไปยัง Google Apps Script Web App
-// ============================================================
-
-// 🔧 แก้ URL นี้เป็น Web App URL ของคุณหลัง Deploy
-const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbyRBL7WVGA65E7s52GFoGY8OeFMT2exwTl5GWrBP_puIxyxwuqNuyvTk3-lnXaa4SwvmA/exec";
-
-// ------------------------------------------------------------
-//  Helper: ดึงค่า checkbox group (คืนค่าเป็น string คั่นด้วย ", ")
-// ------------------------------------------------------------
-function getCheckedValues(selector) {
-  return Array.from(document.querySelectorAll(selector))
-    .filter(el => el.checked)
-    .map(el => el.value || el.nextSibling?.textContent?.trim() || el.parentElement.textContent.trim())
-    .join(", ");
-}
-
-// ------------------------------------------------------------
-//  Helper: ดึงค่า radio ที่ถูกเลือกจาก name
-// ------------------------------------------------------------
-function getRadioValue(name) {
-  const el = document.querySelector(`input[name="${name}"]:checked`);
-  return el ? el.value : "";
-}
-
-// ------------------------------------------------------------
-//  Helper: ดึงค่า input by id, return "" ถ้าไม่มี element
-// ------------------------------------------------------------
-function val(id) {
-  const el = document.getElementById(id);
-  return el ? el.value : "";
-}
-
-// ------------------------------------------------------------
-//  Helper: ดึง matrix table radio เป็น array {ชื่อแถว, คะแนน, หมายเหตุ}
-// ------------------------------------------------------------
-function getMatrixRows(tableSelector) {
-  const rows = [];
-  document.querySelectorAll(`${tableSelector} tbody tr`).forEach(tr => {
-    const label = tr.querySelector("td:first-child")?.textContent.trim() || "";
-    const checked = tr.querySelector("input[type=radio]:checked");
-    const score = checked ? checked.value : "";
-    const noteInput = tr.querySelector("td:last-child input[type=text]");
-    const note = noteInput ? noteInput.value : "";
-    rows.push({ ข้อ: label, คะแนน: score, หมายเหตุ: note });
-  });
-  return rows;
-}
-
-// ============================================================
-//  รวบรวมข้อมูล FORM 0 : บริบทโรงเรียน
-// ============================================================
-function collectF0Data() {
-  // ตารางวิชาเอก
-  const majorTable = [];
-  document.querySelectorAll("#major_table tbody tr").forEach(tr => {
-    const subj = tr.querySelector(".mj-count")?.dataset?.subject;
-    if (subj) {
-      majorTable.push({
-        วิชา: subj,
-        จำนวน: tr.querySelector(".mj-count")?.value || "0",
-        หมายเหตุ: tr.querySelector(".mj-note")?.value || ""
-      });
-    }
-  });
-
-  // ตารางระดับชั้นที่ใช้ DLTV (academic_tbody สร้าง dynamic ต้องดึงตาม DOM จริง)
-  const academicRows = [];
-  document.querySelectorAll("#academic_tbody tr").forEach(tr => {
-    const cells = tr.querySelectorAll("input, select");
-    if (cells.length >= 3) {
-      academicRows.push({
-        ระดับชั้น: cells[0]?.value || "",
-        รายวิชา: cells[1]?.value || "",
-        ความถี่: cells[2]?.value || "",
-        หมายเหตุ: cells[3]?.value || ""
-      });
-    }
-  });
-
-  return {
-    "2_บทบาทผู้ให้ข้อมูล": getRadioValue("inf_role") + (val("inf_role_other_txt") ? " (" + val("inf_role_other_txt") + ")" : ""),
-    "2_ชื่อ-นามสกุลผู้ให้ข้อมูล": val("inf_name"),
-    "2_ตำแหน่ง": val("inf_pos"),
-    "2_โทรศัพท์ผู้ให้ข้อมูล": val("inf_tel"),
-    "2_อีเมล": val("inf_email"),
-    "2_วันที่ให้ข้อมูล": val("inf_date"),
-
-    "3.1_ชื่อโรงเรียน": val("sch_name"),
-    "3.1_รหัสโรงเรียน10หลัก": val("sch_code"),
-    "3.1_ตำบล": val("sch_tambon"),
-    "3.1_อำเภอ": val("sch_amphoe"),
-    "3.1_จังหวัด": val("sch_province"),
-    "3.1_รหัสไปรษณีย์": val("sch_zip"),
-    "3.1_โทรศัพท์โรงเรียน": val("sch_tel"),
-    "3.1_สำนักงานเขตพื้นที่การศึกษา": val("sch_area"),
-    "3.1_ประเภทโรงเรียน": getCheckedValues(".sch_type") + (val("sch_type_other_txt") ? " (" + val("sch_type_other_txt") + ")" : ""),
-
-    "3.2_ลักษณะการจัดชั้นเรียน": getCheckedValues(".room_style") + (val("room_style_other_txt") ? " (" + val("room_style_other_txt") + ")" : ""),
-    "3.2_รายละเอียดข้อจำกัดห้องเรียน": val("room_limit_detail"),
-
-    "3.3_ผู้อำนวยการ/ครูใหญ่": getRadioValue("has_director"),
-    "3.3_จำนวนรองผอ(คน)": val("count_deputy"),
-    "3.3_จำนวนครูทั้งหมด(คน)": val("count_teacher"),
-    "3.3_จำนวนครูอัตราจ้าง(คน)": val("count_contract"),
-    "3.3_จำนวนเจ้าหน้าที่ธุรการ(คน)": val("count_admin"),
-    "3.3_ครูตรงเอก_ปฐมวัย": document.querySelector('.mj-count[data-subject="ปฐมวัย"]')?.value || "",
-    "3.3_ครูตรงเอก_ภาษาไทย": document.querySelector('.mj-count[data-subject="ภาษาไทย"]')?.value || "",
-    "3.3_ครูตรงเอก_คณิตศาสตร์": document.querySelector('.mj-count[data-subject="คณิตศาสตร์"]')?.value || "",
-    "3.3_ครูตรงเอก_วิทยาศาสตร์และเทคโนโลยี": document.querySelector('.mj-count[data-subject="วิทยาศาสตร์และเทคโนโลยี"]')?.value || "",
-    "3.3_ครูตรงเอก_ภาษาอังกฤษ": document.querySelector('.mj-count[data-subject="ภาษาอังกฤษ"]')?.value || "",
-    "3.3_ครูตรงเอก_สังคมศึกษา": document.querySelector('.mj-count[data-subject="สังคมศึกษา"]')?.value || "",
-    "3.3_ครูตรงเอก_ประวัติศาสตร์": document.querySelector('.mj-count[data-subject="ประวัติศาสตร์"]')?.value || "",
-    "3.3_ครูตรงเอก_สุขศึกษาและพลศึกษา": document.querySelector('.mj-count[data-subject="สุขศึกษา"]')?.value || "",
-    "3.3_ครูตรงเอก_การงานอาชีพ": document.querySelector('.mj-count[data-subject="การงานอาชีพ"]')?.value || "",
-    "3.3_ครูตรงเอก_ศิลปะ": document.querySelector('.mj-count[data-subject="ศิลปะ"]')?.value || "",
-    "3.3_ครูตรงเอก_คอมพิวเตอร์": document.querySelector('.mj-count[data-subject="คอมพิวเตอร์"]')?.value || "",
-    "3.3_ครูตรงเอก_อื่นๆชื่อ": val("mj_other_title"),
-    "3.3_ครูตรงเอก_อื่นๆจำนวน": val("mj_other_count"),
-    "3.3_ครูตรงเอก_หมายเหตุ": val("mj_other_note"),
-
-    "4.1_ลักษณะการใช้DLTV": getCheckedValues(".usage_style") + (val("usage_style_other_txt") ? " (" + val("usage_style_other_txt") + ")" : ""),
-    "4.2_ระดับชั้นและรายวิชาที่ใช้DLTV(JSON)": academicRows,
-    "4.3_บทบาทครูปลายทาง": getCheckedValues(".teacher_role") + (val("teacher_role_other_txt") ? " (" + val("teacher_role_other_txt") + ")" : ""),
-    "4.4_การเตรียมการก่อนใช้DLTV": getCheckedValues(".prep_style") + (val("prep_style_other_txt") ? " (" + val("prep_style_other_txt") + ")" : ""),
-    "4.5_การติดตามผลการเรียนรู้": getCheckedValues(".follow_style") + (val("follow_style_other_txt") ? " (" + val("follow_style_other_txt") + ")" : ""),
-
-    "5.1_ช่องทางรับชมDLTV": getCheckedValues(".watch_channel") + (val("watch_channel_other_txt") ? " (" + val("watch_channel_other_txt") + ")" : ""),
-    "5.1_รายละเอียดช่องทางรายชั้น": val("watch_channel_diff_detail"),
-    "3.3_ครูตรงเอก_หมายเหตุรวม": majorTable,
-
-    "8.1_บริบทสำคัญของโรงเรียน": val("s8_1") || val("sum_context"),
-    "8.2_ข้อจำกัดสำคัญในการเรียนรู้": val("s8_2") || val("sum_limit"),
-    "8.3_สิ่งที่ครูต้นทางควรคำนึงถึง": val("s8_3") || val("sum_consider"),
-    "8.4_ข้อเสนอเบื้องต้นเพื่อสนับสนุน": val("s8_4") || val("sum_support")
-
-    // หมายเหตุ: บาง field id ในหมวด 5.2-5.3 / 6 / 7 / ลงนาม ของไฟล์ HTML จริง
-    // อาจตั้งชื่อ id ต่างกันเล็กน้อย กรุณาตรวจสอบ id จริงแล้วเติม val("...") ตามคู่มือด้านล่าง
-  };
-}
-
-// ============================================================
-//  รวบรวมข้อมูลฟอร์มที่ใช้ matrix-table มาตรฐาน (f1, f2, f3, f4)
-//  ใช้ data-field และ id เจาะจงในแต่ละ panel
+//  เก็บข้อมูลฟอร์ม f1-f5 อัตโนมัติ + ส่งเข้า Google Sheets
+//  (ใช้ mode "dynamic" เหมือน f0 — ไม่ต้องไปไล่ผูกชื่อ field กับ
+//   SHEET_HEADERS ทีละตัว ป้องกันปัญหาข้อมูลเข้า Sheet แต่เป็นค่าว่าง)
 // ============================================================
 
-// ตัวอย่างการดึงข้อมูล FORM 4 (โครงสร้างเรียบง่ายสุด แนะนำให้ทำตามแพทเทิร์นนี้)
-function collectF4Data() {
-  const panel = document.getElementById("form-f4");
-
-  // ฟิลด์ทั่วไป (เรียงตาม DOM order ภายใน panel f4-tab0)
-  const generalInputs = panel.querySelectorAll("#f4-tab0 .field input[type=text], #f4-tab0 .field input[type=date]");
-
-  return {
-    "โรงเรียน": generalInputs[0]?.value || "",
-    "จังหวัด": generalInputs[1]?.value || "",
-    "ระดับชั้น": generalInputs[2]?.value || "",
-    "ห้อง": generalInputs[3]?.value || "",
-    "รายวิชา": generalInputs[4]?.value || "",
-    "เรื่องที่เรียน": generalInputs[5]?.value || "",
-    "วันที่ตอบแบบสอบถาม": generalInputs[6]?.value || "",
-    "ลักษณะการเรียนในครั้งนี้": getRadioValue("f4_learn_type"),
-
-    "๕.๑_ข้อ1_บทเรียนน่าสนใจ": getRadioValue("f4_q_1"),
-    "๕.๑_ข้อ2_อยากเรียนรู้ระหว่างกิจกรรม": getRadioValue("f4_q_2"),
-    "๕.๑_ข้อ3_รู้สึกผ่อนคลาย": getRadioValue("f4_q_3"),
-
-    "๖.๕_คะแนนความเข้าใจตนเอง": getRadioValue("f4_self_score"),
-
-    "๗.๒_ประเด็นที่ควรนำไปพัฒนา DLTV(checkboxes)":
-      getCheckedValues('#f4-tab2 .cb-group input[type=checkbox]')
-  };
-
-  // หมายเหตุสำคัญ: ฟอร์ม F1–F4 ในไฟล์ HTML ต้นฉบับใช้ name ซ้ำกัน
-  // (เช่น f4_q_1 ถูกใช้ซ้ำในหลายตาราง) ทำให้ querySelector ดึงได้แค่ค่าแรก
-  // จำเป็นต้อง "แก้ name ให้ไม่ซ้ำ" ในไฟล์ HTML ก่อน เช่น
-  // f4_q_1 → f4_s1_q1, f4_s2_q1, f4_s3_q1 ... ตามลำดับ section
-  // ดูคำแนะนำเต็มในไฟล์ README_การติดตั้ง.md
-}
-
-// ============================================================
-//  ฟังก์ชันส่งข้อมูลไปยัง Google Apps Script
-// ============================================================
-function submitFormToSheet(formId, dataObject) {
-  // แสดง loading
-  const btn = event?.target;
-  const originalText = btn ? btn.innerHTML : "";
-  if (btn) { btn.disabled = true; btn.innerHTML = "⏳ กำลังบันทึก..."; }
-
-  fetch(GAS_WEB_APP_URL, {
-    method: "POST",
-    headers: { "Content-Type": "text/plain;charset=utf-8" }, // หลีกเลี่ยง CORS preflight
-    body: JSON.stringify({ formId: formId, data: dataObject, mode: "dynamic" })
-    // mode: "dynamic"  -> ใช้กับ auto-collect.js (สร้างคอลัมน์อัตโนมัติ)
-    // ลบบรรทัด mode ทิ้ง หรือเปลี่ยนเป็น "fixed" -> ใช้ Header คงที่ตาม Code.gs (ต้องคู่กับ submit-to-sheets.js แบบเขียนมือ)
-  })
-    .then(res => res.json())
-    .then(result => {
-      if (result.success) {
-        showSuccessPopup();
-      } else {
-        alert("❌ เกิดข้อผิดพลาด: " + result.error);
-      }
-    })
-    .catch(err => {
-      alert("❌ ไม่สามารถเชื่อมต่อ Google Sheet ได้: " + err.message);
-    })
-    .finally(() => {
-      if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
-    });
-}
-
-// ============================================================
-//  Hook เข้ากับปุ่ม "บันทึก" ของแต่ละฟอร์ม
-//  แทนที่ onclick="alert('บันทึกเรียบร้อย!')" เดิมด้วยฟังก์ชันเหล่านี้
-// ============================================================
-// ============================================================
-//  showSuccessPopup — ใช้ popup ที่มีอยู่แล้วใน HTML เดิม (.success-overlay)
-// ============================================================
-function showSuccessPopup() {
-  const overlay = document.querySelector(".success-overlay");
-  if (overlay) {
-    overlay.classList.add("show");
-  } else {
-    alert("✅ บันทึกข้อมูลเรียบร้อยแล้ว!");
-  }
-}
-
-// ============================================================
-//  auto-collect.js
-//  ตัวเก็บข้อมูลอัตโนมัติ — ใช้แทนการเขียนชื่อฟิลด์ทีละตัว
-//  แก้ปัญหา: ฟอร์ม f1-f4 ในไฟล์ต้นฉบับมี name ซ้ำกันข้าม section
-//  (เช่น f4_q_1 ถูกใช้ซ้ำในหลายตาราง) querySelector(`[name=...]`) จึงดึงค่าผิดได้
-//  วิธีนี้จะไล่ตามตำแหน่งจริงใน DOM แทน จึงไม่มีปัญหาซ้ำ
-// ============================================================
-
-/**
- * เก็บค่าทุก field ภายใน container (panel ของฟอร์มนั้น ๆ)
- * โดยตั้งชื่อ key จาก: หัวข้อ section-title + label ที่ใกล้ที่สุด
- * คืนค่าเป็น object {key: value, ...}
- */
 function autoCollectPanel(panelId) {
   const panel = document.getElementById(panelId);
   if (!panel) return {};
-
   const result = {};
-  let counter = {}; // กันชื่อซ้ำ
+  let counter = {};
 
   function addKey(baseKey, value) {
     let key = baseKey || "field";
-    if (counter[key] === undefined) {
-      counter[key] = 0;
-    } else {
-      counter[key]++;
-      key = `${key}_${counter[key] + 1}`;
-    }
+    if (counter[key] === undefined) counter[key] = 0;
+    else { counter[key]++; key = `${key}_${counter[key] + 1}`; }
     result[key] = value;
   }
 
-  // ----- 1) input/textarea/select ที่อยู่ใน .field (มี label ชัดเจน) -----
   panel.querySelectorAll(".field").forEach(fieldDiv => {
     const label = fieldDiv.querySelector("label");
-    const labelText = label ? label.textContent.trim() : "field";
+    const labelText = label ? label.childNodes[0]?.textContent.trim() || label.textContent.trim() : "field";
     const input = fieldDiv.querySelector("input, textarea, select");
     if (!input) return;
 
@@ -3001,15 +3598,12 @@ function autoCollectPanel(panelId) {
     }
   });
 
-  // ----- 2) cb-group นอก .field (checkbox/radio กลุ่มอิสระ) -----
   panel.querySelectorAll(".cb-group").forEach(group => {
-    // หา label/section-title ก่อนหน้า group นี้
     let titleEl = group.previousElementSibling;
     while (titleEl && !titleEl.matches("label, .section-title")) {
       titleEl = titleEl.previousElementSibling;
     }
     const groupLabel = titleEl ? titleEl.textContent.trim() : "ตัวเลือก";
-
     const checked = Array.from(group.querySelectorAll("input[type=checkbox]:checked, input[type=radio]:checked"))
       .map(c => {
         const lbl = c.closest("label");
@@ -3018,20 +3612,16 @@ function autoCollectPanel(panelId) {
     addKey(groupLabel, checked.join(", "));
   });
 
-  // ----- 3) matrix-table (ตารางประเมินระดับ 3/2/1 หรือกรอกข้อมูลเป็นแถว) -----
   panel.querySelectorAll("table.matrix-table").forEach((table, tIdx) => {
-    // หา section-title ของตารางนี้
     let sec = table.closest(".section");
     let titleEl = sec ? sec.querySelector(".section-title") : null;
     const tableTitle = titleEl ? titleEl.textContent.trim() : `ตาราง${tIdx + 1}`;
-
     const rowsData = [];
     table.querySelectorAll("tbody tr").forEach(tr => {
       const rowLabel = tr.querySelector("td:first-child")?.textContent.trim() || "";
       const rowValues = [];
-
       tr.querySelectorAll("td").forEach((td, colIdx) => {
-        if (colIdx === 0) return; // ข้ามคอลัมน์แรก (เป็น label อยู่แล้ว)
+        if (colIdx === 0) return;
         const radio = td.querySelector("input[type=radio]:checked");
         const text  = td.querySelector("input[type=text], input[type=number]");
         const sel   = td.querySelector("select");
@@ -3039,61 +3629,86 @@ function autoCollectPanel(panelId) {
         else if (text) rowValues.push(text.value);
         else if (sel) rowValues.push(sel.value);
       });
-
-      if (rowLabel || rowValues.some(v => v)) {
-        rowsData.push({ รายการ: rowLabel, ค่า: rowValues });
-      }
+      if (rowLabel || rowValues.some(v => v)) rowsData.push(`${rowLabel}: ${rowValues.join('/')}`);
     });
-
-    addKey(tableTitle + "(ตาราง)", rowsData);
+    addKey(tableTitle + "(ตาราง)", rowsData.join(' | '));
   });
 
   return result;
 }
 
-/**
- * เก็บข้อมูลทั้งฟอร์ม (รวมทุก tab-content ภายใน form-panel)
- * ใช้กับฟอร์มที่มีหลาย sub-tab เช่น f1, f2, f3, f4, f5
- */
 function autoCollectForm(formPanelId) {
   const formPanel = document.getElementById(formPanelId);
   if (!formPanel) return {};
-
   let merged = {};
   formPanel.querySelectorAll(".tab-content").forEach(tab => {
-    const data = autoCollectPanel(tab.id);
-    merged = Object.assign(merged, data);
+    merged = Object.assign(merged, autoCollectPanel(tab.id));
   });
-
   return merged;
 }
 
-// ============================================================
-//  ใช้งานง่าย ๆ แทนฟังก์ชัน collectF1Data ฯลฯ ที่เขียนมือ
-// ============================================================
-function saveF0() { submitFormToSheet("f0", autoCollectForm("form-f0")); }
-function saveF1() { submitFormToSheet("f1", autoCollectForm("form-f1")); }
-function saveF2() { submitFormToSheet("f2", autoCollectForm("form-f2")); }
-function saveF3() { submitFormToSheet("f3", autoCollectForm("form-f3")); }
-function saveF4() { submitFormToSheet("f4", autoCollectForm("form-f4")); }
-function saveF5() { submitFormToSheet("f5", autoCollectForm("form-f5")); }
+// ===== ส่งข้อมูลขึ้น Google Sheets พร้อมระบบกันค้าง (เหมือน f0) =====
+async function submitFormGeneric(formId, panelId, btnEl, statusElId) {
+  const statusEl = statusElId ? document.getElementById(statusElId) : null;
+  if (btnEl) {
+    btnEl.disabled = true;
+    btnEl.dataset.originalText = btnEl.dataset.originalText || btnEl.innerHTML;
+    btnEl.style.opacity = '0.7';
+    btnEl.innerHTML = '⏳ กำลังส่งข้อมูล...';
+  }
+  if (statusEl) statusEl.innerHTML = '<span style="color:orange;">⏳ กำลังส่งข้อมูลไปยัง Google Sheets โปรดรอสักครู่...</span>';
 
-/*
-  ⚠️ หมายเหตุสำคัญเกี่ยวกับการใช้วิธี "เก็บอัตโนมัติ":
-  - คอลัมน์ใน Google Sheet จะถูกสร้างตาม "label" ที่เจอจริงในฟอร์ม
-    ไม่ตรงกับ SHEET_HEADERS ที่ fix ไว้ใน Code.gs เป๊ะ ๆ 100%
-  - แนะนำ 2 ทางเลือก:
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+  const watchdogId = setTimeout(() => {
+    if (btnEl && btnEl.disabled) {
+      btnEl.disabled = false;
+      btnEl.style.opacity = '1';
+      btnEl.innerHTML = btnEl.dataset.originalText || '✅ บันทึก';
+      if (statusEl) statusEl.innerHTML = '<span style="color:red;">⏱️ ใช้เวลานานผิดปกติ — กรุณาลองใหม่อีกครั้ง</span>';
+      console.error('[submitFormGeneric] watchdog triggered for', formId);
+    }
+  }, 20000);
 
-    ทางเลือก A (แนะนำ ถ้าต้องการคอลัมน์สวยงาม ตรงตามที่ออกแบบไว้ใน Code.gs):
-      → แก้ HTML ต้นฉบับให้ทุก input มี id ไม่ซ้ำกัน (เติม f1_, f2_ ฯลฯ นำหน้า)
-      → แล้วใช้ val("id") ดึงค่าทีละตัวแบบ collectF0Data() / collectF4Data() ที่เขียนไว้ใน submit-to-sheets.js
+  try {
+    const data = autoCollectForm(panelId);
+    try { localStorage.setItem('dltv_' + formId + '_last_payload', JSON.stringify(data)); } catch(e) {}
 
-    ทางเลือก B (เร็ว ใช้ได้ทันที ไม่ต้องแก้ HTML):
-      → ใช้ autoCollectForm() ในไฟล์นี้
-      → แต่ให้ Code.gs ใช้ saveToSheetDynamic() แทน saveToSheet()
-        (ฟังก์ชันใหม่ที่จะสร้างคอลัมน์อัตโนมัติตามคีย์ที่ส่งมาจริง — ดูด้านล่าง)
-*/
+    await fetch(GS_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify({ formId: formId, data: data, mode: 'dynamic' }),
+      signal: controller.signal
+    });
+    clearTimeout(timeoutId); clearTimeout(watchdogId);
+    if (statusEl) statusEl.innerHTML = '<span style="color:green;">✅ บันทึกข้อมูลสำเร็จเรียบร้อย!</span>';
+    showToast('✅ บันทึก ' + formId.toUpperCase() + ' เข้า Google Sheets สำเร็จ');
+    const fdMeta = (typeof DB2_FORMS !== 'undefined') ? DB2_FORMS.find(f => f.id === formId) : null;
+    const schoolName = (typeof db2GetRowSchoolName === 'function' ? db2GetRowSchoolName(data) : null) || data['ชื่อโรงเรียนปลายทาง'] || data['ชื่อโรงเรียน'] || data['โรงเรียน'] || 'โรงเรียน';
+    showSuccessPopup(schoolName, (fdMeta ? fdMeta.emoji + ' ' + fdMeta.label + ' ' + fdMeta.name : formId.toUpperCase()));
+    if (btnEl) { btnEl.disabled = false; btnEl.style.opacity = '1'; btnEl.innerHTML = btnEl.dataset.originalText || '✅ บันทึก'; }
+  } catch (e) {
+    clearTimeout(timeoutId); clearTimeout(watchdogId);
+    if (btnEl) { btnEl.disabled = false; btnEl.style.opacity = '1'; btnEl.innerHTML = btnEl.dataset.originalText || '✅ บันทึก'; }
+    if (e.name === 'AbortError') {
+      if (statusEl) statusEl.innerHTML = '<span style="color:#b45309;">⏱️ หมดเวลาการตอบสนอง — ข้อมูลอาจถูกบันทึกแล้ว กรุณาตรวจสอบ Google Sheets</span>';
+      showToast('⏱️ หมดเวลา — ตรวจสอบ Google Sheets');
+      const fdMetaW = (typeof DB2_FORMS !== 'undefined') ? DB2_FORMS.find(f => f.id === formId) : null;
+      showSuccessPopup('โรงเรียน', (fdMetaW ? fdMetaW.emoji + ' ' + fdMetaW.label + ' ' + fdMetaW.name : formId.toUpperCase()), true);
+    } else {
+      if (statusEl) statusEl.innerHTML = '<span style="color:red;">❌ เกิดข้อผิดพลาด: ' + e.message + '</span>';
+      showToast('❌ บันทึกไม่สำเร็จ: ' + e.message);
+      console.error('[submitFormGeneric]', formId, e);
+    }
+  }
+}
 
+function saveF1() { submitFormGeneric('f1', 'form-f1', event.currentTarget); }
+function saveF2() { submitFormGeneric('f2', 'form-f2', event.currentTarget); }
+function saveF3() { submitFormGeneric('f3', 'form-f3', event.currentTarget); }
+function saveF4() { submitFormGeneric('f4', 'form-f4', event.currentTarget); }
+function saveF5() { submitFormGeneric('f5', 'form-f5', event.currentTarget); }
 </script>
 </body>
 </html>
