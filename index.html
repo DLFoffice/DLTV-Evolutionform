@@ -3141,6 +3141,8 @@ function fillFormWithData(formId, storedData) {
     if (!panel) return;
     panel.querySelectorAll('input[type=text],input[type=tel],input[type=email],input[type=date],input[type=number],textarea').forEach(el => el.value = '');
     panel.querySelectorAll('input[type=checkbox],input[type=radio]').forEach(el => el.checked = false);
+
+    // ── restore ฟิลด์มาตรฐานผ่าน F0_FIELD_MAP ──
     Object.entries(F0_FIELD_MAP).forEach(([key, field]) => {
       const val = storedData[key];
       if (!val) return;
@@ -3157,6 +3159,87 @@ function fillFormWithData(formId, storedData) {
         });
       }
     });
+
+    // ── restore ตารางครูตรงวิชาเอก ──
+    // format: "ปฐมวัย:3คน(หมายเหตุ) | ภาษาไทย:2คน(-)"
+    const majorRaw = storedData['ตารางครูตรงวิชาเอก_รวม'] || '';
+    if (majorRaw) {
+      majorRaw.split(' | ').forEach(entry => {
+        // entry = "วิชา:จำนวนคน(หมายเหตุ)"
+        const m = entry.match(/^(.+?):(\d+)คน\((.*)?\)$/);
+        if (!m) return;
+        const [, subj, cnt, note] = m;
+        // หา input ที่ data-subject ตรง
+        const cntEl = document.querySelector(`#major_table .mj-count[data-subject="${subj}"]`);
+        const noteEl = document.querySelector(`#major_table .mj-note[data-subject="${subj}"]`);
+        if (cntEl) cntEl.value = cnt;
+        if (noteEl && note && note !== '-') noteEl.value = note;
+        // กรณี "อื่น ๆ"
+        if (!cntEl) {
+          const otherTitle = document.getElementById('mj_other_title');
+          const otherCount = document.getElementById('mj_other_count');
+          const otherNote  = document.getElementById('mj_other_note');
+          if (otherTitle) otherTitle.value = subj;
+          if (otherCount) otherCount.value = cnt;
+          if (otherNote && note && note !== '-') otherNote.value = note;
+        }
+      });
+    }
+
+    // ── restore ตารางวิชาการแยกชั้นปี (4.2) ──
+    // format: "อ.1[วิชา:คณิต|ความถี่:ทุกคาบ] | ป.1[...]"
+    const acRaw = storedData['ตารางวิชาการแยกชั้นปี_รวม'] || '';
+    if (acRaw) {
+      acRaw.split(' | ').forEach(entry => {
+        const m = entry.match(/^(.+?)\[วิชา:(.+?)\|ความถี่:(.+?)\]$/);
+        if (!m) return;
+        const [, grade, subj, freq] = m;
+        const subjEl = document.querySelector(`.ac-subject[data-grade="${grade}"]`);
+        if (subjEl && subj !== '-') subjEl.value = subj;
+        if (freq && freq !== '-') {
+          const freqEl = document.querySelector(`input[name="ac_freq_${grade}"][value="${freq}"]`);
+          if (freqEl) freqEl.checked = true;
+        }
+        // หมายเหตุ
+        const noteEl = document.querySelector(`.ac-note[data-grade="${grade}"]`);
+        if (noteEl) noteEl.value = '';
+      });
+    }
+
+    // ── restore ตารางอุปกรณ์ TV/IRD ──
+    // format: "อ.1[TV:x|IRD:y] | ..."
+    const hwRaw = storedData['ตารางอุปกรณ์ทีวีและกล่อง_รวม'] || '';
+    if (hwRaw) {
+      hwRaw.split(' | ').forEach(entry => {
+        const m = entry.match(/^(.+?)\[TV:(.+?)\|IRD:(.+?)\]$/);
+        if (!m) return;
+        const [, grade, tv, ird] = m;
+        if (tv && tv !== '-') {
+          const tvEl = document.querySelector(`input[name="tv_${grade}"][value="${tv}"]`);
+          if (tvEl) tvEl.checked = true;
+        }
+        if (ird && ird !== '-') {
+          const irdEl = document.querySelector(`input[name="ird_${grade}"][value="${ird}"]`);
+          if (irdEl) irdEl.checked = true;
+        }
+      });
+    }
+
+    // ── restore โครงสร้างพื้นฐาน ──
+    // format: "ไฟฟ้า:x | สัญญาณ:y | เสียง:z | เน็ต:w"
+    const infraRaw = storedData['ตารางโครงสร้างพื้นฐาน_รวม'] || '';
+    if (infraRaw) {
+      const infraMap = { 'ไฟฟ้า': 'inf_elec', 'สัญญาณ': 'inf_sig', 'เสียง': 'inf_vol', 'เน็ต': 'inf_net' };
+      infraRaw.split(' | ').forEach(part => {
+        const [k, v] = part.split(':');
+        const name = infraMap[(k||'').trim()];
+        if (name && v) {
+          const el = document.querySelector(`input[name="${name}"][value="${v.trim()}"]`);
+          if (el) el.checked = true;
+        }
+      });
+    }
+
     return;
   }
 
