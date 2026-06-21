@@ -3208,19 +3208,19 @@ const F0_FIELD_MAP = {
 // ════════════════════════════════════════════════════
 //  ROBUST FORM SERIALIZE / RESTORE  (index-based)
 // ════════════════════════════════════════════════════
-/** Serialize ทุก input ใน form-FX โดยใช้ DOM index ไม่พึ่ง label */
+/** Serialize ทุก input ใน form-FX โดยใช้ DOM index ไม่พึ่ง label
+ *  - text/number/date/tel/email/textarea/select -> __i_N = value
+ *  - radio  -> __ri_N = checked (true/false) per element index (แก้ปัญหา matrix-table)
+ *  - checkbox -> __c_N = checked (true/false)
+ */
 function serializeFormPanel(formId) {
   const panel = document.getElementById('form-' + formId);
   if (!panel) return {};
   const result = {};
   const SEL = 'input[type=text],input[type=number],input[type=date],input[type=tel],input[type=email],textarea,select';
   panel.querySelectorAll(SEL).forEach((el, i) => { result['__i_' + i] = el.value; });
-  const radioMap = {};
-  panel.querySelectorAll('input[type=radio]').forEach(el => {
-    if (!(el.name in radioMap)) radioMap[el.name] = '';
-    if (el.checked) radioMap[el.name] = el.value;
-  });
-  Object.entries(radioMap).forEach(([name, val]) => { result['__r_' + name] = val; });
+  // เก็บ radio แบบ index (ไม่ใช้ name เพราะ matrix-table อาจ name ซ้ำหรือไม่มี)
+  panel.querySelectorAll('input[type=radio]').forEach((el, i) => { result['__ri_' + i] = el.checked; });
   panel.querySelectorAll('input[type=checkbox]').forEach((el, i) => { result['__c_' + i] = el.checked; });
   return result;
 }
@@ -3230,16 +3230,29 @@ function restoreFormPanel(formId, data) {
   const panel = document.getElementById('form-' + formId);
   if (!panel) return;
   const SEL = 'input[type=text],input[type=number],input[type=date],input[type=tel],input[type=email],textarea,select';
+  // เคลียร์ก่อน
   panel.querySelectorAll(SEL).forEach(el => el.value = '');
   panel.querySelectorAll('input[type=radio],input[type=checkbox]').forEach(el => el.checked = false);
+  // restore text inputs
   panel.querySelectorAll(SEL).forEach((el, i) => {
     const v = data['__i_' + i];
     if (v !== undefined) el.value = v;
   });
-  panel.querySelectorAll('input[type=radio]').forEach(el => {
-    const saved = data['__r_' + el.name];
-    if (saved !== undefined && el.value === saved) el.checked = true;
-  });
+  // restore radio แบบ index (รองรับทั้ง __ri_ และ __r_ สำหรับ backward compat)
+  const hasRiKeys = Object.keys(data).some(k => k.startsWith('__ri_'));
+  if (hasRiKeys) {
+    panel.querySelectorAll('input[type=radio]').forEach((el, i) => {
+      const saved = data['__ri_' + i];
+      if (saved !== undefined) el.checked = !!saved;
+    });
+  } else {
+    // fallback: __r_name based (ข้อมูลเก่า)
+    panel.querySelectorAll('input[type=radio]').forEach(el => {
+      const saved = data['__r_' + el.name];
+      if (saved !== undefined && el.value === saved) el.checked = true;
+    });
+  }
+  // restore checkbox
   panel.querySelectorAll('input[type=checkbox]').forEach((el, i) => {
     const saved = data['__c_' + i];
     if (saved !== undefined) el.checked = !!saved;
@@ -3470,18 +3483,37 @@ function openFormEdit(schoolName, formId) {
   // สลับไปหน้าฟอร์มก่อน แล้วค่อยเติมข้อมูล (DOM ต้อง visible ก่อน)
   switchMode('form');
   switchForm(formId);
+  // เปิดทุก tab-content ชั่วคราว (visibility:hidden) เพื่อให้ DOM พร้อมรับค่า
+  const _prePanel = document.getElementById('form-' + formId);
+  if (_prePanel) {
+    _prePanel.querySelectorAll('.tab-content').forEach(tc => {
+      tc.style.display = 'block';
+      tc.style.visibility = 'hidden';
+      tc.style.pointerEvents = 'none';
+    });
+  }
   if (formId === 'f0') showTab(0);
   else showSubTab(formId, 0);
 
   // เติมข้อมูลลงฟอร์ม — ใช้ setTimeout ให้ DOM render ก่อน
+  // รอบที่ 1 (150ms): fill ด้วย label-based หรือ index-based ที่มีอยู่
   setTimeout(() => {
-    fillFormWithData(formId, row);
+    // ถ้ามี __i_ key ให้ใช้ index-based restore โดยตรง (แม่นยำสุด)
+    if (formId !== 'f0' && Object.keys(row).some(k => k.startsWith('__i_'))) {
+      restoreFormPanel(formId, row);
+    } else {
+      fillFormWithData(formId, row);
+    }
 
-    // บันทึก index-based snapshot กลับลงใน row ทันที
-    // เพื่อให้ครั้งถัดไป restore ได้แม่นยำขึ้น
-    if (formId !== 'f0') {
-      const snap = serializeFormPanel(formId);
-      Object.assign(row, snap);
+    // คืน visibility ของ tab-content ทุก tab (ที่ซ่อนไว้ตอนเตรียม DOM)
+    const panelRestore = document.getElementById('form-' + formId);
+    if (panelRestore) {
+      panelRestore.querySelectorAll('.tab-content').forEach(tc => {
+        tc.style.visibility = '';
+        tc.style.pointerEvents = '';
+        // คืน display ให้ CSS class จัดการ (active = block, ไม่ active = none)
+        if (!tc.classList.contains('active')) tc.style.display = '';
+      });
     }
 
     // แสดง banner แก้ไข
@@ -3507,7 +3539,47 @@ function openFormEdit(schoolName, formId) {
     panel.insertBefore(banner, panel.firstChild);
     window.scrollTo({ top: 0, behavior: 'smooth' });
     showToast(`✏️ โหลดข้อมูลเดิมแล้ว — แก้ไขได้เลยครับ`);
-  }, 80);
+
+    // รอบที่ 2 (300ms หลังรอบแรก): วน tab ทุก tab แล้ว fill ซ้ำในแต่ละ tab
+    // เพื่อให้ browser render และรับค่า input ได้ครบทุก tab
+    if (formId !== 'f0') {
+      const panel2 = document.getElementById('form-' + formId);
+      if (panel2) {
+        const tabs = panel2.querySelectorAll('.tab-content');
+        const totalTabs = tabs.length;
+        let tabIdx = 0;
+        const hasSnapshot = Object.keys(row).some(k => k.startsWith('__i_'));
+        function fillNextTab() {
+          if (tabIdx >= totalTabs) {
+            // กลับมา tab แรก แล้ว re-restore ครั้งสุดท้าย
+            showSubTab(formId, 0);
+            setTimeout(() => {
+              if (hasSnapshot) {
+                restoreFormPanel(formId, row);
+              } else {
+                fillFormWithData(formId, row);
+                // serialize เก็บ snapshot เพื่อใช้ครั้งต่อไป
+                const snap = serializeFormPanel(formId);
+                Object.assign(row, snap);
+              }
+              showToast('✅ โหลดข้อมูลครบทุกหน้าแล้ว');
+            }, 80);
+            return;
+          }
+          showSubTab(formId, tabIdx);
+          // fill ข้อมูลซ้ำในแต่ละ tab
+          if (hasSnapshot) {
+            restoreFormPanel(formId, row);
+          } else {
+            fillFormWithData(formId, row);
+          }
+          tabIdx++;
+          setTimeout(fillNextTab, 80);
+        }
+        setTimeout(fillNextTab, 200);
+      }
+    }
+  }, 150);
 }
 
 function cancelEditMode() {
@@ -4126,6 +4198,19 @@ async function submitFormGeneric(formId, panelId, btnEl, statusElId) {
     showToast('✅ บันทึก ' + formId.toUpperCase() + ' เข้า Google Sheets สำเร็จ');
     const fdMeta = (typeof DB2_FORMS !== 'undefined') ? DB2_FORMS.find(f => f.id === formId) : null;
     const schoolName = (typeof db2GetRowSchoolName === 'function' ? db2GetRowSchoolName(data) : null) || data['ชื่อโรงเรียนปลายทาง'] || data['ชื่อโรงเรียน'] || data['โรงเรียน'] || 'โรงเรียน';
+
+    // บันทึก row ใหม่ลง db2MultiFormData พร้อม index-based snapshot เพื่อให้แก้ไขได้ทันที
+    if (typeof db2MultiFormData !== 'undefined' && formId !== 'f0') {
+      if (!db2MultiFormData[formId]) db2MultiFormData[formId] = [];
+      const existIdx = db2MultiFormData[formId].findIndex(r =>
+        (typeof db2GetRowSchoolName === 'function' ? db2GetRowSchoolName(r) : '') === schoolName
+      );
+      const snapshot = serializeFormPanel(formId);
+      const newRow = Object.assign({}, data, snapshot);
+      if (existIdx >= 0) { db2MultiFormData[formId][existIdx] = newRow; }
+      else { db2MultiFormData[formId].push(newRow); }
+    }
+
     showSuccessPopup(schoolName, (fdMeta ? fdMeta.emoji + ' ' + fdMeta.label + ' ' + fdMeta.name : formId.toUpperCase()));
     if (btnEl) { btnEl.disabled = false; btnEl.style.opacity = '1'; btnEl.innerHTML = btnEl.dataset.originalText || '✅ บันทึก'; }
   } catch (e) {
