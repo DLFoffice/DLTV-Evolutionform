@@ -2343,7 +2343,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
 
 <script>
 // Google Apps Script Web App URL (Hardcoded)
-const GS_URL = "https://script.google.com/macros/s/AKfycbxrN00qThjQaYz-W2wLDmGoc0srj3bD-PR0Xn03-pz1C6OZr9a3WfEjHSr8lD4sqFCydw/exec";
+const GS_URL = "https://script.google.com/macros/s/AKfycbwEwdO3RKhRwy4027ybKlhj6Q9cAM3HPUYqnQ9YRE608SVMRoWnuPNarmF-gfZCmWCWMw/exec";
 
 let currentTabIdx = 0;
 const totalTabs = 6;
@@ -3508,20 +3508,37 @@ function collectFormBySchema(formId){
     }
     if (entry.kind === 'matrix') {
       if (entry.hasInputs === false) return;             // ตารางเกณฑ์/อ้างอิง ไม่เก็บ
-      const dk = entry.dataKey || 'ตาราง';
-      entry.rows.forEach((ri, idx) => {
-        const rowLabel = ri.rowLabel || ('แถว' + (idx + 1));
-        const cells = readMatrixRowFromDOM(ri);
-        const radioCell = cells.find(c => c.type === 'radio');
-        const textCell  = cells.find(c => c.type === 'text' || c.type === 'select');
-        if (_matrixRowHasRadio(ri)) {
-          put(dk + ' — ' + rowLabel, radioCell ? radioCell.val : '');
-          if (_matrixRowHasText(ri)) put(dk + ' — ' + rowLabel + ' (หลักฐาน)', textCell ? textCell.val : '');
-        } else {
-          put(dk + ' — ' + rowLabel, textCell ? textCell.val : '');
-        }
-      });
-      if (entry.evEl) put(dk + ' (หลักฐานประกอบ)', entry.evEl.value || '');
+      const hasRadio = !!entry.el.querySelector('tbody input[type=radio]');
+      const base = entry.dataKey || entry.section || 'ตาราง';
+
+      if (hasRadio) {
+        // ตารางให้คะแนน: ระดับ (+ หลักฐานต่อแถวถ้ามี)
+        entry.rows.forEach((ri, idx) => {
+          const rowLabel = ri.rowLabel || ('แถว' + (idx + 1));
+          const cells = readMatrixRowFromDOM(ri);
+          const radioCell = cells.find(c => c.type === 'radio');
+          const textCell  = cells.find(c => c.type === 'text' || c.type === 'select');
+          put(base + ' — ' + rowLabel, radioCell ? radioCell.val : '');
+          if (_matrixRowHasText(ri)) put(base + ' — ' + rowLabel + ' (หลักฐาน)', textCell ? textCell.val : '');
+        });
+      } else {
+        // ตารางกรอกอิสระ: หนึ่งคอลัมน์ต่อหนึ่งช่องกรอก (ตามหัวตาราง)
+        entry.rows.forEach((ri, idx) => {
+          const tds = [...ri.tr.querySelectorAll('td')];
+          const labelParts = [];
+          const inputCells = [];
+          tds.forEach((td, ci) => {
+            if (td.querySelector('input,select,textarea')) inputCells.push({ ci: ci, val: _cellValue(td) });
+            else labelParts.push(td.textContent.trim());
+          });
+          const rowName = (labelParts.join(' ').trim()) || ri.rowKey || ('แถว' + (idx + 1));
+          inputCells.forEach(c => {
+            const header = entry.headers[c.ci] || ('คอลัมน์' + (c.ci + 1));
+            put(base + ' — ' + rowName + ' — ' + header, c.val);
+          });
+        });
+      }
+      if (entry.evEl) put(base + ' (หลักฐานประกอบ)', entry.evEl.value || '');
       return;
     }
   });
@@ -3585,6 +3602,18 @@ function readMatrixRowFromDOM(rowInfo){
 /* ---------- PDF (อ่านจากฟอร์มจริงตามลำดับข้อ) ---------- */
 function _pdfEsc(s){ return String(s==null?'':s).replace(/</g,'&lt;').replace(/\n/g,'<br>'); }
 function _pdfMissing(){ return '<span style="color:#94a3b8;">—</span>'; }
+/** อ่านค่าของ cell ตาราง: ช่องกรอก -> ค่าที่กรอก, เซลล์คงที่ -> ข้อความ (label/เลขลำดับ) */
+function _cellValue(td){
+  const inp=td.querySelector('input[type=text],input[type=number],input[type=tel],input[type=email],textarea');
+  if(inp) return inp.value||'';
+  const sel=td.querySelector('select');
+  if(sel){ const o=sel.options[sel.selectedIndex]; return (o&&o.value&&o.value!=='--')?o.textContent.trim():''; }
+  const r=td.querySelector('input[type=radio]:checked'); if(r) return r.value;
+  const cbs=td.querySelectorAll('input[type=checkbox]:checked');
+  if(cbs.length) return [...cbs].map(c=>{const l=c.closest('label');return l?l.textContent.trim():c.value;}).join(', ');
+  if(td.querySelector('input,select,textarea')) return ''; // ช่องว่างที่ยังไม่กรอก
+  return td.textContent.trim();
+}
 
 function buildPDFFromLiveForm(formId, school){
   const fd=(typeof DB2_FORMS!=='undefined')?DB2_FORMS.find(f=>f.id===formId):null;
@@ -3606,19 +3635,38 @@ function buildPDFFromLiveForm(formId, school){
     else if(entry.kind==='matrix'){
       if(!entry.hasInputs) return; // ตารางเกณฑ์ (ไม่มีช่องกรอก) ข้าม
       closeKV();
-      // ตรวจว่ามีข้อมูลในตารางไหม
-      let rowsHtml=''; let any=false;
-      const ncol = entry.headers.length;
-      entry.rows.forEach(ri=>{
-        const cells=readMatrixRowFromDOM(ri);
-        const valStr=cells.map(c=>c.val).filter(x=>x!=='').join(' / ');
-        if(valStr!=='') any=true;
-        if(ri.rowLabel || valStr!==''){
-          rowsHtml+=`<tr><td style="width:58%;font-size:10pt;">${_pdfEsc(ri.rowLabel)}</td><td style="font-size:10pt;">${valStr===''?_pdfMissing():_pdfEsc(valStr)}</td></tr>`;
+      const hasRadio = !!entry.el.querySelector('tbody input[type=radio]');
+
+      if(hasRadio){
+        // ── ตารางให้คะแนน: รูปแบบกระชับ [ป้ายข้อ | ระดับ/หลักฐาน] ──
+        let rowsHtml=''; let any=false;
+        entry.rows.forEach(ri=>{
+          const cells=readMatrixRowFromDOM(ri);
+          const rating=cells.filter(c=>c.type==='radio').map(c=>c.val);
+          const texts =cells.filter(c=>c.type!=='radio').map(c=>c.val).filter(x=>x!=='');
+          const valStr=rating.concat(texts).join(' / ');
+          if(valStr!=='') any=true;
+          if(ri.rowLabel || valStr!==''){
+            rowsHtml+=`<tr><td style="width:58%;font-size:10pt;">${_pdfEsc(ri.rowLabel)}</td><td style="font-size:10pt;">${valStr===''?_pdfMissing():_pdfEsc(valStr)}</td></tr>`;
+          }
+        });
+        if(any || rowsHtml){
+          html+=`<table class="pdf-table" style="font-size:10pt;"><thead><tr><th style="width:58%;">${_pdfEsc(entry.headers[0]||'รายการ')}</th><th>${_pdfEsc(entry.headers.slice(1).join(' / ')||'ระดับ')}</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
         }
-      });
-      if(any || rowsHtml){
-        html+=`<table class="pdf-table" style="font-size:10pt;"><thead><tr><th style="width:58%;">${_pdfEsc(entry.headers[0]||'รายการ')}</th><th>ค่าที่บันทึก</th></tr></thead><tbody>${rowsHtml}</tbody></table>`;
+      } else {
+        // ── ตารางกรอกอิสระ: แสดงครบทุกคอลัมน์ตามหัวตาราง ──
+        const ncol=entry.headers.length || (entry.rows[0]?entry.rows[0].tr.querySelectorAll('td').length:0);
+        let rowsHtml=''; let any=false;
+        entry.rows.forEach((ri,idx)=>{
+          const tds=[...ri.tr.querySelectorAll('td')];
+          const vals=tds.map(td=>_cellValue(td));
+          if(vals.some(v=>String(v).trim()!=='')) any=true;
+          rowsHtml+='<tr>'+vals.map(v=>`<td style="font-size:10pt;vertical-align:top;white-space:pre-wrap;">${String(v).trim()===''?_pdfMissing():_pdfEsc(v)}</td>`).join('')+'</tr>';
+        });
+        if(any){
+          const thead=entry.headers.map(h=>`<th>${_pdfEsc(h)}</th>`).join('');
+          html+=`<table class="pdf-table" style="font-size:9.5pt;"><thead><tr>${thead}</tr></thead><tbody>${rowsHtml}</tbody></table>`;
+        }
       }
       if(entry.evEl){ const ev=entry.evEl.value||''; if(ev) html+=`<div class="p-block-wrap"><span class="p-block-label">หลักฐาน/ข้อสังเกต:</span> <span class="p-block-val">${_pdfEsc(ev)}</span></div>`; }
     }
