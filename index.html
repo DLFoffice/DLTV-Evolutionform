@@ -2343,7 +2343,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
 
 <script>
 // Google Apps Script Web App URL (Hardcoded)
-const GS_URL = "https://script.google.com/macros/s/AKfycbyWGrS7sthf37LeIUzJoMZq_6lmqrKl-zob7Fo4jcAhl8gtNGqjrIO2VniPTAxNluutTg/exec";
+const GS_URL = "https://script.google.com/macros/s/AKfycbxrN00qThjQaYz-W2wLDmGoc0srj3bD-PR0Xn03-pz1C6OZr9a3WfEjHSr8lD4sqFCydw/exec";
 
 let currentTabIdx = 0;
 const totalTabs = 6;
@@ -3482,6 +3482,56 @@ function buildFormSchema(formId){
     });
   });
   return schema;
+}
+
+/** ---------- ตัวเก็บข้อมูลแบบ schema: หนึ่งคอลัมน์ต่อหนึ่งข้อ เรียงตาม DOM ----------
+ *  ใช้เป็นแหล่งความจริงเดียวทั้ง payload ที่ส่งขึ้นชีต และลำดับคอลัมน์ (SHEET_HEADERS)
+ *  จึงได้คอลัมน์ที่เรียงตามข้อในแบบฟอร์มเป๊ะ ไม่มีคีย์ซ้ำ/ตัวต่อท้ายแบบมั่ว
+ */
+function _matrixRowHasRadio(rowInfo){ return !!rowInfo.tr.querySelector('td:not(:first-child) input[type=radio]'); }
+function _matrixRowHasText(rowInfo){ return !!rowInfo.tr.querySelector('td:not(:first-child) input[type=text],td:not(:first-child) input[type=number],td:not(:first-child) select'); }
+
+function collectFormBySchema(formId){
+  const schema = buildFormSchema(formId);
+  const out = [];          // [{key, value}] รักษาลำดับตาม DOM
+  const seen = {};
+  const put = (rawKey, val) => {
+    let key = (rawKey || 'field').trim();
+    if (seen[key] !== undefined) { seen[key]++; key = key + '_' + (seen[key] + 1); }
+    else { seen[key] = 0; }
+    out.push({ key: key, value: (val == null ? '' : val) });
+  };
+  schema.forEach(entry => {
+    if (entry.kind === 'field' || entry.kind === 'cbgroup') {
+      put(entry.key, readEntryFromDOM(entry));
+      return;
+    }
+    if (entry.kind === 'matrix') {
+      if (entry.hasInputs === false) return;             // ตารางเกณฑ์/อ้างอิง ไม่เก็บ
+      const dk = entry.dataKey || 'ตาราง';
+      entry.rows.forEach((ri, idx) => {
+        const rowLabel = ri.rowLabel || ('แถว' + (idx + 1));
+        const cells = readMatrixRowFromDOM(ri);
+        const radioCell = cells.find(c => c.type === 'radio');
+        const textCell  = cells.find(c => c.type === 'text' || c.type === 'select');
+        if (_matrixRowHasRadio(ri)) {
+          put(dk + ' — ' + rowLabel, radioCell ? radioCell.val : '');
+          if (_matrixRowHasText(ri)) put(dk + ' — ' + rowLabel + ' (หลักฐาน)', textCell ? textCell.val : '');
+        } else {
+          put(dk + ' — ' + rowLabel, textCell ? textCell.val : '');
+        }
+      });
+      if (entry.evEl) put(dk + ' (หลักฐานประกอบ)', entry.evEl.value || '');
+      return;
+    }
+  });
+  return out;
+}
+/** ลำดับชื่อคอลัมน์ของฟอร์ม (สำหรับสร้าง SHEET_HEADERS) — โครงสร้างคงที่ไม่ขึ้นกับค่าที่กรอก */
+function formColumnOrder(formId){ return collectFormBySchema(formId).map(o => o.key); }
+/** payload object พร้อมส่งขึ้นชีต (คีย์ = ชื่อคอลัมน์ตามข้อ) */
+function collectFormPayload(formId){
+  const o = {}; collectFormBySchema(formId).forEach(p => { o[p.key] = p.value; }); return o;
 }
 
 /** อ่านค่าจาก row หลาย key (กันชื่อคอลัมน์ต่างเล็กน้อย) */
@@ -4850,7 +4900,9 @@ async function submitFormGeneric(formId, panelId, btnEl, statusElId) {
 
   try {
     const rawData = autoCollectForm(panelId);
-    const data = remapFormData(formId, rawData);
+    // ★ ใช้ payload แบบ schema (หนึ่งคอลัมน์ต่อข้อ เรียงตาม DOM = ตรงกับ SHEET_HEADERS เป๊ะ)
+    //   remapFormData ยังเก็บไว้เผื่อส่วนอื่นเรียกใช้ แต่ไม่ใช้เป็น payload หลักแล้ว
+    const data = collectFormPayload(formId);
     // เก็บ snapshot ตามตำแหน่งช่องจริง (index-based) ลงคอลัมน์เดียว __snapshot__
     // เพื่อให้ดึงกลับมาแก้ไข/พิมพ์ PDF ได้ครบและตรงเป๊ะ แม้โหลดจาก Google Sheets
     try { data['__snapshot__'] = JSON.stringify(serializeFormPanel(formId)); } catch(e) { console.warn('snapshot fail', e); }
