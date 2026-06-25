@@ -2097,7 +2097,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
     <div class="db2-hero">
       <div class="db2-hero-text">
         <h2>📊 แดชบอร์ดติดตามแบบฟอร์ม DLTV</h2>
-        <p>ติดตามสถานะการกรอก F0–F5 รายโรงเรียน · วิเคราะห์ประเด็นสำคัญด้วย AI · พิมพ์ PDF</p>
+        <p>ติดตามสถานะการกรอก F1–F6 รายโรงเรียน · วิเคราะห์ประเด็นสำคัญด้วย AI · พิมพ์ PDF</p>
       </div>
       <div class="db2-stats">
         <div class="db2-stat"><div class="n" id="ds-total">—</div><div class="l">โรงเรียนทั้งหมด</div></div>
@@ -2109,10 +2109,9 @@ small, .small, .preview-item .label { font-size: 12px !important; }
 
     <!-- SUMMARY CARDS -->
     <div class="db2-cards" id="db2SummaryCards">
-      <div class="db2-card"><div class="ci">🏫</div><div class="cn" id="db2-c0">—</div><div class="cd">โรงเรียนที่บันทึก F0</div></div>
-      <div class="db2-card g"><div class="ci">✅</div><div class="cn" id="db2-c1">—</div><div class="cd">กรอกครบ F0–F5</div></div>
+      <div class="db2-card"><div class="ci">🏫</div><div class="cn" id="db2-c0">—</div><div class="cd">โรงเรียนที่บันทึก F1</div></div>
+      <div class="db2-card g"><div class="ci">✅</div><div class="cn" id="db2-c1">—</div><div class="cd">กรอกครบ F1–F6</div></div>
       <div class="db2-card a"><div class="ci">⏳</div><div class="cn" id="db2-c2">—</div><div class="cd">กรอกบางฟอร์ม</div></div>
-      <div class="db2-card r"><div class="ci">⭕</div><div class="cn" id="db2-c3">—</div><div class="cd">มีเฉพาะ F0</div></div>
       <div class="db2-card"><div class="ci">📋</div><div class="cn" id="db2-c4">—</div><div class="cd">แบบฟอร์มรวมทั้งหมด</div></div>
     </div>
 
@@ -2129,7 +2128,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
         <option value="">ทุกสถานะ</option>
         <option value="complete">✅ ครบทุกฟอร์ม</option>
         <option value="partial">⏳ บางฟอร์ม</option>
-        <option value="f0only">📝 มีแค่ F0</option>
+        <option value="f0only">📝 มีแค่ F1</option>
       </select>
       <button class="db2-btn" onclick="loadDashboardData()">🔄 รีเฟรช</button>
     </div>
@@ -2139,18 +2138,19 @@ small, .small, .preview-item .label { font-size: 12px !important; }
           <tr>
             <th style="min-width:190px;">โรงเรียน</th>
             <th style="min-width:80px;">จังหวัด</th>
-            <th class="fc" title="F0 บริบทโรงเรียน">F1<br><span style="font-size:10px;opacity:.7;">บริบท</span></th>
-            <th class="fc" title="F1 สังเกตนักเรียน">F2<br><span style="font-size:10px;opacity:.7;">นักเรียน</span></th>
-            <th class="fc" title="F2 กำกับห้องเรียน">F3<br><span style="font-size:10px;opacity:.7;">ห้องเรียน</span></th>
-            <th class="fc" title="F3 ครูต้นทาง">F4<br><span style="font-size:10px;opacity:.7;">ต้นทาง</span></th>
-            <th class="fc" title="F4 เสียงสะท้อน">F5<br><span style="font-size:10px;opacity:.7;">สะท้อน</span></th>
-            <th class="fc" title="F5 PLC">F6<br><span style="font-size:10px;opacity:.7;">PLC</span></th>
+            <th style="min-width:120px;">สังกัด</th>
+            <th class="fc" title="F1 บริบทโรงเรียน">F1<br><span style="font-size:10px;opacity:.7;">บริบท</span></th>
+            <th class="fc" title="F2 สังเกตนักเรียน">F2<br><span style="font-size:10px;opacity:.7;">นักเรียน</span></th>
+            <th class="fc" title="F3 กำกับห้องเรียน">F3<br><span style="font-size:10px;opacity:.7;">ห้องเรียน</span></th>
+            <th class="fc" title="F4 ครูต้นทาง">F4<br><span style="font-size:10px;opacity:.7;">ต้นทาง</span></th>
+            <th class="fc" title="F5 เสียงสะท้อน">F5<br><span style="font-size:10px;opacity:.7;">สะท้อน</span></th>
+            <th class="fc" title="F6 PLC">F6<br><span style="font-size:10px;opacity:.7;">PLC</span></th>
             <th style="min-width:110px;">ความคืบหน้า</th>
             <th style="min-width:180px;">เครื่องมือ</th>
           </tr>
         </thead>
         <tbody id="dbTableBody">
-          <tr><td colspan="10" style="text-align:center;padding:36px;color:#94a3b8;">⏳ กำลังโหลดข้อมูล...</td></tr>
+          <tr><td colspan="11" style="text-align:center;padding:36px;color:#94a3b8;">⏳ กำลังโหลดข้อมูล...</td></tr>
         </tbody>
       </table>
     </div>
@@ -2171,7 +2171,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
   <div class="success-modal">
     <div class="check-circle" style="color:#fff; font-size:40px; display:flex; align-items:center; justify-content:center;">✓</div>
     <h2 id="successTitle">บันทึกข้อมูลสำเร็จ!</h2>
-    <p>ข้อมูล <strong id="successFormLabel">F0 บริบทโรงเรียน</strong> ของโรงเรียน <strong id="successSchoolName"></strong><br>ถูกส่งเข้าระบบ Google Sheets เรียบร้อยแล้ว</p>
+    <p>ข้อมูล <strong id="successFormLabel">F1 บริบทโรงเรียน</strong> ของโรงเรียน <strong id="successSchoolName"></strong><br>ถูกส่งเข้าระบบ Google Sheets เรียบร้อยแล้ว</p>
     <button class="btn-dashboard-link" onclick="closeSuccessPopup(); switchMode('dashboard')">
       <i class="ti ti-chart-bar"></i> ไปยัง Dashboard ติดตามผล
     </button>
@@ -2750,7 +2750,6 @@ function db2UpdateCards() {
   document.getElementById('db2-c0').textContent = total;
   document.getElementById('db2-c1').textContent = c1;
   document.getElementById('db2-c2').textContent = c2;
-  document.getElementById('db2-c3').textContent = c3;
   document.getElementById('db2-c4').textContent = totalForms;
 }
 
@@ -2759,6 +2758,20 @@ function db2UpdateCards() {
 // (autoCollectForm สร้าง key จาก label ของแต่ละฟอร์ม จึงไม่ตรงกัน) ต้องเช็คทุกแบบ
 function db2GetRowSchoolName(r) {
   return (r['3.1_ชื่อโรงเรียน'] || r['ชื่อโรงเรียน'] || r['ชื่อโรงเรียนปลายทาง'] || r['โรงเรียนปลายทาง'] || r['โรงเรียน'] || r['school_name'] || '').toString().trim();
+}
+
+// สังกัด (สำนักงานเขตพื้นที่การศึกษา) ของโรงเรียน — เอาจาก F0 ก่อน ถ้าไม่มีค่อยหาในฟอร์มอื่น
+function db2GetSchoolArea(name, row) {
+  const pick = (r) => (r && (r['3.1_สำนักงานเขตพื้นที่การศึกษา'] || r['สำนักงานเขตพื้นที่การศึกษา'] || r['สำนักงานเขตพื้นที่'] || '')).toString().trim();
+  let v = pick(row);
+  if (v) return v;
+  // หาในฟอร์ม f1-f5 ของโรงเรียนเดียวกัน
+  for (const f of DB2_FORMS) {
+    if (f.id === 'f0') continue;
+    const rows = db2GetFormRows(name, f.id);
+    for (const r of rows) { const a = pick(r); if (a) return a; }
+  }
+  return '';
 }
 
 function db2SchoolFormStatus(name) {
@@ -2787,14 +2800,15 @@ function db2RenderTable(data) {
   if(badge) badge.textContent = data.length + ' โรงเรียน';
 
   if(!data.length) {
-    tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:40px;color:#94a3b8;">ไม่พบข้อมูลที่ตรงกัน</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;padding:40px;color:#94a3b8;">ไม่พบข้อมูลที่ตรงกัน</td></tr>';
     return;
   }
 
   tbody.innerHTML = data.map((row, idx) => {
     const name    = row['3.1_ชื่อโรงเรียน'] || row['ชื่อโรงเรียน'] || '-';
     const prov    = row['3.1_จังหวัด'] || row['จังหวัด'] || '-';
-    const code    = row['3.1_รหัสโรงเรียน10หลัก'] || row['รหัสโรงเรียน'] || (row._stub ? '(ยังไม่มี F0)' : '-');
+    const area    = db2GetSchoolArea(name, row);
+    const code    = row['3.1_รหัสโรงเรียน10หลัก'] || row['รหัสโรงเรียน'] || (row._stub ? '(ยังไม่มี F1)' : '-');
     const date    = row['2_วันที่ให้ข้อมูล'] || row['ผู้ให้ข้อมูล_วันที่บันทึก'] || row['timestamp'] || '-';
     const isStub  = !!row._stub;
     const st      = db2SchoolFormStatus(name);
@@ -2822,17 +2836,18 @@ function db2RenderTable(data) {
     const origIdx = allResponsesData.indexOf(row);
 
     const f0Tools = isStub
-      ? `<span style="font-size:11px;color:#f59e0b;font-weight:600;">⚠️ ยังไม่มีข้อมูล F0</span>`
+      ? `<span style="font-size:11px;color:#f59e0b;font-weight:600;">⚠️ ยังไม่มีข้อมูล F1</span>`
       : `<button onclick="openPreviewModal(${origIdx})"><i class="ti ti-eye"></i> พรีวิว</button>
-         <button onclick="openFormEdit('${name.replace(/'/g,"\\'")}','f0')"><i class="ti ti-pencil"></i> แก้ไข F0</button>
+         <button onclick="openFormEdit('${name.replace(/'/g,"\\'")}','f0')"><i class="ti ti-pencil"></i> แก้ไข F1</button>
          <button onclick="downloadSinglePDF(${origIdx})"><i class="ti ti-file-text"></i> PDF</button>`;
 
     return `<tr${isStub ? ' style="background:#fffbeb;"' : ''}>
       <td>
-        <div class="sn">${name}${isStub ? ' <span style="font-size:10px;color:#d97706;background:#fef3c7;padding:1px 6px;border-radius:10px;">ยังไม่มี F0</span>' : ''}</div>
+        <div class="sn">${name}${isStub ? ' <span style="font-size:10px;color:#d97706;background:#fef3c7;padding:1px 6px;border-radius:10px;">ยังไม่มี F1</span>' : ''}</div>
         <div class="si">${code} · ${date}</div>
       </td>
       <td>${prov}</td>
+      <td style="font-size:12px;color:#475569;">${area || '<span style="color:#cbd5e1;">—</span>'}</td>
       ${chips}
       <td>
         <div style="display:flex;align-items:center;gap:5px;">
@@ -2902,8 +2917,8 @@ async function db2AiSchool(name) {
 
 async function runAiAnalysis() {
   if(!allResponsesData.length){ showToast('⚠️ กรุณาโหลดข้อมูลก่อน'); return; }
-  const labels = {overview:'ภาพรวมทั้งหมด',f0:'F0 บริบท',f1:'F1 นักเรียน',
-    f2f3:'F2+F3 ครู',f4f5:'F4+F5 สะท้อน',issues:'ปัญหา',support:'ความต้องการ'};
+  const labels = {overview:'ภาพรวมทั้งหมด',f0:'F1 บริบท',f1:'F2 นักเรียน',
+    f2f3:'F3+F4 ครู',f4f5:'F5+F6 สะท้อน',issues:'ปัญหา',support:'ความต้องการ'};
   await db2CallClaude(db2BuildSnippet(db2AiScope, db2MultiFormData, allResponsesData), labels[db2AiScope]||db2AiScope);
 }
 
@@ -2999,7 +3014,7 @@ async function db2CallClaude(snippet, scopeLabel) {
   const sys = `คุณเป็นผู้เชี่ยวชาญวิเคราะห์ข้อมูลการศึกษา DLTV ตอบเป็นภาษาไทย ใน JSON เท่านั้น ไม่มี backticks:
 {"executive_summary":"...","key_findings":["..."],"strengths":["..."],"challenges":["..."],"recommendations":["..."],"urgent_issues":["..."],"tags":{"red":["..."],"amber":["..."],"green":["..."]}}`;
 
-  const scopeMap = {overview:'วิเคราะห์ภาพรวมทั้งหมด',f0:'วิเคราะห์บริบทโรงเรียน F0',f1:'วิเคราะห์ความเข้าใจนักเรียน F1',f2f3:'วิเคราะห์การสอนครูต้นทาง/ปลายทาง F2+F3',f4f5:'วิเคราะห์เสียงสะท้อนและ PLC F4+F5',issues:'ระบุและจัดกลุ่มปัญหาอุปสรรค',support:'วิเคราะห์ความต้องการการสนับสนุน'};
+  const scopeMap = {overview:'วิเคราะห์ภาพรวมทั้งหมด',f0:'วิเคราะห์บริบทโรงเรียน F1',f1:'วิเคราะห์ความเข้าใจนักเรียน F2',f2f3:'วิเคราะห์การสอนครูต้นทาง/ปลายทาง F3+F4',f4f5:'วิเคราะห์เสียงสะท้อนและ PLC F5+F6',issues:'ระบุและจัดกลุ่มปัญหาอุปสรรค',support:'วิเคราะห์ความต้องการการสนับสนุน'};
 
   try {
     // เรียก Anthropic API โดยตรงจาก browser
@@ -3068,7 +3083,7 @@ function openPreviewModal(index) {
 
   // ── F0 section ──
   let html = `<div class="preview-section">
-    <h4>🏫 F0 บันทึกบริบทโรงเรียน</h4>`;
+    <h4>🏫 F1 บันทึกบริบทโรงเรียน</h4>`;
   if (!item._stub) {
     const f0Fields = [
       ['3.1_ชื่อโรงเรียน','ชื่อโรงเรียน'],['3.1_รหัสโรงเรียน10หลัก','รหัสโรงเรียน'],
@@ -3087,7 +3102,7 @@ function openPreviewModal(index) {
     });
     html += `</div>`;
   } else {
-    html += `<p style="color:#f59e0b;font-weight:600;">⚠️ ยังไม่ได้กรอกแบบฟอร์ม F0</p>`;
+    html += `<p style="color:#f59e0b;font-weight:600;">⚠️ ยังไม่ได้กรอกแบบฟอร์ม F1</p>`;
   }
   html += `</div>`;
 
@@ -3118,8 +3133,8 @@ function openPreviewModal(index) {
   body.innerHTML = html;
 
   document.querySelector('.modal-footer').innerHTML = `
-    <button class="btn-modal-pdf" onclick="downloadSinglePDF(currentPreviewIndex)"><i class="ti ti-file-text"></i> ออก PDF (F0)</button>
-    <button class="btn-modal-edit" onclick="closePreviewModal();openFormEdit(db2GetRowSchoolName(allResponsesData[currentPreviewIndex]),'f0')"><i class="ti ti-pencil"></i> แก้ไข F0</button>
+    <button class="btn-modal-pdf" onclick="downloadSinglePDF(currentPreviewIndex)"><i class="ti ti-file-text"></i> ออก PDF (F1)</button>
+    <button class="btn-modal-edit" onclick="closePreviewModal();openFormEdit(db2GetRowSchoolName(allResponsesData[currentPreviewIndex]),'f0')"><i class="ti ti-pencil"></i> แก้ไข F1</button>
   `;
 
   document.getElementById('previewModal').classList.add('show');
