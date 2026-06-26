@@ -99,11 +99,11 @@ table.matrix-table input[type=text], table.matrix-table input[type=number] { pad
 /* Preview/Edit Modal */
 .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:8888; align-items:flex-start; justify-content:center; padding:20px; overflow-y:auto; }
 .modal-overlay.show { display:flex; }
-.modal-box { background:#fff; border-radius:16px; width:100%; max-width:860px; margin:auto; box-shadow:0 20px 60px rgba(0,0,0,0.25); overflow:hidden; }
+.modal-box { background:#fff; border-radius:16px; width:100%; max-width:980px; margin:auto; box-shadow:0 20px 60px rgba(0,0,0,0.25); overflow:hidden; }
 .modal-header { background:linear-gradient(135deg,#1e3a8a,#3b82f6); color:#fff; padding:1.25rem 1.5rem; display:flex; align-items:center; justify-content:space-between; }
 .modal-header h3 { margin:0; font-size:16px; }
 .btn-modal-close { background:rgba(255,255,255,0.2); border:none; color:#fff; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:18px; display:flex; align-items:center; justify-content:center; }
-.modal-body { padding:1.5rem; max-height:70vh; overflow-y:auto; }
+.modal-body { padding:1.5rem; max-height:78vh; overflow-y:auto; }
 .preview-section { margin-bottom:1.25rem; }
 .preview-section h4 { font-size:14px; font-weight:600; color:var(--accent); background:var(--accent-light); padding:6px 12px; border-radius:6px; margin:0 0 10px; }
 .preview-row { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:8px; }
@@ -2157,6 +2157,21 @@ small, .small, .preview-item .label { font-size: 12px !important; }
 
     <hr class="db2-divider">
 
+    <!-- ===== SCHOOL SUMMARY PANEL ===== -->
+    <div id="schoolSummaryPanel" style="display:none;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px;">
+        <div class="db2-sec-head" style="margin:0;">
+          <h3 id="schoolSummaryTitle">📋 สรุปประเด็นสำคัญรายโรงเรียน</h3>
+          <span class="db2-badge" id="schoolSummaryBadge">F1–F6</span>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="db2-btn" onclick="printSchoolSummary()" title="พิมพ์/บันทึก PDF">🖨️ พิมพ์ / PDF</button>
+          <button class="db2-btn" onclick="closeSchoolSummary()">✕ ปิด</button>
+        </div>
+      </div>
+      <div id="schoolSummaryBody" style="background:#fff;border-radius:14px;border:1.5px solid #e2e8f0;padding:24px;box-shadow:0 2px 8px rgba(0,0,0,0.06);"></div>
+    </div>
+
     <!-- Legacy summary cards (hidden, kept for backward compat) -->
     <div style="display:none;">
       <div id="schoolTypeSummaryList"></div>
@@ -2165,6 +2180,9 @@ small, .small, .preview-item .label { font-size: 12px !important; }
 
   </div>
 </div>
+
+<!-- SCHOOL SUMMARY PRINT AREA (hidden, for print/PDF) -->
+<div id="school-summary-print" style="display:none;"></div>
 
 <!-- SUCCESS POPUP -->
 <div class="success-overlay" id="successOverlay">
@@ -2835,11 +2853,14 @@ function db2RenderTable(data) {
     // find original index in allResponsesData for PDF/preview
     const origIdx = allResponsesData.indexOf(row);
 
+    const safeSumName = name.replace(/'/g,"\\'");
     const f0Tools = isStub
-      ? `<span style="font-size:11px;color:#f59e0b;font-weight:600;">⚠️ ยังไม่มีข้อมูล F1</span>`
+      ? `<span style="font-size:11px;color:#f59e0b;font-weight:600;">⚠️ ยังไม่มีข้อมูล F1</span>
+         <button style="background:#eff6ff;color:#1e3a8a;border-color:#bfdbfe;" onclick="openPreviewModal(${origIdx})"><i class="ti ti-layout-list"></i> สรุปรายโรงเรียน</button>`
       : `<button onclick="openPreviewModal(${origIdx})"><i class="ti ti-eye"></i> พรีวิว</button>
          <button onclick="openFormEdit('${name.replace(/'/g,"\\'")}','f0')"><i class="ti ti-pencil"></i> แก้ไข F1</button>
-         <button onclick="downloadSinglePDF(${origIdx})"><i class="ti ti-file-text"></i> PDF</button>`;
+         <button onclick="downloadSinglePDF(${origIdx})"><i class="ti ti-file-text"></i> PDF</button>
+         <button style="background:#eff6ff;color:#1e3a8a;border-color:#bfdbfe;" onclick="openPreviewModal(${origIdx})"><i class="ti ti-layout-list"></i> สรุปรายโรงเรียน</button>`;
 
     return `<tr${isStub ? ' style="background:#fffbeb;"' : ''}>
       <td>
@@ -3071,70 +3092,411 @@ function db2RenderAiResult(d, scopeLabel) {
   </div>`;
 }
 
+
+// ════════════════════════════════════════════════════
+// SCHOOL SUMMARY PANEL — สรุปประเด็นสำคัญรายโรงเรียน
+// ════════════════════════════════════════════════════
+
+function openSchoolSummary(schoolName) {
+  const panel = document.getElementById('schoolSummaryPanel');
+  const body  = document.getElementById('schoolSummaryBody');
+  const title = document.getElementById('schoolSummaryTitle');
+  const badge = document.getElementById('schoolSummaryBadge');
+
+  title.textContent = 'สรุปประเด็นสำคัญ — ' + schoolName;
+  const st = db2SchoolFormStatus(schoolName);
+  const cnt = Object.values(st).filter(Boolean).length;
+  badge.textContent = cnt + '/6 ฟอร์ม';
+
+  body.innerHTML = buildSchoolSummaryHTML(schoolName, st);
+  panel.style.display = 'block';
+  panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function closeSchoolSummary() {
+  document.getElementById('schoolSummaryPanel').style.display = 'none';
+}
+
+function printSchoolSummary() {
+  const body = document.getElementById('schoolSummaryBody');
+  const printArea = document.getElementById('school-summary-print');
+  const title = document.getElementById('schoolSummaryTitle').textContent;
+  printArea.innerHTML = '<div style="font-family:Sarabun,sans-serif;padding:10mm 15mm;color:#1e293b;">' +
+    '<h2 style="text-align:center;color:#1e3a8a;font-size:18pt;margin:0 0 4px;">' + title + '</h2>' +
+    '<p style="text-align:center;color:#64748b;font-size:11pt;margin:0 0 16px;">โครงการ DLTV</p>' +
+    body.innerHTML + '</div>';
+  const style = document.createElement('style');
+  style.id = '__sum_print_style__';
+  style.textContent = '@media print{body *{visibility:hidden!important}#school-summary-print,#school-summary-print *{visibility:visible!important;display:block!important}#school-summary-print{position:absolute;top:0;left:0;width:100%;padding:0;}}';
+  document.head.appendChild(style);
+  printArea.style.display = 'block';
+  window.print();
+  setTimeout(function() {
+    printArea.style.display = 'none';
+    var s = document.getElementById('__sum_print_style__');
+    if (s) s.remove();
+  }, 1000);
+}
+
+function _sv(row) {
+  var keys = Array.prototype.slice.call(arguments, 1);
+  for (var i = 0; i < keys.length; i++) {
+    var k = keys[i];
+    if (!k) continue;
+    var v = row[k];
+    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+    var a = k.replace(/ /g,'_'), b = k.replace(/_/g,' ');
+    if (row[a] !== undefined && String(row[a]).trim() !== '') return String(row[a]).trim();
+    if (row[b] !== undefined && String(row[b]).trim() !== '') return String(row[b]).trim();
+  }
+  return '';
+}
+
+function _esc2(s) { return String(s == null ? '' : s).replace(/</g,'&lt;').replace(/\n/g,'<br>'); }
+
+function _trow(label, val, bg, color) {
+  if (!val) return '';
+  return '<tr><td style="width:38%;font-weight:600;background:' + (bg||'#f8fafc') + ';padding:7px 10px;border:1px solid #e2e8f0;vertical-align:top;' + (color?'color:'+color+';':'') + '">' + label + '</td><td style="padding:7px 10px;border:1px solid #e2e8f0;white-space:pre-wrap;">' + _esc2(val) + '</td></tr>';
+}
+
+function _fhead(label, count, hasData) {
+  var ok = hasData
+    ? '<span style="background:#dcfce7;color:#15803d;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">✓ มีข้อมูล' + (count > 1 ? ' ' + count + ' รายการ' : '') + '</span>'
+    : '<span style="background:#f1f5f9;color:#94a3b8;border-radius:20px;padding:2px 10px;font-size:11px;font-weight:700;">— ยังไม่มีข้อมูล</span>';
+  return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:10px 14px;background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:10px;margin-bottom:10px;margin-top:18px;"><span style="font-weight:800;color:#fff;font-size:14px;">' + label + '</span>' + ok + '</div>';
+}
+
+function _miniCard(icon, label, val, bg, border, color) {
+  if (!val) val = '<span style="color:#94a3b8;">— ไม่มีข้อมูล —</span>';
+  return '<div style="background:' + (bg||'#f8fafc') + ';border:1.5px solid ' + (border||'#e2e8f0') + ';border-radius:12px;padding:14px 16px;margin-bottom:10px;">' +
+    '<div style="font-size:12px;font-weight:700;color:' + (color||'#475569') + ';margin-bottom:6px;">' + icon + ' ' + label + '</div>' +
+    '<div style="font-size:13.5px;color:#1e293b;line-height:1.7;white-space:pre-wrap;">' + val + '</div></div>';
+}
+
+function buildSchoolSummaryHTML(schoolName, st) {
+
+  /* ── helpers ─────────────────────────────── */
+  function sv(row) {
+    var keys = Array.prototype.slice.call(arguments, 1);
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i]; if (!k) continue;
+      if (row[k] !== undefined && row[k] !== null && String(row[k]).trim() !== '') return String(row[k]).trim();
+      var a = k.replace(/ /g,'_'), b = k.replace(/_/g,' ');
+      if (row[a] !== undefined && String(row[a]).trim() !== '') return String(row[a]).trim();
+      if (row[b] !== undefined && String(row[b]).trim() !== '') return String(row[b]).trim();
+    }
+    return '';
+  }
+  function svMatch(row) {
+    var kws = Array.prototype.slice.call(arguments, 1);
+    var keys = Object.keys(row);
+    for (var ki = 0; ki < kws.length; ki++) {
+      var kw = kws[ki].toLowerCase();
+      for (var ri = 0; ri < keys.length; ri++) {
+        var rk = keys[ri];
+        if (rk.toLowerCase().indexOf(kw) !== -1) {
+          var v = String(row[rk]||'').trim();
+          if (v.length > 2) return v;
+        }
+      }
+    }
+    return '';
+  }
+  function esc(s) { return String(s==null?'':s).replace(/</g,'&lt;').replace(/\n/g,'<br>'); }
+  function fmtTs(ts) {
+    if (!ts) return '';
+    try {
+      var d = new Date(ts);
+      if (isNaN(d.getTime())) return String(ts);
+      return d.toLocaleDateString('th-TH',{year:'numeric',month:'short',day:'numeric'}) + ' ' + d.toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});
+    } catch(e) { return String(ts); }
+  }
+  function trow(label, val, bg, color) {
+    if (!val || !String(val).trim()) return '';
+    return '<tr><td style="width:36%;font-weight:600;background:'+(bg||'#f8fafc')+';padding:7px 10px;border:1px solid #e2e8f0;vertical-align:top;'+(color?'color:'+color+';':'')+'">'+label+'</td>'
+           +'<td style="padding:7px 10px;border:1px solid #e2e8f0;line-height:1.6;white-space:pre-wrap;">'+esc(val)+'</td></tr>';
+  }
+  function card(icon, label, val, bg, border, color) {
+    var content = (val && String(val).trim()) ? esc(val) : '<span style="color:#94a3b8;">— ไม่มีข้อมูล —</span>';
+    return '<div style="background:'+(bg||'#f8fafc')+';border:1.5px solid '+(border||'#e2e8f0')+';border-radius:12px;padding:14px 16px;margin-bottom:10px;">'
+           +'<div style="font-size:12px;font-weight:700;color:'+(color||'#475569')+';margin-bottom:6px;">'+icon+' '+label+'</div>'
+           +'<div style="font-size:13.5px;color:#1e293b;line-height:1.7;white-space:pre-wrap;">'+content+'</div></div>';
+  }
+  function secHead(emoji, label, count, hasData) {
+    var badge = hasData
+      ? '<span style="background:#dcfce7;color:#15803d;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;">✓ มีข้อมูล'+(count>1?' '+count+' รายการ':'')+'</span>'
+      : '<span style="background:#f1f5f9;color:#94a3b8;border-radius:20px;padding:3px 12px;font-size:11px;font-weight:700;">— ยังไม่มีข้อมูล</span>';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;gap:8px;padding:11px 16px;background:linear-gradient(135deg,#1e3a8a,#2563eb);border-radius:10px;margin:18px 0 10px;">'
+           +'<span style="font-weight:800;color:#fff;font-size:14px;">'+emoji+' '+label+'</span>'+badge+'</div>';
+  }
+  function rowMeta(parts) {
+    var txt = parts.filter(Boolean).join(' &nbsp;·&nbsp; ');
+    if (!txt) return '';
+    return '<div style="font-size:12px;color:#64748b;margin-bottom:8px;padding-left:2px;">'+txt+'</div>';
+  }
+  function fallbackTable(r) {
+    var skip = {'rowIndex':1,'Timestamp':1,'timestamp':1,'EntryID':1,'entryId':1,'_stub':1};
+    var entries = Object.entries(r).filter(function(e){
+      return !skip[e[0]] && !String(e[0]).startsWith('__') && e[1] !== null && e[1] !== undefined && String(e[1]).trim().length > 1;
+    });
+    if (!entries.length) return '<div style="color:#94a3b8;font-size:13px;padding:6px 0 12px;">— ไม่พบข้อมูลสรุปในฟอร์มนี้</div>';
+    var h = '<div style="border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
+           +'<table style="width:100%;border-collapse:collapse;font-size:12.5px;">';
+    entries.slice(0,20).forEach(function(e){ h += trow(String(e[0]).replace(/_/g,' '), String(e[1])); });
+    h += '</table></div>';
+    return h;
+  }
+  function entryBanner(idx, obs, ts, total) {
+    if (total <= 1) return '';
+    var name = obs && String(obs).trim() ? String(obs).trim() : '(ไม่ระบุผู้สังเกต)';
+    var time = fmtTs(ts);
+    return '<div style="background:#f0f4ff;border-left:3px solid #3b82f6;border-radius:6px;padding:8px 12px;margin-bottom:8px;font-size:12px;font-weight:700;color:#1e3a8a;">'
+           +'รายการที่ '+(idx+1)+': '+esc(name)+(time?' &nbsp;·&nbsp; <span style="font-weight:400;color:#64748b;">'+time+'</span>':'')+'</div>';
+  }
+
+  var html = '';
+
+  /* ════════════════════════════════════════════
+     F1 · บันทึกบริบทโรงเรียน  (allResponsesData, key=f0)
+     ════════════════════════════════════════════ */
+  var f0 = allResponsesData.find(function(r){ return db2GetRowSchoolName(r).trim()===schoolName && !r._stub; });
+  html += secHead('🏫','F1 · บันทึกบริบทโรงเรียน', 1, !!f0);
+  if (f0) {
+    var prov    = sv(f0,'3.1_จังหวัด','จังหวัด');
+    var area    = sv(f0,'3.1_สำนักงานเขตพื้นที่การศึกษา','สำนักงานเขตพื้นที่การศึกษา');
+    var type_   = sv(f0,'3.1_ประเภทโรงเรียน','ประเภทโรงเรียน_รวม');
+    var usage   = sv(f0,'4.1_ลักษณะการใช้DLTV','ภาพรวมการใช้_รวม');
+    var ctx61   = sv(f0,'6_ลักษณะผู้เรียนและข้อจำกัด');
+    var ctx62   = sv(f0,'6_ลักษณะผู้เรียนและข้อจำกัด2');
+    var tknow   = sv(f0,'6_สิ่งที่ครูต้นทางควรรู้เกี่ยวกับผู้เรียน');
+    var str_    = sv(f0,'7_จุดแข็งในการใช้DLTV');
+    var prob    = sv(f0,'7_ปัญหาอุปสรรคและความต้องการสนับสนุน');
+    var ctx8_1  = sv(f0,'8.1_บริบทสำคัญของโรงเรียน');
+    var ctx8_2  = sv(f0,'8.2_ข้อจำกัดสำคัญในการเรียนรู้');
+    var ctx8_3  = sv(f0,'8.3_สิ่งที่ครูต้นทางควรคำนึงถึง');
+    var ctx8_4  = sv(f0,'8.4_ข้อเสนอเบื้องต้นเพื่อสนับสนุน');
+    var inf     = sv(f0,'2_ชื่อ-นามสกุลผู้ให้ข้อมูล','ลงนาม_ผู้ให้ข้อมูล');
+    var recDate = sv(f0,'2_วันที่ให้ข้อมูล','ผู้ให้ข้อมูล_วันที่บันทึก');
+    html += rowMeta([prov, area, inf?'ผู้ให้ข้อมูล: '+inf:'', recDate?fmtTs(recDate):'']);
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">';
+    html += card('🏷️','ประเภทโรงเรียน', type_, '#eff6ff','#93c5fd','#1d4ed8');
+    html += card('📺','ภาพรวมการใช้ DLTV', usage, '#eff6ff','#93c5fd','#1d4ed8');
+    html += '</div>';
+    html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px;">';
+    html += card('💪','จุดแข็งในการใช้ DLTV', str_, '#f0fdf4','#86efac','#15803d');
+    html += card('⚠️','ปัญหา / อุปสรรค', prob, '#fffbeb','#fcd34d','#d97706');
+    html += '</div>';
+    if (ctx61||ctx62) html += card('👥','ลักษณะผู้เรียนและข้อจำกัด', [ctx61,ctx62].filter(Boolean).join('\n'), '#fffbeb','#fcd34d','#d97706');
+    if (tknow)        html += card('👩‍🏫','สิ่งที่ครูต้นทางควรรู้เกี่ยวกับผู้เรียน', tknow, '#f8fafc','#e2e8f0','#475569');
+    if (ctx8_1||ctx8_2||ctx8_3||ctx8_4) {
+      html += '<div style="border:1.5px solid #e2e8f0;border-radius:12px;padding:14px 16px;margin-bottom:10px;">'
+             +'<div style="font-weight:700;color:#1e3a8a;margin-bottom:10px;font-size:13px;">📌 สรุปบริบทสำคัญ (หมวด 8)</div>'
+             +'<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+             +trow('8.1 บริบทสำคัญของโรงเรียน', ctx8_1,'#f8fafc')
+             +trow('8.2 ข้อจำกัดสำคัญในการเรียนรู้', ctx8_2,'#fffbeb','#d97706')
+             +trow('8.3 สิ่งที่ครูต้นทางควรคำนึงถึง', ctx8_3,'#f8fafc')
+             +trow('8.4 ข้อเสนอเบื้องต้น', ctx8_4,'#f0fdf4','#15803d')
+             +'</table></div>';
+    }
+  } else {
+    html += '<div style="padding:12px 4px;color:#d97706;font-size:13px;font-weight:600;">⚠️ ยังไม่ได้กรอกแบบฟอร์ม F1 (บริบทโรงเรียน)</div>';
+  }
+
+  /* ════════════════════════════════════════════
+     F2 · สังเกตความเข้าใจนักเรียน  (db2MultiFormData['f1'])
+     key จริง: 14.1_นักเรียนเข้าใจดีในประเด็นใด / 14.2_ / 14.3_ / 14.4_ / 14.5_ / 14.6_ / 14_ความเห็นเพิ่มเติม
+     ════════════════════════════════════════════ */
+  var f1rows = db2GetFormRows(schoolName,'f1');
+  html += secHead('👁️','F2 · สังเกตความเข้าใจนักเรียน', f1rows.length, f1rows.length>0);
+  if (f1rows.length) {
+    f1rows.forEach(function(r,i){
+      var obs  = sv(r,'ผู้สังเกต'); var ts = sv(r,'timestamp','Timestamp');
+      var date2= sv(r,'วันที่สังเกต'); var grade=sv(r,'ระดับชั้น'); var subj=sv(r,'ชื่อรายวิชา/ตอน','รายวิชา');
+      html += entryBanner(i, obs, ts, f1rows.length);
+      html += rowMeta([date2?'📅 '+date2:'', grade?'ชั้น '+grade:'', subj]);
+      var v1 = sv(r,'14.1_นักเรียนเข้าใจดีในประเด็นใด') || svMatch(r,'14.1','เข้าใจดี');
+      var v2 = sv(r,'14.2_นักเรียนยังไม่เข้าใจประเด็นใด') || svMatch(r,'14.2','ยังไม่เข้าใจ');
+      var v3 = sv(r,'14.3_สาเหตุสำคัญ') || svMatch(r,'14.3','สาเหตุ');
+      var v4 = sv(r,'14.4_เทปควรปรับช่วงใด') || svMatch(r,'14.4','เทปควรปรับ');
+      var v5a= sv(r,'14.5_วิธีอธิบายควรปรับอย่างไร') || svMatch(r,'14.5_วิธีอธิบาย');
+      var v5b= sv(r,'14.5_สื่อใบงานควรปรับอย่างไร')   || svMatch(r,'14.5_สื่อ');
+      var v6 = sv(r,'14.6_คำแนะนำสำหรับครูปลายทาง')  || svMatch(r,'14.6','คำแนะนำ');
+      var note=sv(r,'14_ความเห็นเพิ่มเติม','ความเห็นเพิ่มเติม');
+      var any = v1||v2||v3||v4||v5a||v5b||v6||note;
+      if (any) {
+        html += '<div style="border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
+               +'<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+               +trow('14.1 นักเรียนเข้าใจดีในประเด็นใด', v1,'#f0fdf4','#15803d')
+               +trow('14.2 นักเรียนยังไม่เข้าใจ / เข้าใจคลาดเคลื่อน', v2,'#fffbeb','#d97706')
+               +trow('14.3 สาเหตุที่ทำให้เข้าใจหรือไม่เข้าใจ', v3,'#f8fafc')
+               +trow('14.4 เทปการสอนควรปรับช่วงใด', v4,'#eff6ff','#1d4ed8')
+               +trow('14.5 วิธีอธิบาย / คำถามควรปรับอย่างไร', v5a,'#f8fafc')
+               +trow('14.5 สื่อ / ใบงาน / กิจกรรม ควรปรับอย่างไร', v5b,'#f8fafc')
+               +trow('14.6 คำแนะนำสำหรับครูปลายทาง', v6,'#f8fafc')
+               +trow('ความเห็นเพิ่มเติมของผู้สังเกต', note,'#fdf4ff','#7c3aed')
+               +'</table></div>';
+      } else { html += fallbackTable(r); }
+    });
+  }
+
+  /* ════════════════════════════════════════════
+     F3 · กำกับห้องเรียนครูปลายทาง  (db2MultiFormData['f2'])
+     key จริง: 15.1_แนวทางกำกับห้องเรียนที่ได้ผล / 15.2_วิธีที่ช่วยนักเรียนเข้าใจมากขึ้น / 15.3_อุปสรรคสำคัญ / 15.5_เทป/สื่อควรปรับอะไร / ความเห็นเพิ่มเติม
+     ════════════════════════════════════════════ */
+  var f2rows = db2GetFormRows(schoolName,'f2');
+  html += secHead('🏫','F3 · กำกับห้องเรียนครูปลายทาง', f2rows.length, f2rows.length>0);
+  if (f2rows.length) {
+    f2rows.forEach(function(r,i){
+      var obs  = sv(r,'ผู้สังเกต'); var ts=sv(r,'timestamp','Timestamp');
+      var date2= sv(r,'วันที่สังเกต'); var grade=sv(r,'ระดับชั้น');
+      var tDst = sv(r,'ชื่อครูปลายทางผู้กำกับห้องเรียน');
+      var tSrc = sv(r,'ชื่อครูต้นทางเจ้าของเทป');
+      html += entryBanner(i, obs, ts, f2rows.length);
+      html += rowMeta([date2?'📅 '+date2:'', grade?'ชั้น '+grade:'', tSrc?'ต้นทาง: '+tSrc:'', tDst?'ปลายทาง: '+tDst:'']);
+      var v1 = sv(r,'15.1_แนวทางกำกับห้องเรียนที่ได้ผล')        || svMatch(r,'15.1','กำกับ');
+      var v2 = sv(r,'15.2_วิธีที่ช่วยนักเรียนเข้าใจมากขึ้น')    || svMatch(r,'15.2','ช่วยนักเรียน');
+      var v3 = sv(r,'15.3_อุปสรรคสำคัญ')                        || svMatch(r,'15.3','อุปสรรค');
+      var v5 = sv(r,'15.5_เทป/สื่อควรปรับอะไร')                  || svMatch(r,'15.5','เทป','สื่อควรปรับ');
+      var note=sv(r,'ความเห็นเพิ่มเติม');
+      var any = v1||v2||v3||v5||note;
+      if (any) {
+        html += '<div style="border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
+               +'<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+               +trow('15.1 แนวทางกำกับห้องเรียนที่ได้ผล', v1,'#f0fdf4','#15803d')
+               +trow('15.2 วิธีที่ช่วยให้นักเรียนเข้าใจมากขึ้น', v2,'#f8fafc')
+               +trow('15.3 อุปสรรคสำคัญของการกำกับห้องเรียน', v3,'#fffbeb','#d97706')
+               +trow('15.5 เทป / สื่อควรปรับอะไรเพื่อช่วยครูปลายทาง', v5,'#eff6ff','#1d4ed8')
+               +trow('ความเห็นเพิ่มเติม', note,'#fdf4ff','#7c3aed')
+               +'</table></div>';
+      } else { html += fallbackTable(r); }
+    });
+  }
+
+  /* ════════════════════════════════════════════
+     F4 · สังเกตการสอนจริงครูต้นทาง  (db2MultiFormData['f3'])
+     key จริง: 15.1_นักเรียนเข้าใจ/ไม่เข้าใจประเด็นใด / 15.2_อุปสรรคสำคัญ / 15.3_สิ่งที่แตกต่างจากการสอนออกอากาศ / 15.4_ครูต้นทางปรับเฉพาะหน้าอย่างไร / 13.3_วิธีที่ได้ผลดีและควรใช้ในการออกแบบ
+     ════════════════════════════════════════════ */
+  var f3rows = db2GetFormRows(schoolName,'f3');
+  html += secHead('👨‍🏫','F4 · สังเกตการสอนจริงครูต้นทาง', f3rows.length, f3rows.length>0);
+  if (f3rows.length) {
+    f3rows.forEach(function(r,i){
+      var obs  = sv(r,'ผู้สังเกต'); var ts=sv(r,'timestamp','Timestamp');
+      var date2= sv(r,'วันที่สังเกต'); var tSrc=sv(r,'ชื่อครูต้นทาง'); var ttype=sv(r,'ลักษณะการสอน');
+      html += entryBanner(i, obs, ts, f3rows.length);
+      html += rowMeta([date2?'📅 '+date2:'', tSrc?'ต้นทาง: '+tSrc:'', ttype]);
+      var v1 = sv(r,'15.1_นักเรียนเข้าใจ/ไม่เข้าใจประเด็นใด') || svMatch(r,'15.1','นักเรียนเข้าใจ');
+      var v2 = sv(r,'15.2_อุปสรรคสำคัญ')                      || svMatch(r,'15.2','อุปสรรค');
+      var v3 = sv(r,'15.3_สิ่งที่แตกต่างจากการสอนออกอากาศ')  || svMatch(r,'13.3_วิธีที่ได้ผลดีและควรใช้ในการออกแบบ','15.3','แตกต่าง','ออกแบบ');
+      var v4 = sv(r,'15.4_ครูต้นทางปรับเฉพาะหน้าอย่างไร')    || svMatch(r,'15.4','ปรับเฉพาะหน้า');
+      var note=sv(r,'ความเห็นเพิ่มเติม');
+      var any = v1||v2||v3||v4||note;
+      if (any) {
+        html += '<div style="border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
+               +'<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+               +trow('15.1 นักเรียนเข้าใจ / ไม่เข้าใจประเด็นใด', v1,'#f8fafc')
+               +trow('15.2 อุปสรรคสำคัญ', v2,'#fffbeb','#d97706')
+               +trow('15.3 สิ่งที่แตกต่างจากการสอนออกอากาศ / วิธีที่ได้ผลดี', v3,'#f8fafc')
+               +trow('15.4 ครูต้นทางปรับเฉพาะหน้าอย่างไร', v4,'#f0fdf4','#15803d')
+               +trow('ความเห็นเพิ่มเติม', note,'#fdf4ff','#7c3aed')
+               +'</table></div>';
+      } else { html += fallbackTable(r); }
+    });
+  }
+
+  /* ════════════════════════════════════════════
+     F5 · เสียงสะท้อนนักเรียน  (db2MultiFormData['f4'])
+     key จริง: 6.1_เข้าใจเรื่องใดมากที่สุด / 6.2_ / 6.3_ / 6.4_ / 6.5_ / 7_ข้อค้นพบจากเสียงสะท้อน
+     ════════════════════════════════════════════ */
+  var f4rows = db2GetFormRows(schoolName,'f4');
+  html += secHead('💬','F5 · เสียงสะท้อนนักเรียน', f4rows.length, f4rows.length>0);
+  if (f4rows.length) {
+    f4rows.forEach(function(r,i){
+      var obs  = sv(r,'ผู้สังเกต','ผู้ให้ข้อมูล'); var ts=sv(r,'timestamp','Timestamp');
+      var date2= sv(r,'วันที่','วันที่บันทึก'); var grade=sv(r,'ระดับชั้น'); var room=sv(r,'ห้อง');
+      var subj = sv(r,'รายวิชา','วิชา'); var topic=sv(r,'เรื่องที่เรียน','หัวข้อ');
+      html += entryBanner(i, obs, ts, f4rows.length);
+      html += rowMeta([date2?'📅 '+date2:'', grade?'ชั้น '+grade+(room?' ห้อง'+room:''):'', subj, topic]);
+      var q1 = sv(r,'6.1_เข้าใจเรื่องใดมากที่สุด')        || svMatch(r,'6.1','เข้าใจมากที่สุด');
+      var q2 = sv(r,'6.2_ยังไม่เข้าใจเรื่องใด')           || svMatch(r,'6.2','ยังไม่เข้าใจ');
+      var q3 = sv(r,'6.3_สิ่งที่ช่วยให้เรียนได้ดีในวันนี้') || svMatch(r,'6.3','ช่วยให้เรียน');
+      var q4 = sv(r,'6.4_สิ่งที่อยากให้ครูช่วยเพิ่มเติม') || svMatch(r,'6.4','อยากให้ครู');
+      var q5 = sv(r,'6.5_คะแนนความเข้าใจตนเอง')           || svMatch(r,'6.5','คะแนน');
+      var f7 = sv(r,'7_ข้อค้นพบจากเสียงสะท้อน')           || svMatch(r,'7.ข้อค้นพบ','ข้อค้นพบ');
+      var any= q1||q2||q3||q4||q5||f7;
+      if (any) {
+        html += '<div style="border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
+               +'<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+               +trow('6.1 เข้าใจเรื่องใดมากที่สุด', q1,'#f0fdf4','#15803d')
+               +trow('6.2 ยังไม่เข้าใจเรื่องใด', q2,'#fffbeb','#d97706')
+               +trow('6.3 สิ่งที่ช่วยให้เรียนได้ดีในวันนี้', q3,'#f8fafc')
+               +trow('6.4 สิ่งที่อยากให้ครูช่วยเพิ่มเติม', q4,'#f8fafc')
+               +trow('6.5 คะแนนความเข้าใจตนเอง (ของนักเรียน)', q5,'#eff6ff','#1d4ed8')
+               +trow('7. ข้อค้นพบสำคัญจากเสียงสะท้อน', f7,'#fdf4ff','#7c3aed')
+               +'</table></div>';
+      } else { html += fallbackTable(r); }
+    });
+  }
+
+  /* ════════════════════════════════════════════
+     F6 · สะท้อนผลรวม PLC  (db2MultiFormData['f5'])
+     key จริง: 5.1_บริบทสำคัญที่ส่งผลต่อการใช้ DLTV / 12.1_ / 12.2_ / 12.3_
+     ════════════════════════════════════════════ */
+  var f5rows = db2GetFormRows(schoolName,'f5');
+  html += secHead('📊','F6 · สะท้อนผลรวม PLC', f5rows.length, f5rows.length>0);
+  if (f5rows.length) {
+    f5rows.forEach(function(r,i){
+      var rec  = sv(r,'ผู้บันทึกผลการสะท้อน','ลงนาม_ผู้บันทึก'); var ts=sv(r,'timestamp','Timestamp');
+      var vdate= sv(r,'วันที่ลงพื้นที่','วันที่'); var pdate=sv(r,'วันที่ประชุม PLC','วันประชุม PLC','วันประชุม');
+      html += entryBanner(i, rec, ts, f5rows.length);
+      html += rowMeta([vdate?'📅 ลงพื้นที่: '+vdate:'', pdate?'PLC: '+pdate:'']);
+      var ctx5= sv(r,'5.1_บริบทสำคัญที่ส่งผลต่อการใช้ DLTV') || svMatch(r,'5.1','บริบทสำคัญ');
+      var s1  = sv(r,'12.1_ข้อค้นพบสำคัญที่สุด')               || svMatch(r,'12.1','ข้อค้นพบ');
+      var s2  = sv(r,'12.2_บทเรียนสำคัญสำหรับการพัฒนา DLTV')  || svMatch(r,'12.2','บทเรียนสำคัญ');
+      var s3  = sv(r,'12.3_ข้อเสนอหลักที่ควรดำเนินการต่อ')    || svMatch(r,'12.3','ข้อเสนอ');
+      var any = ctx5||s1||s2||s3;
+      if (any) {
+        if (ctx5) html += card('📍','บริบทสำคัญที่ส่งผลต่อการใช้ DLTV (5.1)', ctx5,'#f8fafc','#e2e8f0','#475569');
+        html += '<div style="border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;margin-bottom:14px;">'
+               +'<table style="width:100%;border-collapse:collapse;font-size:13px;">'
+               +trow('12.1 ข้อค้นพบสำคัญที่สุด', s1,'#fdf4ff','#7c3aed')
+               +trow('12.2 บทเรียนสำคัญสำหรับการพัฒนา DLTV', s2,'#eff6ff','#1d4ed8')
+               +trow('12.3 ข้อเสนอหลักที่ควรดำเนินการต่อ', s3,'#f0fdf4','#15803d')
+               +'</table></div>';
+      } else { html += fallbackTable(r); }
+    });
+  }
+
+  return html || '<p style="color:#94a3b8;text-align:center;padding:24px;">ยังไม่มีข้อมูลแบบฟอร์มใดสำหรับโรงเรียนนี้</p>';
+}
+
+// ── end school summary ──────────────────────────────
+
 function openPreviewModal(index) {
   currentPreviewIndex = index;
   const item = allResponsesData[index];
   if (!item) return;
-  const name = item['ชื่อโรงเรียน'] || 'โรงเรียนปลายทาง';
+  const name = db2GetRowSchoolName(item) || item['ชื่อโรงเรียน'] || 'โรงเรียนปลายทาง';
+  const st   = db2SchoolFormStatus(name);
+  const cnt  = Object.values(st).filter(Boolean).length;
 
-  document.getElementById('previewModalTitle').textContent = `📋 ${name} — ภาพรวมทุกแบบฟอร์ม`;
+  // ── title ──
+  document.getElementById('previewModalTitle').innerHTML =
+    `<span style="font-size:16px;">📋 ${name}</span>
+     <span style="margin-left:10px;background:#dcfce7;color:#15803d;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;">${cnt}/6 ฟอร์ม</span>`;
 
+  // ── body: ใช้ buildSchoolSummaryHTML ──
   const body = document.getElementById('previewModalBody');
+  body.innerHTML = '<div style="padding:4px 0;">' + buildSchoolSummaryHTML(name, st) + '</div>';
 
-  // ── F0 section ──
-  let html = `<div class="preview-section">
-    <h4>🏫 F1 บันทึกบริบทโรงเรียน</h4>`;
-  if (!item._stub) {
-    const f0Fields = [
-      ['3.1_ชื่อโรงเรียน','ชื่อโรงเรียน'],['3.1_รหัสโรงเรียน10หลัก','รหัสโรงเรียน'],
-      ['3.1_จังหวัด','จังหวัด'],['3.1_อำเภอ','อำเภอ'],['3.1_สำนักงานเขตพื้นที่การศึกษา','สพท.'],
-      ['3.1_ประเภทโรงเรียน','ประเภทโรงเรียน'],['4.1_ลักษณะการใช้DLTV','ภาพรวมการใช้ DLTV'],
-      ['7_จุดแข็งในการใช้DLTV','จุดแข็ง'],['7_ปัญหาอุปสรรคและความต้องการสนับสนุน','ปัญหาอุปสรรค'],
-      ['8.1_บริบทสำคัญของโรงเรียน','สรุปบริบทสำคัญ'],['8.2_ข้อจำกัดสำคัญในการเรียนรู้','ข้อจำกัด'],
-      ['8.4_ข้อเสนอเบื้องต้นเพื่อสนับสนุน','ข้อเสนอแนะ'],
-    ];
-    html += `<div class="preview-row">`;
-    f0Fields.forEach(([key, label]) => {
-      if (item[key]) html += `<div class="preview-item" style="width:100%;margin-bottom:6px;">
-        <div class="label">${label}</div>
-        <div class="value" style="font-weight:500;white-space:pre-wrap;">${String(item[key]).replace(/</g,'&lt;')}</div>
-      </div>`;
-    });
-    html += `</div>`;
-  } else {
-    html += `<p style="color:#f59e0b;font-weight:600;">⚠️ ยังไม่ได้กรอกแบบฟอร์ม F1</p>`;
-  }
-  html += `</div>`;
-
-  // ── F1–F5 sections ──
-  const skipKeys = ['rowIndex','Timestamp','timestamp'];
-  DB2_FORMS.filter(f => f.id !== 'f0').forEach(fd => {
-    const row = findFormRow(name, fd.id);
-    html += `<div class="preview-section">
-      <h4>${fd.emoji} ${fd.label} ${fd.name}</h4>`;
-    if (row) {
-      const entries = Object.entries(row)
-        .filter(([k,v]) => !skipKeys.includes(k) && !k.startsWith('__') && v !== undefined && v !== null && String(v).trim() !== '');
-      if (entries.length) {
-        html += entries.map(([k,v]) => `
-          <div class="preview-item" style="width:100%;margin-bottom:6px;">
-            <div class="label">${k.replace(/_/g,' ')}</div>
-            <div class="value" style="font-weight:500;white-space:pre-wrap;">${String(v).replace(/</g,'&lt;')}</div>
-          </div>`).join('');
-      } else {
-        html += `<p style="color:#94a3b8;">ไม่มีข้อมูล</p>`;
-      }
-    } else {
-      html += `<p style="color:#94a3b8;">— ยังไม่ได้กรอกแบบฟอร์มนี้</p>`;
-    }
-    html += `</div>`;
-  });
-
-  body.innerHTML = html;
-
+  // ── footer ──
+  const safe = name.replace(/'/g,"\\'");
   document.querySelector('.modal-footer').innerHTML = `
-    <button class="btn-modal-pdf" onclick="downloadSinglePDF(currentPreviewIndex)"><i class="ti ti-file-text"></i> ออก PDF (F1)</button>
-    <button class="btn-modal-edit" onclick="closePreviewModal();openFormEdit(db2GetRowSchoolName(allResponsesData[currentPreviewIndex]),'f0')"><i class="ti ti-pencil"></i> แก้ไข F1</button>
+    <button class="btn-modal-pdf" onclick="exportSummaryPDF('${safe}')">
+      <i class="ti ti-file-text"></i> ออก PDF สรุปทุกฟอร์ม
+    </button>
+    <button class="btn-modal-edit" onclick="closePreviewModal();openFormEdit(db2GetRowSchoolName(allResponsesData[currentPreviewIndex]),'f0')">
+      <i class="ti ti-pencil"></i> แก้ไข F1
+    </button>
   `;
 
   document.getElementById('previewModal').classList.add('show');
@@ -3143,6 +3505,114 @@ function openPreviewModal(index) {
 
 
 function closePreviewModal() { document.getElementById('previewModal').classList.remove('show'); }
+
+// ═══════════════════════════════════════════════════
+// exportSummaryPDF — PDF สรุปรายโรงเรียน F1-F6
+// ═══════════════════════════════════════════════════
+function exportSummaryPDF(schoolName) {
+  const st  = db2SchoolFormStatus(schoolName);
+  const cnt = Object.values(st).filter(Boolean).length;
+  const now = new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
+
+  // build summary content (reuse same helpers as buildSchoolSummaryHTML but inline for PDF)
+  const summaryBody = buildSchoolSummaryHTML(schoolName, st);
+
+  const css = `
+    @page { size: A4; margin: 15mm 18mm 18mm 18mm; }
+    * { box-sizing: border-box; font-family: 'Sarabun', 'TH Sarabun New', sans-serif; }
+    body { margin: 0; padding: 0; color: #1e293b; font-size: 13pt; line-height: 1.7; }
+
+    /* ── Cover header ── */
+    .pdf-cover {
+      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
+      color: #fff;
+      border-radius: 12px;
+      padding: 22px 26px 18px;
+      margin-bottom: 20px;
+      page-break-inside: avoid;
+    }
+    .pdf-cover .proj { font-size: 11pt; opacity: 0.85; margin-bottom: 4px; }
+    .pdf-cover .title { font-size: 20pt; font-weight: 800; margin: 0 0 6px; }
+    .pdf-cover .meta { font-size: 11pt; opacity: 0.9; display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
+    .pdf-cover .badge {
+      background: rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 2px 12px;
+      font-size: 11pt;
+      font-weight: 700;
+    }
+
+    /* ── Section heads ── */
+    div[style*="linear-gradient(135deg,#1e3a8a"] {
+      page-break-inside: avoid;
+      page-break-before: auto;
+    }
+
+    /* ── Tables ── */
+    table { width: 100%; border-collapse: collapse; font-size: 12pt; margin-bottom: 10px; }
+    td { padding: 7px 10px; border: 1px solid #cbd5e1; vertical-align: top; line-height: 1.6; }
+    td:first-child { width: 36%; font-weight: 700; background: #f8fafc; }
+
+    /* ── Cards ── */
+    .pdf-card { border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 15px; margin-bottom: 10px; page-break-inside: avoid; }
+    .pdf-card .card-label { font-size: 11pt; font-weight: 700; color: #475569; margin-bottom: 5px; }
+    .pdf-card .card-val { font-size: 12.5pt; line-height: 1.7; }
+
+    /* ── Entry banner ── */
+    div[style*="border-left:3px solid #3b82f6"] {
+      page-break-inside: avoid;
+    }
+
+    /* ── Page footer ── */
+    .pdf-footer {
+      position: fixed;
+      bottom: 10mm;
+      left: 18mm;
+      right: 18mm;
+      border-top: 1px solid #cbd5e1;
+      padding-top: 5px;
+      font-size: 10pt;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+    @media screen { .pdf-footer { display: none; } }
+  `;
+
+  const html = `<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>สรุปรายโรงเรียน — ${schoolName}</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>${css}</style>
+</head>
+<body>
+  <div class="pdf-cover">
+    <div class="proj">📡 โครงการ DLTV — สรุปผลการลงพื้นที่</div>
+    <div class="title">📋 ${schoolName}</div>
+    <div class="meta">
+      <span class="badge">✓ ${cnt}/6 ฟอร์ม</span>
+      <span>พิมพ์เมื่อ: ${now}</span>
+    </div>
+  </div>
+  <div class="pdf-footer">
+    <span>โครงการ DLTV · สรุปรายโรงเรียน</span>
+    <span>${schoolName}</span>
+  </div>
+  ${summaryBody}
+</body>
+</html>`;
+
+  const win = window.open('', '_blank', 'width=900,height=700');
+  if (!win) { alert('กรุณาอนุญาต Popup สำหรับหน้านี้แล้วลองใหม่'); return; }
+  win.document.write(html);
+  win.document.close();
+  win.onload = function() {
+    setTimeout(function() { win.focus(); win.print(); }, 600);
+  };
+}
+
 
 // ============================================================
 //  GENERIC FORM PREVIEW / PDF — ใช้ได้กับทุกฟอร์ม (F0–F5)
