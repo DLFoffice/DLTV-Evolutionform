@@ -601,60 +601,73 @@ small, .small, .preview-item .label { font-size: 12px !important; }
 .db2-wrap { overflow-x:auto; border-radius:14px; box-shadow: 0 2px 0 #e2e8f0, 0 4px 16px rgba(0,0,0,0.07); }
 .db2-table { width:100%; border-collapse:collapse; background:#fff;
   border-radius:14px; overflow:hidden; border:1px solid #e2e8f0;
-  min-width:820px; }
+  min-width:760px; }
 .db2-table th { background: linear-gradient(180deg, #1e3a8a 0%, #172554 100%);
   color:rgba(255,255,255,.95);
   padding:13px 14px; font-size:12px; font-weight:700; text-align:left;
   letter-spacing:0.02em;
 }
-.db2-table th.fc { text-align:center; }
-.db2-table td { padding:11px 14px; border-bottom:1px solid #f1f5f9;
+.db2-table th.fc { text-align:center; padding-left:7px; padding-right:7px; }
+.db2-table td { padding:10px 14px; border-bottom:1px solid #f1f5f9;
   font-size:13px; vertical-align:middle; }
 .db2-table tr:last-child td { border-bottom:none; }
-.db2-table tr:hover td { background: linear-gradient(90deg, #f8faff, #fafbff); }
+.db2-table tbody tr:nth-child(even) td { background:#fafbfd; }
+.db2-table tbody tr:hover td { background:#eff6ff !important; }
 .sn { font-weight:700; color:#1e3a8a; }
 .si { font-size:11px; color:#94a3b8; margin-top:2px; }
-/* ── 3D Checkmark Circles ── */
+/* ── Status check circles (soft style) ── */
 .fchip {
   display:inline-flex; align-items:center; justify-content:center;
   width:26px; height:26px; border-radius:50%; font-size:13px; font-weight:800;
-  position:relative; transition: transform .18s, box-shadow .18s;
+  position:relative; transition: transform .18s, background .18s, border-color .18s;
   cursor:pointer; flex-shrink:0;
 }
+.fchip i { font-size:15px; }
 .fchip:hover { transform: scale(1.12); }
 .fchip.ok {
-  background: linear-gradient(145deg, #4ade80, #16a34a);
-  color: #fff;
-  box-shadow:
-    0 2px 0 #14532d,
-    0 3px 7px rgba(22,163,74,0.4),
-    inset 0 1px 1px rgba(255,255,255,0.35);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  background:#dcfce7; color:#16a34a; border:1px solid #86efac;
 }
 .fchip.ok:hover {
-  box-shadow:
-    0 2px 0 #14532d,
-    0 5px 12px rgba(22,163,74,0.5),
-    inset 0 1px 1px rgba(255,255,255,0.35);
+  background:#bbf7d0; border-color:#4ade80;
 }
 .fchip.no {
-  background: linear-gradient(145deg, #f1f5f9, #e2e8f0);
-  color: #94a3b8;
-  box-shadow:
-    0 1px 0 #cbd5e1,
-    0 2px 4px rgba(0,0,0,0.06),
-    inset 0 1px 1px rgba(255,255,255,0.8);
+  background:#f8fafc; color:#cbd5e1; border:1px solid #e2e8f0;
 }
 
 /* ── Progress bar ── */
 .pb-wrap { height:6px; background:#f1f5f9; border-radius:99px; overflow:hidden; margin-top:4px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.06); }
 .pb-fill  { height:100%; border-radius:99px; transition:width .7s cubic-bezier(.4,0,.2,1); background: linear-gradient(90deg, #3b82f6, #22c55e); box-shadow: 0 0 6px rgba(34,197,94,0.4); }
-.row-tools button { padding:5px 9px; border-radius:6px; border:1px solid #e2e8f0;
-  background:#fff; color:#475569; font-size:11.5px; cursor:pointer;
-  font-family:inherit; font-weight:600; transition:all .15s; margin-right:3px; }
-.row-tools button:hover { background:#eff6ff; color:#1e3a8a; border-color:#93c5fd; }
-.row-tools .ai-b { border-color:#c4b5fd; color:#6d28d9; }
-.row-tools .ai-b:hover { background:#f5f3ff; }
+/* ── Compact row action bar (replaces the old stacked button list) ── */
+.row-actions { display:flex; align-items:center; gap:6px; flex-wrap:nowrap; }
+.ra-btn { display:inline-flex; align-items:center; gap:5px; padding:6px 11px; border-radius:8px;
+  border:1px solid #e2e8f0; background:#fff; color:#475569; font-size:12px; font-weight:600;
+  font-family:inherit; cursor:pointer; transition:all .15s; white-space:nowrap; line-height:1; }
+.ra-btn i { font-size:15px; }
+.ra-btn:hover { border-color:#93c5fd; color:#1e3a8a; background:#eff6ff; }
+.ra-pdf:hover { background:#fef2f2; color:#b91c1c; border-color:#fecaca; }
+.ra-edit { background:#f0fdf4; color:#15803d; border-color:#bbf7d0; }
+.ra-edit:hover { background:#dcfce7; color:#14532d; border-color:#86efac; }
+.ra-caret { font-size:13px !important; opacity:.65; margin-left:-2px; }
+.ra-stub { font-size:11px; color:#b45309; font-weight:600; white-space:nowrap; }
+
+/* ── Edit dropdown menu (rendered to <body>, position:fixed so it isn't clipped) ── */
+.row-menu { position:fixed; z-index:9999; min-width:248px; max-width:320px;
+  background:#fff; border:1px solid #e2e8f0; border-radius:12px;
+  box-shadow:0 14px 36px rgba(15,23,42,.18), 0 2px 6px rgba(15,23,42,.08);
+  padding:6px; animation:rmIn .14s ease; }
+@keyframes rmIn { from{opacity:0; transform:translateY(-6px);} to{opacity:1; transform:translateY(0);} }
+.rm-head { font-size:11px; font-weight:700; color:#94a3b8; padding:7px 10px 6px; letter-spacing:.02em; }
+.rm-item { display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  padding:9px 10px; border:none; background:transparent; border-radius:8px; cursor:pointer;
+  font-family:inherit; font-size:13px; color:#334155; font-weight:600; transition:background .12s; }
+.rm-item:hover { background:#f0fdf4; color:#15803d; }
+.rm-emoji { font-size:16px; width:22px; text-align:center; flex-shrink:0; }
+.rm-label { flex:1; display:flex; flex-direction:column; line-height:1.3; }
+.rm-label small { font-size:10.5px; color:#94a3b8; font-weight:500; }
+.rm-item:hover .rm-label small { color:#65a30d; }
+.rm-count { background:#ef4444; color:#fff; font-size:10px; font-weight:800;
+  min-width:18px; height:18px; line-height:18px; text-align:center; border-radius:9px; padding:0 5px; flex-shrink:0; }
+.rm-empty { padding:14px 12px; text-align:center; color:#94a3b8; font-size:12.5px; }
 
 /* -- AI panel -- */
 .db2-ai-panel { background:#fff; border:1px solid #e2e8f0; border-radius:12px;
@@ -718,13 +731,6 @@ small, .small, .preview-item .label { font-size: 12px !important; }
 
 /* divider */
 .db2-divider { border:0; border-top:1.5px solid #f1f5f9; margin:22px 0; }
-
-/* ── per-form edit buttons ── */
-.row-tools { display:flex; flex-wrap:wrap; gap:3px; }
-.row-tools button { padding:5px 9px; border-radius:6px; border:1px solid #e2e8f0;
-  background:#fff; color:#475569; font-size:11.5px; cursor:pointer;
-  font-family:inherit; font-weight:600; transition:all .15s; }
-.row-tools button:hover { background:#eff6ff; color:#1e3a8a; border-color:#93c5fd; }
 
 /* ===================================================== */
 /* ===== REDESIGN: CARD LAUNCHER + STEP BREADCRUMB ====== */
@@ -797,6 +803,8 @@ small, .small, .preview-item .label { font-size: 12px !important; }
 
 /* Required-field hint dot (used optionally by .field.is-required) */
 .field.is-required label::after { content:' *'; color:#dc2626; font-weight:800; }
+/* Highlight a field that failed validation on submit */
+.field-error { border-color:#dc2626 !important; box-shadow:0 0 0 3px rgba(220,38,38,0.18) !important; background:#fff5f5 !important; }
 
 /* Clearer section spacing rhythm */
 .section { scroll-margin-top: 90px; }
@@ -828,18 +836,6 @@ small, .small, .preview-item .label { font-size: 12px !important; }
   padding:3px 12px; font-size:11.5px; font-weight:700;
   border: 1px solid #bfdbfe;
 }
-
-/* Row tools upgrade */
-.row-tools { display:flex; flex-wrap:wrap; gap:4px; }
-.row-tools button {
-  padding:5px 10px; border-radius:7px; border:1px solid #e2e8f0;
-  background:#fff; color:#475569; font-size:11.5px; cursor:pointer;
-  font-family:inherit; font-weight:600; transition:all .15s;
-  box-shadow: 0 1px 0 #e2e8f0;
-}
-.row-tools button:hover { background:#eff6ff; color:#1e3a8a; border-color:#93c5fd; transform: translateY(-1px); box-shadow: 0 2px 4px rgba(59,130,246,0.15); }
-.row-tools .ai-b { border-color:#c4b5fd; color:#6d28d9; }
-.row-tools .ai-b:hover { background:#f5f3ff; border-color:#a78bfa; }
 
 /* Toolbar inputs */
 .db2-search {
@@ -1597,7 +1593,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
       </div>
       <div class="action-controls">
         <button type="button" class="btn-control btn-back" onclick="showSubTab('f1',3)"><i class="ti ti-arrow-left"></i> ก่อนหน้า</button>
-        <button type="button" style="padding:12px 28px;font-size:15px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;cursor:pointer;font-weight:700;" onclick="saveF1()">✅ บันทึกแบบสังเกต</button>
+        <button type="button" style="padding:12px 28px;font-size:15px;border-radius:10px;background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff;border:none;cursor:pointer;font-weight:700;" onclick="saveF1(event)">✅ บันทึกแบบสังเกต</button>
       </div>
     </div>
   </div><!-- end form-f1 -->
@@ -1794,7 +1790,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
       </div>
       <div class="action-controls">
         <button type="button" class="btn-control btn-back" onclick="showSubTab('f2',3)"><i class="ti ti-arrow-left"></i> ก่อนหน้า</button>
-        <button type="button" style="padding:12px 28px;font-size:15px;border-radius:10px;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border:none;cursor:pointer;font-weight:700;" onclick="saveF2()">✅ บันทึกแบบสังเกต</button>
+        <button type="button" style="padding:12px 28px;font-size:15px;border-radius:10px;background:linear-gradient(135deg,#0f766e,#14b8a6);color:#fff;border:none;cursor:pointer;font-weight:700;" onclick="saveF2(event)">✅ บันทึกแบบสังเกต</button>
       </div>
     </div>
   </div><!-- end form-f2 -->
@@ -1951,7 +1947,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
       </div>
       <div class="action-controls">
         <button type="button" class="btn-control btn-back" onclick="showSubTab('f3',2)"><i class="ti ti-arrow-left"></i> ก่อนหน้า</button>
-        <button type="button" style="padding:12px 28px;font-size:15px;border-radius:10px;background:linear-gradient(135deg,#b45309,#f59e0b);color:#fff;border:none;cursor:pointer;font-weight:700;" onclick="saveF3()">✅ บันทึกแบบสังเกต</button>
+        <button type="button" style="padding:12px 28px;font-size:15px;border-radius:10px;background:linear-gradient(135deg,#b45309,#f59e0b);color:#fff;border:none;cursor:pointer;font-weight:700;" onclick="saveF3(event)">✅ บันทึกแบบสังเกต</button>
       </div>
     </div>
   </div><!-- end form-f3 -->
@@ -2063,7 +2059,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
       </div>
       <div class="action-controls">
         <button type="button" class="btn-control btn-back" onclick="showSubTab('f4',1)"><i class="ti ti-arrow-left"></i> ก่อนหน้า</button>
-        <button type="button" style="padding:12px 28px;font-size:15px;border-radius:10px;background:linear-gradient(135deg,#be185d,#ec4899);color:#fff;border:none;cursor:pointer;font-weight:700;" onclick="saveF4()">✅ บันทึกแบบสอบถาม</button>
+        <button type="button" style="padding:12px 28px;font-size:15px;border-radius:10px;background:linear-gradient(135deg,#be185d,#ec4899);color:#fff;border:none;cursor:pointer;font-weight:700;" onclick="saveF4(event)">✅ บันทึกแบบสอบถาม</button>
       </div>
     </div>
   </div><!-- end form-f4 -->
@@ -2219,7 +2215,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
       </div>
       <div class="action-controls">
         <button type="button" class="btn-control btn-back" onclick="showSubTab('f5',2)"><i class="ti ti-arrow-left"></i> ก่อนหน้า</button>
-        <button type="button" style="padding:12px 28px;font-size:15px;border-radius:10px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border:none;cursor:pointer;font-weight:700;" onclick="saveF5()">✅ บันทึกผลการสะท้อน PLC</button>
+        <button type="button" style="padding:12px 28px;font-size:15px;border-radius:10px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:#fff;border:none;cursor:pointer;font-weight:700;" onclick="saveF5(event)">✅ บันทึกผลการสะท้อน PLC</button>
       </div>
     </div>
   </div><!-- end form-f5 -->
@@ -2281,7 +2277,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
             <th class="fc" title="F5 เสียงสะท้อน">F5<br><span style="font-size:10px;opacity:.7;">สะท้อน</span></th>
             <th class="fc" title="F6 PLC">F6<br><span style="font-size:10px;opacity:.7;">PLC</span></th>
             <th style="min-width:110px;">ความคืบหน้า</th>
-            <th style="min-width:180px;">เครื่องมือ</th>
+            <th style="min-width:215px;">เครื่องมือ</th>
           </tr>
         </thead>
         <tbody id="dbTableBody">
@@ -2508,7 +2504,7 @@ const gradeList = ["อ.1", "อ.2", "อ.3", "ป.1", "ป.2", "ป.3", "ป.4"
 window.addEventListener('DOMContentLoaded', () => {
   // Render Academic Matrix
   const acTbody = document.getElementById('academic_tbody');
-  gradeList.forEach(g => {
+  if (acTbody) gradeList.forEach(g => {
     acTbody.innerHTML += `
       <tr>
         <td style="font-weight:700;color:#1e3a8a;text-align:center;font-size:13px;">${g}</td>
@@ -2530,7 +2526,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Render Hardware Matrix
   const hwTbody = document.getElementById('hardware_tbody');
-  gradeList.forEach(g => {
+  if (hwTbody) gradeList.forEach(g => {
     hwTbody.innerHTML += `
       <tr>
         <td>${g}</td>
@@ -2591,6 +2587,22 @@ function getRadioVal(name) {
 async function submitForm() {
   const statusEl = document.getElementById('submitStatus');
   const submitBtn = document.getElementById('submitBtn');
+
+  // ===== ตรวจสอบช่องจำเป็นก่อนส่ง: ชื่อโรงเรียน =====
+  // (แดชบอร์ดจัดกลุ่มข้อมูลด้วยชื่อโรงเรียน ถ้าว่างจะกลายเป็นแถวกำพร้าที่จับกลุ่มไม่ได้)
+  if (!getVal('sch_name')) {
+    const f = document.getElementById('sch_name');
+    if (typeof showTab === 'function') showTab(1); // ช่องชื่อโรงเรียนอยู่ในแท็บ "ข้อมูลโรงเรียน"
+    if (f) {
+      f.classList.add('field-error');
+      f.focus();
+      f.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      f.addEventListener('input', () => f.classList.remove('field-error'), { once: true });
+    }
+    if (statusEl) statusEl.innerHTML = '<span style="color:#dc2626;font-weight:600;">⚠️ กรุณากรอก "ชื่อโรงเรียน" ก่อนบันทึกข้อมูล</span>';
+    return;
+  }
+
   // ป้องกันการกดซ้ำ
   if (submitBtn) {
     submitBtn.disabled = true;
@@ -2973,7 +2985,7 @@ function db2RenderTable(data) {
       const safeName = name.replace(/'/g,"\\'");
       const n = st[f.id] ? db2GetFormRows(name, f.id).length : 0;
       if (!n) {
-        return `<td style="text-align:center;"><span class="fchip no" style="cursor:pointer;font-size:11px;" title="ยังไม่มีข้อมูล ${f.label}">—</span></td>`;
+        return `<td style="text-align:center;"><span class="fchip no" style="cursor:pointer;" title="ยังไม่มีข้อมูล ${f.label}"><i class="ti ti-minus"></i></span></td>`;
       }
       const onclick = n > 1
         ? `openFormEntryPicker('${safeName}','${f.id}')`
@@ -2982,20 +2994,13 @@ function db2RenderTable(data) {
         ? `<span style="position:absolute;top:-6px;right:-8px;background:#ef4444;color:#fff;font-size:9px;font-weight:700;min-width:15px;height:15px;line-height:15px;border-radius:8px;padding:0 3px;">${n}</span>`
         : '';
       const title = n > 1 ? `${f.label}: มี ${n} รายการ (คลิกเพื่อเลือก)` : `คลิกเพื่อดู ${f.label}`;
-      return `<td style="text-align:center;"><span class="fchip ok" style="cursor:pointer;position:relative;display:inline-block;" title="${title}" onclick="${onclick}">✓${badge}</span></td>`;
+      return `<td style="text-align:center;"><span class="fchip ok" style="cursor:pointer;position:relative;display:inline-flex;" title="${title}" onclick="${onclick}"><i class="ti ti-check"></i>${badge}</span></td>`;
     }).join('');
 
     // find original index in allResponsesData for PDF/preview
     const origIdx = allResponsesData.indexOf(row);
 
     const safeSumName = name.replace(/'/g,"\\'");
-    const f0Tools = isStub
-      ? `<span style="font-size:11px;color:#f59e0b;font-weight:600;">⚠️ ยังไม่มีข้อมูล F1</span>
-         <button style="background:#eff6ff;color:#1e3a8a;border-color:#bfdbfe;" onclick="openPreviewModal(${origIdx})"><i class="ti ti-layout-list"></i> สรุปรายโรงเรียน</button>`
-      : `<button onclick="openPreviewModal(${origIdx})"><i class="ti ti-eye"></i> พรีวิว</button>
-         <button onclick="openFormEdit('${name.replace(/'/g,"\\'")}','f0')"><i class="ti ti-pencil"></i> แก้ไข F1</button>
-         <button onclick="downloadSinglePDF(${origIdx})"><i class="ti ti-file-text"></i> PDF</button>
-         <button style="background:#eff6ff;color:#1e3a8a;border-color:#bfdbfe;" onclick="openPreviewModal(${origIdx})"><i class="ti ti-layout-list"></i> สรุปรายโรงเรียน</button>`;
 
     return `<tr${isStub ? ' style="background:#fffbeb;"' : ''}>
       <td>
@@ -3012,18 +3017,58 @@ function db2RenderTable(data) {
         </div>
         <div class="pb-wrap"><div class="pb-fill" style="width:${pct}%;background:${col};"></div></div>
       </td>
-      <td class="row-tools">
-        ${f0Tools}
-        ${DB2_FORMS.filter(f=>f.id!=='f0'&&st[f.id]).map(f=>{
-          const safe = name.replace(/'/g,"\\'");
-          const n = db2GetFormRows(name, f.id).length;
-          const click = n > 1 ? `openFormEntryPicker('${safe}','${f.id}')` : `openFormEdit('${safe}','${f.id}')`;
-          const lbl = n > 1 ? `แก้ไข ${f.label} (${n})` : `แก้ไข ${f.label}`;
-          return `<button style="background:#f0fdf4;color:#15803d;border-color:#bbf7d0;" onclick="${click}"><i class="ti ti-pencil"></i> ${lbl}</button>`;
-        }).join('')}
+      <td>
+        <div class="row-actions">
+          <button class="ra-btn ra-view" title="ดูสรุป / พรีวิวรายโรงเรียน" onclick="openPreviewModal(${origIdx})"><i class="ti ti-eye"></i><span>ดู</span></button>
+          ${isStub ? '' : `<button class="ra-btn ra-pdf" title="ดาวน์โหลด PDF" onclick="downloadSinglePDF(${origIdx})"><i class="ti ti-file-text"></i><span>PDF</span></button>`}
+          <button class="ra-btn ra-edit" title="แก้ไขแบบฟอร์ม" onclick="openRowMenu(event,'${safeSumName}')"><i class="ti ti-pencil"></i><span>แก้ไข</span><i class="ti ti-chevron-down ra-caret"></i></button>
+          ${isStub ? '<span class="ra-stub" title="ยังไม่มีข้อมูล F1">⚠️ ยังไม่มี F1</span>' : ''}
+        </div>
       </td>
     </tr>`;
   }).join('');
+}
+
+// ── Row edit dropdown menu (popover rendered to <body> so it isn't clipped) ──
+function openRowMenu(ev, name) {
+  ev.stopPropagation();
+  closeRowMenu();
+  const safe = name.replace(/'/g, "\\'");
+  const st = db2SchoolFormStatus(name);
+  const items = DB2_FORMS.filter(f => st[f.id]).map(f => {
+    const nrec  = db2GetFormRows(name, f.id).length;
+    const click = (nrec > 1) ? `openFormEntryPicker('${safe}','${f.id}')` : `openFormEdit('${safe}','${f.id}')`;
+    const badge = nrec > 1 ? `<span class="rm-count">${nrec}</span>` : '';
+    return `<button class="rm-item" onclick="closeRowMenu();${click}">
+      <span class="rm-emoji">${f.emoji}</span>
+      <span class="rm-label">แก้ไข ${f.label} <small>${f.name}</small></span>${badge}</button>`;
+  }).join('');
+
+  const menu = document.createElement('div');
+  menu.className = 'row-menu';
+  menu.id = 'activeRowMenu';
+  menu.innerHTML = `<div class="rm-head">เลือกแบบฟอร์มที่จะแก้ไข</div>${items || '<div class="rm-empty">ยังไม่มีแบบฟอร์มให้แก้ไข</div>'}`;
+  document.body.appendChild(menu);
+
+  const r = ev.currentTarget.getBoundingClientRect();
+  let left = r.right - menu.offsetWidth;
+  if (left < 8) left = 8;
+  let top = r.bottom + 6;
+  if (top + menu.offsetHeight > window.innerHeight - 8) {
+    top = Math.max(8, r.top - menu.offsetHeight - 6); // flip up if no room below
+  }
+  menu.style.left = left + 'px';
+  menu.style.top  = top + 'px';
+
+  setTimeout(() => {
+    document.addEventListener('click', closeRowMenu, { once: true });
+    window.addEventListener('scroll', closeRowMenu, { once: true, capture: true });
+    window.addEventListener('resize', closeRowMenu, { once: true });
+  }, 0);
+}
+function closeRowMenu() {
+  const m = document.getElementById('activeRowMenu');
+  if (m) m.remove();
 }
 
 function filterDashboardTable() {
@@ -5571,6 +5616,24 @@ async function submitFormGeneric(formId, panelId, btnEl, statusElId) {
     // ★ ใช้ payload แบบ schema (หนึ่งคอลัมน์ต่อข้อ เรียงตาม DOM = ตรงกับ SHEET_HEADERS เป๊ะ)
     //   remapFormData ยังเก็บไว้เผื่อส่วนอื่นเรียกใช้ แต่ไม่ใช้เป็น payload หลักแล้ว
     const data = collectFormPayload(formId);
+
+    // ===== ตรวจสอบช่องจำเป็นก่อนส่ง: ชื่อโรงเรียน =====
+    // (แดชบอร์ดจัดกลุ่มข้อมูลด้วยชื่อโรงเรียน ถ้าว่างจะกลายเป็นแถวกำพร้าที่จับกลุ่มไม่ได้)
+    if (!db2GetRowSchoolName(data)) {
+      clearTimeout(timeoutId); clearTimeout(watchdogId);
+      const panel = document.getElementById(panelId);
+      const schInput = panel ? panel.querySelector('[data-key="โรงเรียนปลายทาง"] input, [data-key="โรงเรียน"] input') : null;
+      if (schInput) {
+        schInput.classList.add('field-error');
+        schInput.focus();
+        schInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        schInput.addEventListener('input', () => schInput.classList.remove('field-error'), { once: true });
+      }
+      if (btnEl) { btnEl.disabled = false; btnEl.style.opacity = '1'; btnEl.innerHTML = btnEl.dataset.originalText || '✅ บันทึก'; }
+      if (statusEl) statusEl.innerHTML = '<span style="color:#dc2626;font-weight:600;">⚠️ กรุณากรอก "ชื่อโรงเรียน" ก่อนบันทึกข้อมูล</span>';
+      return;
+    }
+
     // เก็บ snapshot ตามตำแหน่งช่องจริง (index-based) ลงคอลัมน์เดียว __snapshot__
     // เพื่อให้ดึงกลับมาแก้ไข/พิมพ์ PDF ได้ครบและตรงเป๊ะ แม้โหลดจาก Google Sheets
     try { data['__snapshot__'] = JSON.stringify(serializeFormPanel(formId)); } catch(e) { console.warn('snapshot fail', e); }
@@ -5801,11 +5864,11 @@ function remapFormData(formId, rawData) {
   return rawData; // default: pass through
 }
 
-function saveF1() { submitFormGeneric('f1', 'form-f1', event.currentTarget); }
-function saveF2() { submitFormGeneric('f2', 'form-f2', event.currentTarget); }
-function saveF3() { submitFormGeneric('f3', 'form-f3', event.currentTarget); }
-function saveF4() { submitFormGeneric('f4', 'form-f4', event.currentTarget); }
-function saveF5() { submitFormGeneric('f5', 'form-f5', event.currentTarget); }
+function saveF1(e) { submitFormGeneric('f1', 'form-f1', (e&&e.currentTarget)||(window.event&&window.event.currentTarget)); }
+function saveF2(e) { submitFormGeneric('f2', 'form-f2', (e&&e.currentTarget)||(window.event&&window.event.currentTarget)); }
+function saveF3(e) { submitFormGeneric('f3', 'form-f3', (e&&e.currentTarget)||(window.event&&window.event.currentTarget)); }
+function saveF4(e) { submitFormGeneric('f4', 'form-f4', (e&&e.currentTarget)||(window.event&&window.event.currentTarget)); }
+function saveF5(e) { submitFormGeneric('f5', 'form-f5', (e&&e.currentTarget)||(window.event&&window.event.currentTarget)); }
 </script>
 
 <!-- PDF PRINT AREAS FOR F2-F6 -->
