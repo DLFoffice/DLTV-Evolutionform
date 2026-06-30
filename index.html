@@ -2320,7 +2320,7 @@ small, .small, .preview-item .label { font-size: 12px !important; }
   <div class="success-modal">
     <div class="check-circle" style="color:#fff; font-size:40px; display:flex; align-items:center; justify-content:center;">✓</div>
     <h2 id="successTitle">บันทึกข้อมูลสำเร็จ!</h2>
-    <p>ข้อมูล <strong id="successFormLabel">F1 บริบทโรงเรียน</strong> ของโรงเรียน <strong id="successSchoolName"></strong><br>ถูกส่งเข้าระบบ Google Sheets เรียบร้อยแล้ว</p>
+    <p>ข้อมูล <strong id="successFormLabel">F1 บริบทโรงเรียน</strong> ของโรงเรียน <strong id="successSchoolName"></strong><br>ถูกบันทึกเข้าระบบ (Firebase) เรียบร้อยแล้ว</p>
     <button class="btn-dashboard-link" onclick="closeSuccessPopup(); switchMode('dashboard')">
       <i class="ti ti-chart-bar"></i> ไปยัง Dashboard ติดตามผล
     </button>
@@ -2491,8 +2491,112 @@ small, .small, .preview-item .label { font-size: 12px !important; }
 </div>
 
 <script>
-// Google Apps Script Web App URL (Hardcoded)
+// Google Apps Script Web App URL (เก็บไว้เป็น fallback/อ้างอิง — ไม่ได้ใช้แล้วหลังย้ายไป Firebase)
 const GS_URL = "https://script.google.com/macros/s/AKfycbwEwdO3RKhRwy4027ybKlhj6Q9cAM3HPUYqnQ9YRE608SVMRoWnuPNarmF-gfZCmWCWMw/exec";
+
+/* ════════════════════════════════════════════════════════════════════
+ *  CLOUD FIRESTORE (REST) — แหล่งเก็บข้อมูลหลัก (เร็วกว่า Apps Script)
+ *  ──────────────────────────────────────────────────────────────────
+ *  Firestore ไม่มี "databaseURL" แบบ Realtime Database — มันใช้
+ *   • Project ID  (เห็นใน URL ของ console: .../project/<PROJECT_ID>/...)
+ *   • Web API Key (Project Settings ⚙️ → General → Web API Key)
+ *
+ *  วิธีตั้งค่า (ทำครั้งเดียว):
+ *   1) ในคอนโซล Firebase เปิดโปรเจกต์ที่สร้างไว้ (เช่น dataevoform)
+ *   2) สร้าง Firestore แล้ว (หน้าที่เห็น "Start collection") — ไม่ต้องสร้าง collection เอง
+ *      โค้ดจะสร้าง collection: dltv_f0 ... dltv_f5 ให้อัตโนมัติเมื่อบันทึกครั้งแรก
+ *   3) เอา Web API Key มาวางใน FS_API_KEY ด้านล่าง
+ *      (กดไอคอนเฟือง ⚙️ ข้างเมนู → Project settings → แท็บ General → ช่อง "Web API Key")
+ *      *API Key ของ Firebase ออกแบบมาให้เปิดเผยในโค้ดฝั่งหน้าเว็บได้ ความปลอดภัยอยู่ที่ Rules*
+ *
+ *  ⚠️ ความปลอดภัย: หน้า Firestore → แท็บ Rules ต้องอนุญาตให้อ่าน/เขียนได้
+ *     ช่วงทดสอบใช้ allow read, write: if true; ได้ แต่ก่อนใช้งานจริงควรล็อกด้วย Auth
+ *     (ดูตัวอย่างใน FIREBASE_SETUP.md)
+ * ════════════════════════════════════════════════════════════════════ */
+const FS_PROJECT_ID = "dataevoform";   // ← Project ID (เห็นใน URL คอนโซล)
+const FS_API_KEY    = "AIzaSyDV1-iHyzq5fillmORHtGUZULy4yritY0Q"; // ← Web API Key (จาก firebaseConfig.apiKey)
+const FS_PREFIX     = "dltv";          // ชื่อนำหน้า collection → dltv_f0 ... dltv_f5
+const FS_BASE       = "https://firestore.googleapis.com/v1/projects/" + FS_PROJECT_ID + "/databases/(default)/documents";
+
+function _fsCollection(formId) { return FS_PREFIX + "_" + formId; }
+function _fsKey() { return FS_API_KEY ? ("key=" + encodeURIComponent(FS_API_KEY)) : ""; }
+function _fsUrl(path, extraQuery) {
+  let u = FS_BASE + (path ? "/" + path : "");
+  const q = [_fsKey(), extraQuery].filter(Boolean).join("&");
+  if (q) u += "?" + q;
+  return u;
+}
+// แปลง object ปกติ → Firestore "fields" (เราเก็บทั้งแถวเป็น string ในคีย์ d เพื่อเลี่ยงข้อจำกัดชื่อฟิลด์)
+function _fsToFields(rowObj) {
+  return { fields: {
+    d:         { stringValue: JSON.stringify(rowObj) },
+    updatedAt: { integerValue: String(Date.now()) }
+  } };
+}
+// แปลง Firestore document → row object เดิม
+function _fsFromDoc(doc) {
+  try {
+    const f = doc && doc.fields;
+    if (f && f.d && typeof f.d.stringValue === "string") {
+      const row = JSON.parse(f.d.stringValue);
+      // เติม EntryID จาก document id ถ้าไม่มี
+      if (row && typeof row === "object" && !row["EntryID"] && !row["entryId"]) {
+        const id = String(doc.name || "").split("/").pop();
+        if (id) row["EntryID"] = id;
+      }
+      return row;
+    }
+  } catch (e) { console.warn("fsFromDoc parse fail", e); }
+  return null;
+}
+
+/** อ่านทุกรายการของฟอร์มหนึ่ง → คืน array ของ object (โครงสร้างเดิม ใช้กับ dashboard/preview/PDF ได้ทันที) */
+async function fbReadForm(formId) {
+  const rows = [];
+  let pageToken = "";
+  do {
+    const extra = "pageSize=300" + (pageToken ? "&pageToken=" + encodeURIComponent(pageToken) : "");
+    const res = await fetch(_fsUrl(_fsCollection(formId), extra));
+    if (!res.ok) {
+      // collection ที่ยังไม่มีเอกสารเลย Firestore จะตอบ 200 + {} ไม่ใช่ error
+      // ถ้า 404/403 ให้โยน error เพื่อให้ผู้ใช้รู้ว่า config/rules ผิด
+      throw new Error("Firestore อ่าน " + formId + " ไม่สำเร็จ (HTTP " + res.status + ")");
+    }
+    const data = await res.json(); // { documents:[...], nextPageToken? } หรือ {}
+    (data.documents || []).forEach(function (doc) {
+      const row = _fsFromDoc(doc);
+      if (row && typeof row === "object") rows.push(row);
+    });
+    pageToken = data.nextPageToken || "";
+  } while (pageToken);
+  return rows;
+}
+
+/** เขียน/อัปเดต 1 รายการ — PATCH ตาม EntryID (สร้างใหม่ หรือทับของเดิมที่ EntryID เดียวกัน) */
+async function fbWriteEntry(formId, entryId, data, signal) {
+  const id = encodeURIComponent(String(entryId || (data && (data["EntryID"] || data["entryId"])) || genEntryId()));
+  const res = await fetch(_fsUrl(_fsCollection(formId) + "/" + id), {
+    method: "PATCH",   // PATCH = create-or-overwrite เอกสารตาม id
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(_fsToFields(data)),
+    signal: signal
+  });
+  if (!res.ok) {
+    let detail = "";
+    try { detail = " — " + (await res.text()).slice(0, 200); } catch (e) {}
+    throw new Error("Firestore บันทึก " + formId + " ไม่สำเร็จ (HTTP " + res.status + ")" + detail);
+  }
+  return res.json();
+}
+
+/** ลบ 1 รายการออกจาก Firestore (ใช้ตอนลบข้อมูลในแดชบอร์ด ถ้ามีปุ่มลบ) */
+async function fbDeleteEntry(formId, entryId) {
+  const id = encodeURIComponent(String(entryId || ""));
+  if (!id) return;
+  const res = await fetch(_fsUrl(_fsCollection(formId) + "/" + id), { method: "DELETE" });
+  if (!res.ok) throw new Error("Firestore ลบ " + formId + " ไม่สำเร็จ (HTTP " + res.status + ")");
+  return true;
+}
 
 let currentTabIdx = 0;
 const totalTabs = 6;
@@ -2609,7 +2713,7 @@ async function submitForm() {
     submitBtn.style.opacity = '0.7';
     submitBtn.innerHTML = '<i class="ti ti-loader" style="font-size:20px;animation:spin 1s linear infinite;"></i> กำลังส่งข้อมูล...';
   }
-  statusEl.innerHTML = '<span style="color:orange;"><i class="ti ti-loader"></i> ⏳ กำลังส่งข้อมูลไปยัง Google Sheets โปรดรอสักครู่...</span>';
+  statusEl.innerHTML = '<span style="color:orange;"><i class="ti ti-loader"></i> ⏳ กำลังบันทึกข้อมูลขึ้น Firebase โปรดรอสักครู่...</span>';
 
   // ===== ครอบทุกขั้นตอนด้วย try/catch เดียว =====
   // (เดิม การสร้าง payload ทำนอก try/catch — ถ้า element ใดหายไป/เป็น null
@@ -2729,19 +2833,9 @@ async function submitForm() {
     // formId = payload.formId / data = payload.data) ถ้าไม่มี formId มันจะ throw
     // "ข้อมูลไม่ครบ" และไม่บันทึกลง Sheet เลย แต่เพราะเป็น no-cors ฝั่งหน้าเว็บ
     // อ่าน response ไม่ได้ จึงเข้าใจผิดว่า "บันทึกสำเร็จ" ทั้งที่ Sheet ไม่มีแถวใหม่เพิ่ม
-    await fetch(GS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        formId: 'f0',
-        data: payload,
-        mode: isEditMode ? 'update' : 'dynamic',
-        entryId: payload['EntryID'],
-        ...(isEditMode && currentEditSchoolName ? { schoolName: currentEditSchoolName } : {})
-      }),
-      signal: controller.signal
-    });
+    // ===== บันทึกลง Firebase (PUT ตาม EntryID = สร้างใหม่หรือทับของเดิม) =====
+    // Firebase ตอบกลับได้จริง (ไม่ใช่ no-cors) จึงรู้ผลสำเร็จ/ล้มเหลวแน่นอน
+    await fbWriteEntry('f0', payload['EntryID'], payload, controller.signal);
     clearTimeout(timeoutId); clearTimeout(watchdogId);
 
     // ถ้าเป็นโหมดแก้ไข — อัปเดตข้อมูลใน local allResponsesData ด้วย
@@ -2768,7 +2862,7 @@ async function submitForm() {
     clearTimeout(timeoutId); clearTimeout(watchdogId);
     if (submitBtn) { submitBtn.disabled = false; submitBtn.style.opacity = '1'; }
     if (e.name === 'AbortError') {
-      statusEl.innerHTML = '<span style="color:#b45309;"><i class="ti ti-clock"></i> หมดเวลาการตอบสนอง — ข้อมูลอาจถูกบันทึกแล้ว กรุณาตรวจสอบ Google Sheets</span>';
+      statusEl.innerHTML = '<span style="color:#b45309;"><i class="ti ti-clock"></i> หมดเวลาการตอบสนอง — ข้อมูลอาจถูกบันทึกแล้ว กรุณาตรวจสอบ Firebase</span>';
       showSuccessPopup(payload['3.1_ชื่อโรงเรียน'] || payload['ชื่อโรงเรียน'] || 'โรงเรียน', '🏫 F1 บันทึกบริบทโรงเรียน', true);
       allResponsesData.push(Object.assign({}, payload));
       db2MultiFormData.f0 = [...allResponsesData.filter(r => !r._stub)];
@@ -2838,13 +2932,13 @@ async function loadDashboardData() {
 
   try {
     // F0
-    const f0 = await db2Fetch(`${GS_URL}?action=read`);
+    const f0 = await fbReadForm('f0');
     db2MultiFormData.f0 = Array.isArray(f0) ? f0 : [];
     allResponsesData = [...db2MultiFormData.f0];
 
-    // F1–F5 (ไม่ block ถ้า GAS ยังไม่รองรับ)
+    // F1–F5
     for (const fid of ['f1','f2','f3','f4','f5']) {
-      try { const d = await db2Fetch(`${GS_URL}?action=read&form=${fid}`);
+      try { const d = await fbReadForm(fid);
             db2MultiFormData[fid] = Array.isArray(d) ? d : []; }
       catch(_) { db2MultiFormData[fid] = []; }
     }
@@ -2873,12 +2967,13 @@ async function loadDashboardData() {
 
   } catch(err) {
     tbody.innerHTML = `<tr><td colspan="10" style="padding:36px;">
-      <div style="text-align:center;color:#dc2626;font-weight:700;">❌ ดึงข้อมูลไม่สำเร็จ</div>
+      <div style="text-align:center;color:#dc2626;font-weight:700;">❌ ดึงข้อมูลจาก Firestore ไม่สำเร็จ</div>
       <div style="text-align:center;color:#64748b;font-size:13px;margin-top:6px;">${err.message}</div>
       <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:9px;padding:12px 16px;margin:14px auto 0;max-width:560px;font-size:13px;line-height:1.8;color:#92400e;">
-        <strong>🔧 วิธีแก้:</strong> เปิด Apps Script → Deploy → ตรวจสอบ <em>Who has access: Anyone</em><br>
-        แล้วเพิ่ม JSONP support ใน doGet:<br>
-        <code>if(e.parameter.callback) return ContentService.createTextOutput(e.parameter.callback+'('+JSON.stringify(result)+')').setMimeType(ContentService.MimeType.JAVASCRIPT);</code>
+        <strong>🔧 วิธีแก้:</strong> ตรวจสอบว่า<br>
+        1) ตั้งค่า <code>FS_PROJECT_ID</code> ถูกต้อง (เห็นใน URL คอนโซล: .../project/<b>ตรงนี้</b>/...)<br>
+        2) วาง <code>FS_API_KEY</code> = Web API Key (Project Settings ⚙️ → General → Web API Key)<br>
+        3) หน้า Firestore → แท็บ Rules อนุญาตให้อ่าน/เขียนได้ (ช่วงทดสอบใช้ <code>allow read, write: if true;</code>)
       </div>
     </td></tr>`;
   }
@@ -3651,6 +3746,199 @@ function buildSchoolSummaryHTML(schoolName, st) {
 
 // ── end school summary ──────────────────────────────
 
+// ════════════════════════════════════════════════════════════════
+//  รายงานเต็ม "ตรงตามแบบฟอร์ม" — ใช้ engine เดียวกับ PDF รายฟอร์ม
+//  (buildPDFFromLiveForm + buildFormSchema) เพื่อให้พรีวิว/PDF สรุป
+//  แสดงครบทุกข้อ เรียงตามลำดับในแบบฟอร์มจริง
+// ════════════════════════════════════════════════════════════════
+
+/** เติมข้อมูล 1 แถวเข้า panel แล้วอ่านออกมาเป็น HTML (ตรงตามแบบฟอร์ม) จากนั้นคืนสภาพเดิม */
+function renderFormFaithfulHTML(formId, schoolName, row) {
+  if (!row) return '';
+  // F1 (บริบทโรงเรียน): render จากคอลัมน์โดยตรง — ครบทุกหมวด มีค่าเสมอ และไม่แตะฟอร์มที่กำลังแก้
+  if (formId === 'f0') {
+    try { return buildF0FaithfulHTML(row, schoolName); }
+    catch (e) { console.warn('buildF0FaithfulHTML fail', e); return ''; }
+  }
+  const panel = document.getElementById('form-' + formId);
+  if (!panel) return '';
+  let backup = null;
+  try { backup = serializeFormPanel(formId); } catch (e) {}
+  let html = '';
+  try {
+    let filled = false;
+    if (row['__snapshot__']) {
+      try {
+        const snap = (typeof row['__snapshot__'] === 'string') ? JSON.parse(row['__snapshot__']) : row['__snapshot__'];
+        const isReal = snap && typeof snap === 'object' &&
+          Object.keys(snap).some(k => k.startsWith('__i_') || k.startsWith('__ri_') || k.startsWith('__c_'));
+        if (isReal) { restoreFormPanel(formId, snap); filled = true; }
+      } catch (e) {}
+    }
+    if (!filled && Object.keys(row).some(k => k.startsWith('__i_'))) { restoreFormPanel(formId, row); filled = true; }
+    if (!filled) { restoreFromSchema(formId, row); filled = true; }
+    html = buildPDFFromLiveForm(formId, schoolName);
+  } catch (e) {
+    console.warn('renderFormFaithfulHTML fail', formId, e);
+    html = '';
+  } finally {
+    if (backup) { try { restoreFormPanel(formId, backup); } catch (e) {} }
+  }
+  return html;
+}
+
+/** แถบหัวข้อฟอร์มสำหรับรายงานรวม */
+function _reportFormDivider(fd, count) {
+  const badge = count > 0
+    ? '<span style="background:rgba(255,255,255,0.22);border-radius:20px;padding:3px 13px;font-size:13px;font-weight:700;">✓ ' + count + ' รายการ</span>'
+    : '<span style="background:rgba(255,255,255,0.18);border-radius:20px;padding:3px 13px;font-size:13px;font-weight:700;opacity:.85;">— ยังไม่มีข้อมูล</span>';
+  return '<div class="report-form-divider" style="display:flex;align-items:center;justify-content:space-between;gap:10px;'
+    + 'background:linear-gradient(135deg,#1e3a8a,#2563eb);color:#fff;border-radius:10px;padding:12px 18px;margin:26px 0 14px;">'
+    + '<span style="font-weight:800;font-size:16px;">' + (fd.emoji || '') + ' ' + fd.label + ' · ' + fd.name + '</span>'
+    + badge + '</div>';
+}
+
+/** แบนเนอร์ระบุรายการ (กรณีหลายคนกรอกฟอร์มเดียวกัน) */
+function _reportEntryBanner(idx, total, row) {
+  if (total <= 1) return '';
+  const obs = _sv(row, 'ผู้สังเกต', 'ผู้ให้ข้อมูล', 'ผู้บันทึกผลการสะท้อน', 'ผู้รวบรวมข้อมูล') || '(ไม่ระบุผู้บันทึก)';
+  let ts = _sv(row, 'timestamp', 'Timestamp');
+  if (ts) { try { const d = new Date(ts); if (!isNaN(d.getTime())) ts = d.toLocaleDateString('th-TH', {year:'numeric',month:'short',day:'numeric'}); } catch(e){} }
+  return '<div style="background:#f0f4ff;border-left:4px solid #3b82f6;border-radius:6px;padding:8px 14px;margin:14px 0 8px;font-size:13px;font-weight:700;color:#1e3a8a;">'
+    + 'รายการที่ ' + (idx + 1) + ' / ' + total + ' : ' + _esc2(obs)
+    + (ts ? ' &nbsp;·&nbsp; <span style="font-weight:400;color:#64748b;">' + _esc2(ts) + '</span>' : '')
+    + '</div>';
+}
+
+/**
+ * render ฟอร์ม F1 (บริบทโรงเรียน, id=f0) จากคอลัมน์โดยตรง — ครบทุกหมวด มีค่าเสมอ
+ * (อิง mapping เดียวกับ downloadSinglePDF ซึ่งทดสอบแล้วว่าครบและถูกต้อง)
+ */
+function buildF0FaithfulHTML(row, school) {
+  const gv = (a, b) => {
+    let v = (row[a] !== undefined && row[a] !== null && String(row[a]).trim() !== '') ? row[a]
+          : (b !== undefined ? row[b] : '');
+    return (v == null ? '' : String(v)).trim();
+  };
+  const cell = (s) => (s && String(s).trim() !== '') ? _pdfEsc(s) : _pdfMissing();
+  const twoCol = (rows) => '<table class="p-row2col">' + rows.map(r =>
+      '<tr>' + r.map(c => '<td' + (r.length === 1 ? ' colspan="2"' : '') + '><span class="p-label">' + c[0] + ':</span> <strong>' + cell(c[1]) + '</strong></td>').join('') + '</tr>'
+    ).join('') + '</table>';
+  const block = (label, val) =>
+    '<div class="p-block-wrap"><span class="p-block-label">' + label + '</span><span class="p-block-val">' + cell(val) + '</span></div>';
+  const listBlock = (label, val) => {
+    const items = (val || '').split(' | ').map(s => s.trim()).filter(Boolean);
+    const inner = items.length
+      ? items.map(t => '<div style="margin-bottom:2px;">• ' + _pdfEsc(t) + '</div>').join('')
+      : '<span style="color:#94a3b8;">' + _pdfMissing() + '</span>';
+    return '<div class="p-block-wrap"><span class="p-block-label">' + label + '</span><div style="padding:6px 12px;border:1px solid #e2e8f0;border-radius:6px;background:#f8fafc;">' + inner + '</div></div>';
+  };
+
+  let h = pHeader('F1', 'แบบบันทึกบริบทโรงเรียนปลายทางเพื่อการพัฒนา DLTV', school);
+
+  // 1. ผู้ให้ข้อมูล
+  h += '<div class="p-title">1. ข้อมูลผู้ให้ข้อมูล</div>';
+  h += twoCol([
+    [['ชื่อ-นามสกุล', gv('2_ชื่อ-นามสกุลผู้ให้ข้อมูล','ผู้ให้ข้อมูล_ชื่อ')], ['ตำแหน่ง', gv('2_ตำแหน่ง','ผู้ให้ข้อมูล_ตำแหน่ง')]],
+    [['บทบาท/สถานะ', gv('2_บทบาทผู้ให้ข้อมูล','ผู้ให้ข้อมูล_สถานะ')], ['โทรศัพท์', gv('2_โทรศัพท์ผู้ให้ข้อมูล','ผู้ให้ข้อมูล_เบอร์โทร')]],
+    [['อีเมล', gv('2_อีเมล','ผู้ให้ข้อมูล_อีเมล')], ['วันที่ให้ข้อมูล', gv('2_วันที่ให้ข้อมูล','ผู้ให้ข้อมูล_วันที่บันทึก')]],
+  ]);
+
+  // 2. ข้อมูลพื้นฐานของโรงเรียน (3.1, 3.2)
+  h += '<div class="p-title">2. ข้อมูลพื้นฐานของโรงเรียน</div>';
+  h += twoCol([
+    [['ชื่อโรงเรียน', gv('3.1_ชื่อโรงเรียน','ชื่อโรงเรียน')], ['รหัส 10 หลัก', gv('3.1_รหัสโรงเรียน10หลัก','รหัสโรงเรียน')]],
+    [['สังกัด สพท.', gv('3.1_สำนักงานเขตพื้นที่การศึกษา','สำนักงานเขตพื้นที่')]],
+    [['ที่ตั้ง', 'ต.' + gv('3.1_ตำบล','ตำบล') + ' อ.' + gv('3.1_อำเภอ','อำเภอ') + ' จ.' + gv('3.1_จังหวัด','จังหวัด') + ' ' + gv('3.1_รหัสไปรษณีย์','รหัสไปรษณีย์')]],
+  ]);
+  h += block('ประเภทโรงเรียน:', gv('3.1_ประเภทโรงเรียน','ประเภทโรงเรียน_รวม'));
+  h += block('ลักษณะการจัดชั้นเรียน (3.2):', gv('3.2_ลักษณะการจัดชั้นเรียน','ลักษณะชั้นเรียน_รวม'));
+  h += block('รายละเอียดข้อจำกัดห้องเรียน:', gv('3.2_รายละเอียดข้อจำกัดห้องเรียน','ลักษณะชั้นเรียน_รายละเอียดข้อจำกัด'));
+
+  // 3. บุคลากร (3.3)
+  h += '<div class="p-title">3. ข้อมูลบุคลากรโดยรวม (3.3)</div>';
+  h += twoCol([
+    [['ผู้อำนวยการ/ครูใหญ่', gv('3.3_ผู้อำนวยการ/ครูใหญ่','ผอ_ครูใหญ่')], ['รอง ผอ. (คน)', gv('3.3_จำนวนรองผอ(คน)','จำนวนรองผอ')]],
+    [['ครูทั้งหมด (คน)', gv('3.3_จำนวนครูทั้งหมด(คน)','จำนวนครูทั้งหมด')], ['ครูอัตราจ้าง (คน)', gv('3.3_จำนวนครูอัตราจ้าง(คน)','จำนวนครูอัตราจ้าง')]],
+    [['เจ้าหน้าที่ธุรการ (คน)', gv('3.3_จำนวนเจ้าหน้าที่ธุรการ(คน)','จำนวนธุรการ')]],
+  ]);
+  h += listBlock('จำนวนครูที่สอนตรงวิชาเอกโดยประมาณ:', gv('3.3_ครูตรงเอก_หมายเหตุ','ตารางครูตรงวิชาเอก_รวม'));
+
+  // 4. การใช้ DLTV และวิชาการ (4.x)
+  h += '<div class="p-title">4. การใช้ DLTV และข้อมูลวิชาการ</div>';
+  h += block('4.1 ภาพรวมการใช้งาน DLTV:', gv('4.1_ลักษณะการใช้DLTV','ภาพรวมการใช้_รวม'));
+  h += listBlock('4.2 ระดับชั้น/รายวิชาที่ใช้ DLTV เป็นประจำ:', gv('4.2_ระดับชั้นและรายวิชาที่ใช้DLTV(JSON)','ตารางวิชาการแยกชั้นปี_รวม'));
+  h += block('4.3 บทบาทของครูปลายทาง:', gv('4.3_บทบาทครูปลายทาง','บทบาทครูปลายทาง_รวม'));
+  h += block('4.4 การเตรียมการก่อนใช้ DLTV:', gv('4.4_การเตรียมการก่อนใช้DLTV','การเตรียมการก่อนใช้_รวม'));
+  h += block('4.5 การติดตามผลการเรียนรู้หลังใช้ DLTV:', gv('4.5_การติดตามผลการเรียนรู้','การติดตามผลหลังเรียน_รวม'));
+
+  // 5. เทคนิคและอุปกรณ์ (5.x)
+  h += '<div class="p-title">5. โครงสร้างพื้นฐานและอุปกรณ์ (5.x)</div>';
+  h += block('5.1 ช่องทางการรับชม DLTV:', gv('5.1_ช่องทางรับชมDLTV','ช่องทางรับชม_รวม'));
+  h += listBlock('5.2–5.3 สถานะอุปกรณ์รับชมรายชั้นเรียน:', gv('5.2-5.3_สถานะอุปกรณ์รายชั้น(JSON)','ตารางอุปกรณ์ทีวีและกล่อง_รวม'));
+  h += listBlock('5.4 คุณภาพโครงสร้างพื้นฐานที่เกี่ยวข้อง:', gv('5.4_โครงสร้างพื้นฐาน(JSON)','ตารางโครงสร้างพื้นฐาน_รวม'));
+  h += block('5.5 แนวทางการดูแล/ซ่อมบำรุงหลังหมดประกัน:', gv('5.5_แนวทางการดูแลและซ่อมบำรุง','แนวทางซ่อมบำรุงหลังประกัน'));
+
+  // 6. บริบทผู้เรียน + จุดแข็ง/ปัญหา (6,7)
+  h += '<div class="p-title">6. บริบทผู้เรียน จุดแข็ง และปัญหาอุปสรรค</div>';
+  h += block('6. ลักษณะผู้เรียนและปัจจัยข้อจำกัด:', (gv('6_ลักษณะผู้เรียนและข้อจำกัด','ลักษณะผู้เรียน_รวม') + ' ' + gv('6_ลักษณะผู้เรียนและข้อจำกัด2','ข้อจำกัดสำคัญ_รวม')).trim());
+  h += block('6. สิ่งที่ครูต้นทางควรรู้เกี่ยวกับผู้เรียน:', gv('6_สิ่งที่ครูต้นทางควรรู้เกี่ยวกับผู้เรียน','ครูต้นทางควรรับรู้'));
+  h += block('7. จุดแข็งของโรงเรียนในการใช้ DLTV:', gv('7_จุดแข็งในการใช้DLTV','จุดแข็งโรงเรียน'));
+  h += block('7. ปัญหาอุปสรรคและความต้องการสนับสนุน:', gv('7_ปัญหาอุปสรรคและความต้องการสนับสนุน','ปัญหาอุปสรรค'));
+
+  // 7. สรุปบริบทสำคัญ (8.x)
+  h += '<div class="p-title">7. สรุปบริบทสำคัญ (ข้อ 8)</div>';
+  h += '<table class="pdf-table"><tbody>'
+    + '<tr><td style="width:32%;font-weight:bold;background:#f8fafc;color:#1e3a8a;">8.1 บริบทสำคัญของโรงเรียน</td><td style="white-space:pre-wrap;">' + cell(gv('8.1_บริบทสำคัญของโรงเรียน','S8_บริบทสำคัญ')) + '</td></tr>'
+    + '<tr><td style="font-weight:bold;background:#f8fafc;color:#1e3a8a;">8.2 ข้อจำกัดสำคัญในการเรียนรู้</td><td style="white-space:pre-wrap;">' + cell(gv('8.2_ข้อจำกัดสำคัญในการเรียนรู้','S8_ข้อจำกัดการเรียน')) + '</td></tr>'
+    + '<tr><td style="font-weight:bold;background:#f8fafc;color:#1e3a8a;">8.3 สิ่งที่ครูต้นทางควรคำนึงถึง</td><td style="white-space:pre-wrap;">' + cell(gv('8.3_สิ่งที่ครูต้นทางควรคำนึงถึง','S8_ข้อควรคำนึงถึง')) + '</td></tr>'
+    + '<tr><td style="font-weight:bold;background:#f8fafc;color:#1e3a8a;">8.4 ข้อเสนอเบื้องต้นเพื่อสนับสนุน</td><td style="white-space:pre-wrap;">' + cell(gv('8.4_ข้อเสนอเบื้องต้นเพื่อสนับสนุน','S8_ข้อเสนอแนะเบื้องต้น')) + '</td></tr>'
+    + '</tbody></table>';
+
+  // ลงนาม
+  h += pSigTable(
+    gv('ลงนาม_ผู้ให้ข้อมูล'), gv('ลงนาม_ตำแหน่ง','ลงนาม_ตำแหน่งผู้ให้'), gv('ลงนาม_วันที่','ลงนาม_วันที่ผู้ให้'),
+    gv('ลงนาม_ผู้บริหารรับรอง','ลงนาม_ผู้รับข้อมูล'), gv('ลงนาม_ตำแหน่งผู้บริหาร','ลงนาม_ตำแหน่งผู้รับ'), gv('ลงนาม_วันที่ผู้บริหาร','ลงนาม_วันที่ผู้รับ')
+  );
+  return h;
+}
+
+/**
+ * รายงานเต็มของโรงเรียน: วนทุกฟอร์ม (F1–F6) แล้ว render แบบตรงตามแบบฟอร์ม
+ * opts.pageBreak = true -> ใส่ตัวแบ่งหน้าก่อนแต่ละฟอร์ม (สำหรับ PDF)
+ */
+function buildFaithfulSchoolReport(schoolName, opts) {
+  opts = opts || {};
+  let html = '';
+  let any = false;
+  DB2_FORMS.forEach(function (fd, fi) {
+    const rows = db2GetFormRows(schoolName, fd.id) || [];
+    const wrapOpen = (fi > 0 && opts.pageBreak)
+      ? '<div class="report-form-block" style="page-break-before:always;">'
+      : '<div class="report-form-block">';
+    html += wrapOpen;
+    html += _reportFormDivider(fd, rows.length);
+    if (!rows.length) {
+      html += '<div style="padding:14px 16px;color:#94a3b8;font-size:14px;border:1px dashed #cbd5e1;border-radius:10px;background:#f8fafc;">— ยังไม่มีการบันทึกข้อมูลในแบบฟอร์มนี้สำหรับโรงเรียนนี้ —</div>';
+    } else {
+      any = true;
+      rows.forEach(function (row, i) {
+        html += _reportEntryBanner(i, rows.length, row);
+        const body = renderFormFaithfulHTML(fd.id, schoolName, row);
+        html += body
+          ? '<div class="report-form-body">' + body + '</div>'
+          : '<div style="padding:12px 16px;color:#d97706;font-size:13px;">⚠️ ไม่สามารถแสดงรายละเอียดของรายการนี้ได้</div>';
+        if (i < rows.length - 1) html += '<hr style="border:none;border-top:1px dashed #cbd5e1;margin:20px 0;">';
+      });
+    }
+    html += '</div>';
+  });
+  if (!any) {
+    // ยังไม่มีข้อมูลเลย — แต่ยังแสดงโครงรายงานว่างไว้ให้เห็นว่าครบทุกฟอร์ม
+  }
+  return html;
+}
+
 function openPreviewModal(index) {
   currentPreviewIndex = index;
   const item = allResponsesData[index];
@@ -3664,15 +3952,14 @@ function openPreviewModal(index) {
     `<span style="font-size:16px;">📋 ${name}</span>
      <span style="margin-left:10px;background:#dcfce7;color:#15803d;border-radius:20px;padding:2px 10px;font-size:12px;font-weight:700;">${cnt}/6 ฟอร์ม</span>`;
 
-  // ── body: ใช้ buildSchoolSummaryHTML ──
-  const body = document.getElementById('previewModalBody');
-  body.innerHTML = '<div style="padding:4px 0;">' + buildSchoolSummaryHTML(name, st) + '</div>';
+  // ── body: ค่าเริ่มต้น = มุมมองเต็มตามแบบฟอร์ม ──
+  renderPreviewBody(name, st, 'full');
 
   // ── footer ──
   const safe = name.replace(/'/g,"\\'");
   document.querySelector('.modal-footer').innerHTML = `
     <button class="btn-modal-pdf" onclick="exportSummaryPDF('${safe}')">
-      <i class="ti ti-file-text"></i> ออก PDF สรุปทุกฟอร์ม
+      <i class="ti ti-file-text"></i> ออก PDF เต็มตามแบบฟอร์ม
     </button>
     <button class="btn-modal-edit" onclick="closePreviewModal();openFormEdit(db2GetRowSchoolName(allResponsesData[currentPreviewIndex]),'f0')">
       <i class="ti ti-pencil"></i> แก้ไข F1
@@ -3682,80 +3969,79 @@ function openPreviewModal(index) {
   document.getElementById('previewModal').classList.add('show');
 }
 
+/** สลับมุมมองในพรีวิว: 'full' = เต็มตามแบบฟอร์ม, 'summary' = สรุปย่อ */
+function renderPreviewBody(name, st, view) {
+  const body = document.getElementById('previewModalBody');
+  if (!body) return;
+  const safe = name.replace(/'/g, "\\'");
+  const tabBtn = (v, label) =>
+    `<button onclick="renderPreviewBody('${safe}', db2SchoolFormStatus('${safe}'), '${v}')" style="`
+    + `padding:7px 16px;border-radius:30px;font-size:13px;font-weight:700;cursor:pointer;border:1px solid `
+    + (view === v ? '#1e3a8a;background:#1e3a8a;color:#fff;' : '#cbd5e1;background:#fff;color:#475569;')
+    + `">${label}</button>`;
+  const toggle =
+    '<div style="display:flex;gap:8px;justify-content:center;margin:2px 0 16px;position:sticky;top:0;background:#fff;padding:6px 0 10px;z-index:2;border-bottom:1px solid #f1f5f9;">'
+    + tabBtn('full', '📄 เต็มตามแบบฟอร์ม')
+    + tabBtn('summary', '⚡ สรุปย่อ')
+    + '</div>';
+  const content = (view === 'summary')
+    ? buildSchoolSummaryHTML(name, st)
+    : buildFaithfulSchoolReport(name, { pageBreak: false });
+  body.innerHTML = toggle + '<div class="preview-report-wrap" style="padding:2px 0;">' + content + '</div>';
+}
+
 
 
 function closePreviewModal() { document.getElementById('previewModal').classList.remove('show'); }
 
 // ═══════════════════════════════════════════════════
-// exportSummaryPDF — PDF สรุปรายโรงเรียน F1-F6
+// exportSummaryPDF — PDF เต็มรายโรงเรียน F1-F6
+//   ใช้ engine เดียวกับ PDF รายฟอร์ม (ตรงตามแบบฟอร์มทุกข้อ)
 // ═══════════════════════════════════════════════════
 function exportSummaryPDF(schoolName) {
   const st  = db2SchoolFormStatus(schoolName);
   const cnt = Object.values(st).filter(Boolean).length;
   const now = new Date().toLocaleDateString('th-TH',{year:'numeric',month:'long',day:'numeric'});
 
-  // build summary content (reuse same helpers as buildSchoolSummaryHTML but inline for PDF)
-  const summaryBody = buildSchoolSummaryHTML(schoolName, st);
+  // เนื้อหาเต็ม "ตรงตามแบบฟอร์ม" + แบ่งหน้าก่อนแต่ละฟอร์ม
+  const reportBody = buildFaithfulSchoolReport(schoolName, { pageBreak: true });
 
+  // CSS: ใช้คลาสเดียวกับ PDF รายฟอร์ม (.p-title/.pdf-table/.p-row2col/.p-block-*) + cover/footer
   const css = `
-    @page { size: A4; margin: 15mm 18mm 18mm 18mm; }
+    @page { size: A4; margin: 16mm 16mm 18mm 16mm; }
     * { box-sizing: border-box; font-family: 'Sarabun', 'TH Sarabun New', sans-serif; }
-    body { margin: 0; padding: 0; color: #1e293b; font-size: 13pt; line-height: 1.7; }
+    body { margin: 0; padding: 0; color: #1e293b; font-size: 12pt; line-height: 1.6; }
 
     /* ── Cover header ── */
-    .pdf-cover {
-      background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-      color: #fff;
-      border-radius: 12px;
-      padding: 22px 26px 18px;
-      margin-bottom: 20px;
-      page-break-inside: avoid;
-    }
+    .pdf-cover { background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%); color: #fff; border-radius: 12px; padding: 22px 26px 18px; margin-bottom: 8px; page-break-inside: avoid; }
     .pdf-cover .proj { font-size: 11pt; opacity: 0.85; margin-bottom: 4px; }
     .pdf-cover .title { font-size: 20pt; font-weight: 800; margin: 0 0 6px; }
     .pdf-cover .meta { font-size: 11pt; opacity: 0.9; display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; }
-    .pdf-cover .badge {
-      background: rgba(255,255,255,0.2);
-      border-radius: 20px;
-      padding: 2px 12px;
-      font-size: 11pt;
-      font-weight: 700;
-    }
+    .pdf-cover .badge { background: rgba(255,255,255,0.2); border-radius: 20px; padding: 2px 12px; font-size: 11pt; font-weight: 700; }
 
-    /* ── Section heads ── */
-    div[style*="linear-gradient(135deg,#1e3a8a"] {
-      page-break-inside: avoid;
-      page-break-before: auto;
-    }
+    /* ── โครงรายงานต่อฟอร์ม ── */
+    .report-form-block { page-break-inside: auto; }
+    .report-form-divider { page-break-after: avoid; page-break-inside: avoid; }
+    .report-form-body { page-break-inside: auto; }
 
-    /* ── Tables ── */
-    table { width: 100%; border-collapse: collapse; font-size: 12pt; margin-bottom: 10px; }
-    td { padding: 7px 10px; border: 1px solid #cbd5e1; vertical-align: top; line-height: 1.6; }
-    td:first-child { width: 36%; font-weight: 700; background: #f8fafc; }
+    /* ── หัวฟอร์ม (pHeader) ── */
+    .report-form-body > div:first-child { page-break-inside: avoid; page-break-after: avoid; }
 
-    /* ── Cards ── */
-    .pdf-card { border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 12px 15px; margin-bottom: 10px; page-break-inside: avoid; }
-    .pdf-card .card-label { font-size: 11pt; font-weight: 700; color: #475569; margin-bottom: 5px; }
-    .pdf-card .card-val { font-size: 12.5pt; line-height: 1.7; }
-
-    /* ── Entry banner ── */
-    div[style*="border-left:3px solid #3b82f6"] {
-      page-break-inside: avoid;
-    }
+    /* ── หัวข้อย่อย / ตาราง (จาก buildPDFFromLiveForm) ── */
+    .p-title { font-weight: bold; font-size: 13pt; background: #f1f5f9; padding: 6px 12px; margin: 14px 0 8px; border-left: 5px solid #1e3a8a; color: #1e3a8a; page-break-after: avoid; }
+    .p-label { font-weight: normal; color: #475569; }
+    .p-row2col { width: 100%; border-collapse: collapse; margin-bottom: 6px; }
+    .p-row2col td { font-size: 11.5pt; padding: 4px 10px 4px 0; vertical-align: top; border: none; }
+    .pdf-table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 11pt; }
+    .pdf-table th, .pdf-table td { border: 1px solid #cbd5e1; padding: 7px 9px; text-align: left; vertical-align: top; word-break: break-word; line-height: 1.5; }
+    .pdf-table th { background: #f8fafc; text-align: center; font-weight: bold; color: #1e3a8a; }
+    .pdf-table tr { page-break-inside: avoid; }
+    .p-block-wrap { margin-bottom: 8px; font-size: 11.5pt; page-break-inside: avoid; }
+    .p-block-label { font-weight: bold; display: block; margin-bottom: 3px; color: #1e3a8a; }
+    .p-block-val { display: block; border: 1px solid #e2e8f0; padding: 9px 13px; min-height: 30px; white-space: pre-wrap; word-break: break-word; background: #f8fafc; border-radius: 6px; font-size: 11pt; color: #1e293b; line-height: 1.6; }
 
     /* ── Page footer ── */
-    .pdf-footer {
-      position: fixed;
-      bottom: 10mm;
-      left: 18mm;
-      right: 18mm;
-      border-top: 1px solid #cbd5e1;
-      padding-top: 5px;
-      font-size: 10pt;
-      color: #94a3b8;
-      display: flex;
-      justify-content: space-between;
-    }
+    .pdf-footer { position: fixed; bottom: 9mm; left: 16mm; right: 16mm; border-top: 1px solid #cbd5e1; padding-top: 5px; font-size: 9.5pt; color: #94a3b8; display: flex; justify-content: space-between; }
     @media screen { .pdf-footer { display: none; } }
   `;
 
@@ -3763,24 +4049,24 @@ function exportSummaryPDF(schoolName) {
 <html lang="th">
 <head>
   <meta charset="UTF-8">
-  <title>สรุปรายโรงเรียน — ${schoolName}</title>
+  <title>รายงานเต็มรายโรงเรียน — ${schoolName}</title>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>${css}</style>
 </head>
 <body>
   <div class="pdf-cover">
-    <div class="proj">📡 โครงการ DLTV — สรุปผลการลงพื้นที่</div>
+    <div class="proj">📡 โครงการ DLTV — รายงานเต็มผลการลงพื้นที่ (ตรงตามแบบฟอร์ม)</div>
     <div class="title">📋 ${schoolName}</div>
     <div class="meta">
-      <span class="badge">✓ ${cnt}/6 ฟอร์ม</span>
+      <span class="badge">✓ ${cnt}/6 ฟอร์มที่มีข้อมูล</span>
       <span>พิมพ์เมื่อ: ${now}</span>
     </div>
   </div>
   <div class="pdf-footer">
-    <span>โครงการ DLTV · สรุปรายโรงเรียน</span>
+    <span>โครงการ DLTV · รายงานเต็มรายโรงเรียน</span>
     <span>${schoolName}</span>
   </div>
-  ${summaryBody}
+  ${reportBody}
 </body>
 </html>`;
 
@@ -3789,7 +4075,11 @@ function exportSummaryPDF(schoolName) {
   win.document.write(html);
   win.document.close();
   win.onload = function() {
-    setTimeout(function() { win.focus(); win.print(); }, 600);
+    if (win.document.fonts && win.document.fonts.ready) {
+      win.document.fonts.ready.then(function(){ setTimeout(function(){ win.focus(); win.print(); }, 350); });
+    } else {
+      setTimeout(function() { win.focus(); win.print(); }, 700);
+    }
   };
 }
 
@@ -5597,7 +5887,7 @@ async function submitFormGeneric(formId, panelId, btnEl, statusElId) {
     btnEl.style.opacity = '0.7';
     btnEl.innerHTML = '⏳ กำลังส่งข้อมูล...';
   }
-  if (statusEl) statusEl.innerHTML = '<span style="color:orange;">⏳ กำลังส่งข้อมูลไปยัง Google Sheets โปรดรอสักครู่...</span>';
+  if (statusEl) statusEl.innerHTML = '<span style="color:orange;">⏳ กำลังบันทึกข้อมูลขึ้น Firebase โปรดรอสักครู่...</span>';
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);
@@ -5640,19 +5930,8 @@ async function submitFormGeneric(formId, panelId, btnEl, statusElId) {
     data['EntryID'] = (isEditMode && currentEditFormId === formId && currentEditEntryId) ? currentEditEntryId : genEntryId();
     try { localStorage.setItem('dltv_' + formId + '_last_payload', JSON.stringify(data)); } catch(e) {}
 
-    await fetch(GS_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify({
-        formId: formId,
-        data: data,
-        mode: (isEditMode && currentEditFormId === formId) ? 'update' : 'dynamic',
-        entryId: data['EntryID'],
-        ...(isEditMode && currentEditSchoolName ? { schoolName: currentEditSchoolName } : {})
-      }),
-      signal: controller.signal
-    });
+    // ===== บันทึกลง Firebase (PUT ตาม EntryID) =====
+    await fbWriteEntry(formId, data['EntryID'], data, controller.signal);
     clearTimeout(timeoutId); clearTimeout(watchdogId);
     if (statusEl) statusEl.innerHTML = '<span style="color:green;">✅ บันทึกข้อมูลสำเร็จเรียบร้อย!</span>';
 
@@ -5682,7 +5961,7 @@ async function submitFormGeneric(formId, panelId, btnEl, statusElId) {
       return;
     }
 
-    showToast('✅ บันทึก ' + formId.toUpperCase() + ' เข้า Google Sheets สำเร็จ');
+    showToast('✅ บันทึก ' + formId.toUpperCase() + ' เข้า Firebase สำเร็จ');
     const fdMeta = (typeof DB2_FORMS !== 'undefined') ? DB2_FORMS.find(f => f.id === formId) : null;
     const schoolName = (typeof db2GetRowSchoolName === 'function' ? db2GetRowSchoolName(data) : null) || data['ชื่อโรงเรียนปลายทาง'] || data['โรงเรียนปลายทาง'] || data['ชื่อโรงเรียน'] || data['โรงเรียน'] || 'โรงเรียน';
 
@@ -5707,8 +5986,8 @@ async function submitFormGeneric(formId, panelId, btnEl, statusElId) {
     clearTimeout(timeoutId); clearTimeout(watchdogId);
     if (btnEl) { btnEl.disabled = false; btnEl.style.opacity = '1'; btnEl.innerHTML = btnEl.dataset.originalText || '✅ บันทึก'; }
     if (e.name === 'AbortError') {
-      if (statusEl) statusEl.innerHTML = '<span style="color:#b45309;">⏱️ หมดเวลาการตอบสนอง — ข้อมูลอาจถูกบันทึกแล้ว กรุณาตรวจสอบ Google Sheets</span>';
-      showToast('⏱️ หมดเวลา — ตรวจสอบ Google Sheets');
+      if (statusEl) statusEl.innerHTML = '<span style="color:#b45309;">⏱️ หมดเวลาการตอบสนอง — ข้อมูลอาจถูกบันทึกแล้ว กรุณาตรวจสอบ Firebase</span>';
+      showToast('⏱️ หมดเวลา — ตรวจสอบ Firebase');
       const fdMetaW = (typeof DB2_FORMS !== 'undefined') ? DB2_FORMS.find(f => f.id === formId) : null;
       showSuccessPopup('โรงเรียน', (fdMetaW ? fdMetaW.emoji + ' ' + fdMetaW.label + ' ' + fdMetaW.name : formId.toUpperCase()), true);
     } else {
